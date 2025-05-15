@@ -4,13 +4,8 @@
 //
 //  Created by Kota on 5/15/R7.
 //
-import typealias Accelerate.vecLib.DSPComplex
-import typealias Accelerate.vecLib.DSPDoubleComplex
-import typealias Accelerate.vecLib.__CLPK_complex
-import typealias Accelerate.vecLib.__CLPK_doublecomplex
-import typealias Accelerate.vecLib.__CLPK_real
-import typealias Accelerate.vecLib.__CLPK_doublereal
-import func simd.length
+import Accelerate
+import simd
 import protocol Synchronization.AtomicRepresentable
 @frozen public struct Complex32: ComplexNumber {
 	public typealias FloatLiteralType = Float16
@@ -135,65 +130,65 @@ extension Complex128: AtomicRepresentable {
 //		length(.init(real, imag))
 //	}
 //}
-extension __CLPK_complex: ComplexNumber, @unchecked Sendable {
-	public typealias FloatLiteralType = __CLPK_real
-	@inlinable
-	@inline(__always)
-	public var real: __CLPK_real {
-		_read { yield r }
-		_modify { yield &r }
-	}
-	@inlinable
-	@inline(__always)
-	public var imag: __CLPK_real {
-		_read { yield i }
-		_modify { yield &i }
-	}
-	@inlinable
-	@inline(__always)
-	public init(real: __CLPK_real, imag: __CLPK_real) {
-		self.init(r: real, i: imag)
-	}
-	@inlinable
-	@inline(__always)
-	public func hash(into hasher: inout Hasher) {
-		r.hash(into: &hasher)
-		i.hash(into: &hasher)
-	}
-	@inlinable
-	@inline(__always)
-	public var magnitude: FloatLiteralType.Magnitude {
-		length(.init(r, i))
-	}
-}
-extension __CLPK_doublecomplex: ComplexNumber, @unchecked Sendable {
-	public typealias FloatLiteralType = __CLPK_doublereal
-	@inlinable
-	@inline(__always)
-	public var real: __CLPK_doublereal {
-		_read { yield r }
-		_modify { yield &r }
-	}
-	@inlinable
-	@inline(__always)
-	public var imag: __CLPK_doublereal {
-		_read { yield i }
-		_modify { yield &i }
-	}
-	@inlinable
-	@inline(__always)
-	public init(real: __CLPK_doublereal, imag: __CLPK_doublereal) {
-		self.init(r: real, i: imag)
-	}
-	@inlinable
-	@inline(__always)
-	public func hash(into hasher: inout Hasher) {
-		r.hash(into: &hasher)
-		i.hash(into: &hasher)
-	}
-	@inlinable
-	@inline(__always)
-	public var magnitude: FloatLiteralType.Magnitude {
-		length(.init(r, i))
-	}
-}
+//extension __CLPK_complex: ComplexNumber, @unchecked Sendable {
+//	public typealias FloatLiteralType = __CLPK_real
+//	@inlinable
+//	@inline(__always)
+//	public var real: __CLPK_real {
+//		_read { yield r }
+//		_modify { yield &r }
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public var imag: __CLPK_real {
+//		_read { yield i }
+//		_modify { yield &i }
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public init(real: __CLPK_real, imag: __CLPK_real) {
+//		self.init(r: real, i: imag)
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public func hash(into hasher: inout Hasher) {
+//		r.hash(into: &hasher)
+//		i.hash(into: &hasher)
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public var magnitude: FloatLiteralType.Magnitude {
+//		length(.init(r, i))
+//	}
+//}
+//extension __CLPK_doublecomplex: ComplexNumber, @unchecked Sendable {
+//	public typealias FloatLiteralType = __CLPK_doublereal
+//	@inlinable
+//	@inline(__always)
+//	public var real: __CLPK_doublereal {
+//		_read { yield r }
+//		_modify { yield &r }
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public var imag: __CLPK_doublereal {
+//		_read { yield i }
+//		_modify { yield &i }
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public init(real: __CLPK_doublereal, imag: __CLPK_doublereal) {
+//		self.init(r: real, i: imag)
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public func hash(into hasher: inout Hasher) {
+//		r.hash(into: &hasher)
+//		i.hash(into: &hasher)
+//	}
+//	@inlinable
+//	@inline(__always)
+//	public var magnitude: FloatLiteralType.Magnitude {
+//		length(.init(r, i))
+//	}
+//}
