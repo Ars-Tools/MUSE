@@ -22,7 +22,7 @@ public func abs<T: BinaryInteger>(_ x: T) -> T { // obtain magnitude without any
 @_disfavoredOverload
 @inlinable@inline(__always)
 public func gcd<T: BinaryInteger>(_ x: T, _ y: T) -> T {
-	y == .zero ? x : gcd(y, x % y)
+	y == 0 ? x : gcd(y, x % y)
 }
 @_disfavoredOverload
 @inlinable@inline(__always)
