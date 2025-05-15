@@ -13,8 +13,8 @@ let package = Package(
 	],
     products: [
         .library(
-            name: "MUSE",
-            targets: ["Numerics", "Layout"]
+            name: "Library",
+			targets: ["Numerics", "Layout"]
 		),
     ],
     targets: [
