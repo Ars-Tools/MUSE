@@ -40,7 +40,7 @@ let package = Package(
 			]
 		),
 		.testTarget(
-			name: "Layout",
+			name: "LayoutTests",
 			dependencies: ["Layout"],
 			path: "Layout/Tests"
 		)
