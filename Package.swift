@@ -12,9 +12,15 @@ let package = Package(
 		.macOS(.v15),
 	],
     products: [
-        .library(
-            name: "Library",
-			targets: ["Numerics", "Layout"]
+		.library(
+			name: "Primitive",
+			type: .dynamic,
+			targets: ["Numerics"]
+		),
+		.library(
+			name: "Essential",
+			type: .dynamic,
+			targets: ["Layout"]
 		),
     ],
     targets: [
