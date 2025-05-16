@@ -11,12 +11,12 @@ let package = Package(
 	],
     products: [
 		.library(
-			name: "MUSE.Primitive",
+			name: "MUSE.Primitives",
 			type: .dynamic,
 			targets: ["Numerics"]
 		),
 		.library(
-			name: "MUSE.Essential",
+			name: "MUSE.Essentials",
 			type: .dynamic,
 			targets: ["Layout"]
 		),
