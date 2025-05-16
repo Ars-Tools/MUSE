@@ -1,8 +1,6 @@
 // swift-tools-version: 6.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
-
 import PackageDescription
-
 let package = Package(
     name: "MUSE",
 	platforms: [
@@ -13,12 +11,12 @@ let package = Package(
 	],
     products: [
 		.library(
-			name: "Primitive",
+			name: "MUSE.Primitive",
 			type: .dynamic,
 			targets: ["Numerics"]
 		),
 		.library(
-			name: "Essential",
+			name: "MUSE.Essential",
 			type: .dynamic,
 			targets: ["Layout"]
 		),
