@@ -11,24 +11,20 @@ public protocol RationalNumber<IntegerLiteralType>: Numeric & Comparable & Custo
 }
 // Basics
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public init?<T>(exactly source: T) where T : BinaryInteger {
 		guard let value = IntegerLiteralType(exactly: source) else { return nil }
 		self.init(numerator: value, denominator: 1)
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public init(integerLiteral value: IntegerLiteralType) {
 		self.init(numerator: value, denominator: 1)
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public init(_ numerator: IntegerLiteralType, _ denominator: IntegerLiteralType = 1) {
 		self.init(numerator: numerator, denominator: denominator)
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public init(_ value: some RationalNumber<IntegerLiteralType>) {
 		let (numerator, denominator) = value.factor
 		self.init(numerator: numerator, denominator: denominator)
@@ -36,22 +32,19 @@ extension RationalNumber {
 }
 // Foundations
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public var inverse: Self {
 		.init(numerator: denominator, denominator: numerator)
 	}
 }
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	var factor: (IntegerLiteralType, IntegerLiteralType) {
 		denominator == .zero ?
 			(numerator, denominator) :
 			(numerator / abs(gcd(numerator, denominator)), denominator / abs(gcd(numerator, denominator)))
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	static func comparison(lhs: Self, rhs: Self, comparator: (IntegerLiteralType, IntegerLiteralType) -> Bool) -> Bool {
 		switch (lhs.factor, rhs.factor) {
 		case ((0, 0), (0, 0)), ((0, 0), _), (_, (0, 0)): // NaN comparison
@@ -67,53 +60,48 @@ extension RationalNumber {
 }
 // Equatable
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public static func==(lhs: Self, rhs: Self) -> Bool {
 		comparison(lhs: lhs, rhs: rhs, comparator: ==)
 	}
 }
 // Comparable
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public static func<(lhs: Self, rhs: Self) -> Bool {
 		comparison(lhs: lhs, rhs: rhs, comparator: <)
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public static func>(lhs: Self, rhs: Self) -> Bool {
 		comparison(lhs: lhs, rhs: rhs, comparator: >)
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public static func<=(lhs: Self, rhs: Self) -> Bool {
 		comparison(lhs: lhs, rhs: rhs, comparator: <=)
 	}
-	@inline(__always)
-	@inlinable
+	@inlinable @inline(__always)
 	public static func>=(lhs: Self, rhs: Self) -> Bool {
 		comparison(lhs: lhs, rhs: rhs, comparator: >=)
 	}
 }
 extension RationalNumber {
-	@inlinable
+	@inlinable @inline(__always)
 	public var isInfinite: Bool {
 		denominator == .zero && numerator != .zero
 	}
-	@inlinable
+	@inlinable @inline(__always)
 	public var isNaN: Bool {
 		denominator == .zero && numerator == .zero
 	}
-	@inlinable
+	@inlinable @inline(__always)
 	public var isFinite: Bool {
 		denominator != .zero
 	}
-	@inlinable
+	@inlinable @inline(__always)
 	public var isNormal: Bool {
 		denominator != .zero && numerator != .zero
 	}
-	@inlinable
+	@inlinable @inline(__always)
 	public var isZero: Bool {
 		denominator != .zero && numerator == .zero
 	}

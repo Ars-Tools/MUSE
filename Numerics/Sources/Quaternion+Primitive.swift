@@ -1,5 +1,5 @@
 //
-//  Quoternion+Primitive.swift
+//  Quaternion+Primitive.swift
 //  MUSE
 //
 //  Created by Kota on 5/16/R7.
@@ -12,10 +12,12 @@ public typealias Quoternion128 = simd_quatf
 public typealias Quoternion256 = simd_quatd
 extension Quoternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuoternionNumber {
 	public typealias FloatLiteralType = Float16
+	@inlinable @inline(__always)
 	public var real: FloatLiteralType {
 		_read { yield vector.w }
 		_modify { yield &vector.w }
 	}
+	@inlinable @inline(__always)
 	public var imag: SIMD3<FloatLiteralType> {
 		get { .init(vector.x, vector.y, vector.z) }
 		set {
@@ -24,9 +26,11 @@ extension Quoternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive E
 			vector.z = newValue.z
 		}
 	}
+	@inlinable @inline(__always)
 	public init(real: Float16, imag: SIMD3<Float16>) {
 		self.init(vector: .init(imag, real))
 	}
+	@inlinable @inline(__always)
 	public init(ix: Float16, iy: Float16, iz: Float16, r: Float16) {
 		self.init(vector: .init(x: ix, y: iy, z: iz, w: r))
 	}
