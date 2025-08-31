@@ -7,10 +7,10 @@
 import typealias simd.simd_quath
 import typealias simd.simd_quatf
 import typealias simd.simd_quatd
-public typealias Quoternion64 = simd_quath
-public typealias Quoternion128 = simd_quatf
-public typealias Quoternion256 = simd_quatd
-extension Quoternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuoternionNumber {
+public typealias Quaternion64 = simd_quath
+public typealias Quaternion128 = simd_quatf
+public typealias Quaternion256 = simd_quatd
+extension Quaternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
 	public typealias FloatLiteralType = Float16
 	@inlinable @inline(__always)
 	public var real: FloatLiteralType {
@@ -35,9 +35,9 @@ extension Quoternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive E
 		self.init(vector: .init(x: ix, y: iy, z: iz, w: r))
 	}
 }
-extension Quoternion128: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuoternionNumber {
+extension Quaternion128: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
 	public typealias FloatLiteralType = Float32
 }
-extension Quoternion256: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuoternionNumber {
+extension Quaternion256: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
 	public typealias FloatLiteralType = Float64
 }
