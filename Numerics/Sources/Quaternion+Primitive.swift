@@ -36,6 +36,15 @@ extension Quaternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive E
 		self.init(vector: .init(x: ix, y: iy, z: iz, w: r))
 	}
 }
+extension Quaternion64: @retroactive AtomicRepresentable {
+	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		value.vector
+	}
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		.init(vector: storage)
+	}
+}
 extension Quaternion128: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, @retroactive AtomicRepresentable, QuaternionNumber {
 	public typealias FloatLiteralType = Float32
 	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
