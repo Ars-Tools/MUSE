@@ -5,7 +5,7 @@
 //  Created by Kota on 5/15/R7.
 //
 public protocol ComplexNumber<FloatLiteralType>: Numeric & Comparable & Hashable & CustomStringConvertible & Sendable & Copyable where IntegerLiteralType == FloatLiteralType.IntegerLiteralType, Magnitude == FloatLiteralType {
-	associatedtype FloatLiteralType: SignedNumeric & Comparable & Hashable
+	associatedtype FloatLiteralType: SignedNumeric & Comparable & Hashable & Copyable
 	var real: FloatLiteralType { get }
 	var imag: FloatLiteralType { get }
 	init(real: FloatLiteralType, imag: FloatLiteralType)

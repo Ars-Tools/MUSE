@@ -66,11 +66,12 @@ extension Complex64: ComplexNumber, @unchecked Sendable {
 	public static let i = Self(real: 0, imag: 1)
 }
 extension Complex64: AtomicRepresentable {
-	public static func decodeAtomicRepresentation(_ storage: consuming SIMD2<FloatLiteralType>) -> Self {
-		unsafeBitCast(storage, to: Self.self)
+	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	public static func encodeAtomicRepresentation(_ value: consuming Self) -> SIMD2<FloatLiteralType> {
-		unsafeBitCast(value, to: SIMD2<FloatLiteralType>.self)
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		unsafeBitCast(storage, to: Self.self)
 	}
 }
 //@frozen public struct Complex128: ComplexNumber {
@@ -107,11 +108,12 @@ extension Complex128: ComplexNumber, @unchecked Sendable {
 	public static let i = Self(real: 0, imag: 1)
 }
 extension Complex128: AtomicRepresentable {
-	public static func decodeAtomicRepresentation(_ storage: consuming SIMD2<FloatLiteralType>) -> Self {
-		unsafeBitCast(storage, to: Self.self)
+	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	public static func encodeAtomicRepresentation(_ value: consuming Self) -> SIMD2<FloatLiteralType> {
-		unsafeBitCast(value, to: SIMD2<FloatLiteralType>.self)
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		unsafeBitCast(storage, to: Self.self)
 	}
 }
 //@frozen public struct Complex160: ComplexNumber {
