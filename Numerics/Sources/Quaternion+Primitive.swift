@@ -10,6 +10,7 @@ import typealias simd.simd_quatd
 public typealias Quaternion64 = simd_quath
 public typealias Quaternion128 = simd_quatf
 public typealias Quaternion256 = simd_quatd
+import protocol Synchronization.AtomicRepresentable
 extension Quaternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
 	public typealias FloatLiteralType = Float16
 	@inlinable @inline(__always)
@@ -35,9 +36,23 @@ extension Quaternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive E
 		self.init(vector: .init(x: ix, y: iy, z: iz, w: r))
 	}
 }
-extension Quaternion128: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
+extension Quaternion128: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, @retroactive AtomicRepresentable, QuaternionNumber {
 	public typealias FloatLiteralType = Float32
+	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		value.vector
+	}
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		.init(vector: storage)
+	}
 }
-extension Quaternion256: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
+extension Quaternion256: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, @retroactive AtomicRepresentable, QuaternionNumber {
 	public typealias FloatLiteralType = Float64
+	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		value.vector
+	}
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		.init(vector: storage)
+	}
 }
