@@ -16,7 +16,7 @@ let package = Package(
 		),
 		.library(
 			name: "MUSE.Essentials",
-			targets: ["Layout"]
+			targets: ["Layout", "Optimise"]
 		),
     ],
     targets: [
