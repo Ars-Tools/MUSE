@@ -12,16 +12,38 @@ let package = Package(
     products: [
 		.library(
 			name: "MUSE.Primitives",
-			type: .dynamic,
-			targets: ["Numerics"]
+			targets: ["Numerics", "Dense"]
 		),
 		.library(
 			name: "MUSE.Essentials",
-			type: .dynamic,
 			targets: ["Layout"]
 		),
     ],
     targets: [
+		.target(
+			name: "Dense",
+			dependencies: ["Layout"],
+			path: "Dense/Sources",
+			cSettings: [
+				.define("ACCELERATE_NEW_LAPACK"),
+				.define("ACCELERATE_LAPACK_ILP64")
+			]
+		),
+		.testTarget(
+			name: "DenseTests",
+			dependencies: ["Dense"],
+			path: "Dense/Tests"
+		),
+		.target(
+			name: "Optimise",
+			dependencies: ["Numerics"],
+			path: "Optimise/Sources"
+		),
+		.testTarget(
+			name: "OptimiseTests",
+			dependencies: ["Optimise"],
+			path: "Optimise/Tests"
+		),
 		.target(
 			name: "Numerics",
 			path: "Numerics/Sources",
@@ -47,6 +69,6 @@ let package = Package(
 			name: "LayoutTests",
 			dependencies: ["Layout"],
 			path: "Layout/Tests"
-		)
+		),
     ]
 )
