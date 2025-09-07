@@ -6,22 +6,11 @@
 //
 // solve optima pair by using Hungarian method, cost is row-major-matrix
 @inlinable@inline(__always)
-func hungarian<V: SIMDScalar & Hashable, C: Numeric & Comparable>(u: some Collection<V>, v: some Collection<V>, cost: Dictionary<SIMD2<V>, C>, initial: C) -> Set<SIMD2<V>> {
-	let U = Array(u)
-	let V = Array(v)
-	let m = U.count
-	let n = V.count
+func hungarian<C: Numeric & Comparable>(m: Int, n: Int, cost table: Array<C>, initial: C) -> Set<SIMD2<Int>> {
 	assert(m == n)
 	assert(m < .max)
 	assert(n < .max)
-	var table = Array<C>(unsafeUninitializedCapacity: m * n) {
-		for (j, u) in U.enumerated() {
-			for (k, v) in V.enumerated() {
-				$0[j*n+k] = cost[.init(u, v)] ?? initial
-			}
-		}
-		$1 = $0.count
-	}
+	var table = table
 	for c in 0..<n {
 		let row = stride(from: c, to: c + m * n, by: n)
 		let min = row.lazy.map { table[$0] }.min() ?? .zero
@@ -46,8 +35,8 @@ func hungarian<V: SIMDScalar & Hashable, C: Numeric & Comparable>(u: some Collec
 				vu[c] = r
 			}
 		}
-		if m == Set(uv).count, n == Set(vu).count {
-			return.init(uv.enumerated().lazy.map {.init(U[$0], V[$1])})
+		if n == Set(vu).count {
+			return Set(uv.enumerated().map(SIMD2.init(x:y:)))
 		} else {
 			// Zero-Cover
 			var queue = (
@@ -86,15 +75,41 @@ func hungarian<V: SIMDScalar & Hashable, C: Numeric & Comparable>(u: some Collec
 			}
 			for r in star.row {
 				for c in star.col {
-					table[r*n+c] += 2 * min
+					table[r*n+c] += min
 				}
 			}
 		}
 	}
 }
-public func hungarian<V: SIMDScalar, C: FixedWidthInteger>(u: some Collection<V>, v: some Collection<V>, cost: Dictionary<SIMD2<V>, C>) -> Set<SIMD2<V>> {
-	hungarian(u: u, v: v, cost: cost, initial: .max)
+@inlinable
+public func hungarian<T: FixedWidthInteger>(size: Int, cost table: Array<T>) -> Set<SIMD2<Int>> {
+	hungarian(m: size, n: size, cost: table, initial: .max)
 }
-public func hungarian<V: SIMDScalar, C: FloatingPoint>(u: some Collection<V>, v: some Collection<V>, cost: Dictionary<SIMD2<V>, C>) -> Set<SIMD2<V>> {
-	hungarian(u: u, v: v, cost: cost, initial: .infinity)
+@inlinable
+public func hungarian<T: FloatingPoint>(size: Int, cost table: Array<T>) -> Set<SIMD2<Int>> {
+	hungarian(m: size, n: size, cost: table, initial: .infinity)
+}
+@inlinable
+public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: FixedWidthInteger>(u: U, v: V, cost: Dictionary<SIMD2<S>, T>) -> Set<SIMD2<S>> where U.Index == Int, V.Index == Int {
+	.init(hungarian(m: u.count, n: v.count, cost: Array<T>(unsafeUninitializedCapacity: u.count * v.count) {
+		let w = v.count
+		for (j, u) in u.enumerated() {
+			for (k, v) in v.enumerated() {
+				$0[j*w+k] = cost[.init(u, v)] ?? .max
+			}
+		}
+		$1 = $0.count
+	}, initial: .max).map {.init(u[$0.x], v[$0.y])})
+}
+@inlinable
+public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: FloatingPoint>(u: U, v: V, cost: Dictionary<SIMD2<S>, T>) -> Set<SIMD2<S>> where U.Index == Int, V.Index == Int {
+	.init(hungarian(m: u.count, n: v.count, cost: Array<T>(unsafeUninitializedCapacity: u.count * v.count) {
+		let w = v.count
+		for (j, u) in u.enumerated() {
+			for (k, v) in v.enumerated() {
+				$0[j*w+k] = cost[.init(u, v)] ?? .infinity
+			}
+		}
+		$1 = $0.count
+	}, initial: .infinity).map {.init(u[$0.x], v[$0.y])})
 }
