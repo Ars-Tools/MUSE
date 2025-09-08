@@ -6,18 +6,11 @@
 //
 // solve optima pair by using Hungarian method, cost is row-major-matrix
 @inlinable@inline(__always)
-func hungarian<C: Numeric & Comparable>(m: Int, n: Int, cost table: Array<C>, initial: C) -> Set<SIMD2<Int>> {
+func hungarian<C: Numeric & Comparable>(m: Int, n: Int, cost table: Array<C>) -> Set<SIMD2<Int>> {
 	assert(m == n)
 	assert(m < .max)
 	assert(n < .max)
 	var table = table
-	for c in 0..<n {
-		let row = stride(from: c, to: c + m * n, by: n)
-		let min = row.lazy.map { table[$0] }.min() ?? .zero
-		for r in row {
-			table[r] -= min
-		}
-	}
 	for r in stride(from: 0, to: m * n, by: n) {
 		let col = r..<r+n
 		let min = table[col].min() ?? .zero
@@ -25,69 +18,75 @@ func hungarian<C: Numeric & Comparable>(m: Int, n: Int, cost table: Array<C>, in
 			table[c] -= min
 		}
 	}
+	for c in 0..<n {
+		let row = stride(from: c, to: c + m * n, by: n)
+		let min = row.lazy.map { table[$0] }.min() ?? .zero
+		for r in row {
+			table[r] -= min
+		}
+	}
 	while true {
-		// Path
-		var uv = Array<Int>(repeating: .max, count: m)
-		var vu = Array<Int>(repeating: .max, count: n)
+		let na = Int.min
+		var uv = Array<Int>(repeating: na, count: m)
+		var vu = Array<Int>(repeating: na, count: n)
+		// Dummy Pair
 		for r in 0..<m {
-			for c in 0..<n where table[r*n+c] == 0 && uv[r] == .max && vu[c] == .max {
+			for c in 0..<n where table[r*n+c] <= .zero && uv[r] == na && vu[c] == na {
 				uv[r] = c
 				vu[c] = r
 			}
 		}
-		if n == Set(vu).count {
+		// Arg Path
+		var queue = ArraySlice<Int>(uv.enumerated().lazy.filter { $1 == na }.map(\.offset))
+		var cover = (
+			row: Set<Int>(0..<m),
+			col: Set<Int>()
+		)
+		while let r = queue.popFirst() {
+			cover.row.remove(r)
+			for c in 0..<n where table[r*n+c] <= .zero && !cover.col.contains(c) {
+				cover.col.insert(c)
+				if vu[c] == na {
+					uv[r] = c
+					vu[c] = r
+				} else {
+					queue.append(vu[c])
+					uv[vu[c]] = na
+					uv[r] = c
+					vu[c] = r
+				}
+			}
+		}
+		let extra = (
+			row: Set(0..<m).subtracting(cover.row),
+			col: Set(0..<n).subtracting(cover.col)
+		)
+		// Cost Table
+		var min = Optional<C>.none
+		for r in extra.row {
+			for c in extra.col {
+				min = Swift.min(min ?? table[r*n+c], table[r*n+c])
+			}
+		}
+		guard let min else {
+			assert(!uv.contains(na))
 			return Set(uv.enumerated().map(SIMD2.init(x:y:)))
-		} else {
-			// Zero-Cover
-			var queue = (
-				row: ArraySlice(uv.enumerated().lazy.filter { $1 == .max }.map(\.offset)),
-				col: ArraySlice(vu.enumerated().lazy.filter { $1 == .max }.map(\.offset))
-			)
-			var star = (
-				row: Set<Int>(),
-				col: Set<Int>()
-			)
-			while ![queue.row, queue.col].allSatisfy(\.isEmpty) {
-				if let r = queue.row.popFirst(), !star.row.contains(r) {
-					star.row.insert(r)
-					for c in 0..<n where table[r*n+c] == .zero {
-						queue.col.append(c)
-					}
-				}
-				if let c = queue.col.popFirst(), !star.col.contains(c) {
-					star.col.insert(c)
-					for r in 0..<m where table[r*n+c] == .zero {
-						queue.row.append(r)
-					}
-				}
+		}
+		for r in extra.row {
+			for c in extra.col {
+				table[r*n+c] -= min
 			}
-			// Modify
-			var min = initial
-			for r in 0..<m where !star.row.contains(r) {
-				for c in 0..<n where !star.col.contains(c) {
-					min = Swift.min(min, table[r*n+c])
-				}
-			}
-			for r in 0..<m where !star.row.contains(r) {
-				for c in 0..<n where !star.col.contains(c) {
-					table[r*n+c] -= min
-				}
-			}
-			for r in star.row {
-				for c in star.col {
-					table[r*n+c] += min
-				}
+		}
+		for r in cover.row {
+			for c in cover.col {
+				table[r*n+c] += min
 			}
 		}
 	}
 }
 @inlinable
-public func hungarian<T: FixedWidthInteger>(size: Int, cost table: Array<T>) -> Set<SIMD2<Int>> {
-	hungarian(m: size, n: size, cost: table, initial: .max)
-}
-@inlinable
-public func hungarian<T: FloatingPoint>(size: Int, cost table: Array<T>) -> Set<SIMD2<Int>> {
-	hungarian(m: size, n: size, cost: table, initial: .infinity)
+public func hungarian<C: Numeric & Comparable>(size: Int, cost table: Array<C>) -> Set<SIMD2<Int>> {
+	hungarian(m: size, n: size, cost: table)
 }
 @inlinable
 public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: FixedWidthInteger>(u: U, v: V, cost: Dictionary<SIMD2<S>, T>) -> Set<SIMD2<S>> where U.Index == Int, V.Index == Int {
@@ -99,7 +98,7 @@ public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: Fixe
 			}
 		}
 		$1 = $0.count
-	}, initial: .max).map {.init(u[$0.x], v[$0.y])})
+	}).map {.init(u[$0.x], v[$0.y])})
 }
 @inlinable
 public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: FloatingPoint>(u: U, v: V, cost: Dictionary<SIMD2<S>, T>) -> Set<SIMD2<S>> where U.Index == Int, V.Index == Int {
@@ -111,5 +110,25 @@ public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: Floa
 			}
 		}
 		$1 = $0.count
-	}, initial: .infinity).map {.init(u[$0.x], v[$0.y])})
+	}).map {.init(u[$0.x], v[$0.y])})
+}
+// solve optima pair by brute-force, cost is row-major-matrix, to validate other algorithms
+@inlinable
+func bruteforceAssignment<C: Numeric & Comparable>(size: Int, cost table: Array<C>) -> Set<SIMD2<Int>> {
+	func permutation(head: Array<Int>, tail: Set<Int>) -> Array<Int> {
+		tail.lazy.map {
+			permutation(head: head + [$0], tail: tail.subtracting([$0]))
+		}.min {
+//			assert($0.count == size)
+//			assert($1.count == size)
+			$0.enumerated().reduce(C.zero) {
+				$0 + table[$1.0 * size + $1.1]
+			}
+			<
+			$1.enumerated().reduce(C.zero) {
+				$0 + table[$1.0 * size + $1.1]
+			}
+		} ?? head
+	}
+	return.init(permutation(head: .init(), tail: .init(0..<size)).enumerated().lazy.map(SIMD2<Int>.init(x:y:)))
 }
