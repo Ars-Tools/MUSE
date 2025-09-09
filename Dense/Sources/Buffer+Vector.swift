@@ -77,7 +77,7 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 extension VectorBuffer: CustomStringConvertible {
 	@inlinable
 	public var description: String {
-		rawIndex.lazy.map { data[$0] }.description
+		(0..<count).lazy.map { data[data.startIndex.advanced(by: $0 * inc)] }.description
 	}
 }
 public typealias VecBuf<T: MutScalar> = VectorBuffer<ArraySlice<T>>
