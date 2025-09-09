@@ -5,6 +5,7 @@
 //  Created by Kota on 9/8/R7.
 //
 import protocol Accelerate.AccelerateMutableBuffer
+import func Layout.capacity
 import typealias Layout.MemoryStrategy
 public struct VectorBuffer<R: RandomAccessCollection & MutableCollection & AccelerateMutableBuffer & Sendable> where R.Index: BinaryInteger, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence == R {
 	public typealias U = R.Element
@@ -50,9 +51,27 @@ extension VectorBuffer: MutVector {
 		([inc], {data})
 	}
 }
+extension VectorBuffer {
+	@inlinable
+	public init(shape: (Int), stride: (Int), data memory: R) {
+		precondition(capacity(alloc: [shape], stride: [stride]) <= memory.count)
+		count = shape
+		inc = stride
+		data = memory
+	}
+}
 extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
-	public init(arrayLiteral elements: R.Element...) {
-		self.init(count: elements.count, inc: 1, data: .init(elements))
+	@inlinable
+	public init(shape: Int) {
+		count = shape
+		inc = 1
+		data = .init(repeating: .zero, count: count)
+	}
+	@inlinable
+	public init(arrayLiteral elements: Element...) {
+		count = elements.count
+		inc = 1
+		data = .init(elements)
 	}
 }
 extension VectorBuffer: CustomStringConvertible {

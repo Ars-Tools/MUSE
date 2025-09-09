@@ -16,13 +16,6 @@ public struct MatrixBuffer<R: RandomAccessCollection & MutableCollection & Accel
 	@usableFromInline let ldc: Int
 	@usableFromInline
 	private(set) var data: R
-//	@inlinable
-//	public init(shape: (Int, Int), stride: (Int, Int), buffer: R) {
-//		assert(Swift.max(shape.0 * stride.1, shape.1 * stride.0) <= buffer.count)
-//		(rows, cols) = shape
-//		(ldr, ldc) = stride
-//		data = buffer
-//	}
 }
 extension MatrixBuffer: MutMatrix {
 	public typealias S = Self
@@ -58,7 +51,6 @@ extension MatrixBuffer: MutMatrix {
 			fatalError()
 		}
 	}
-	
 	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> MatrixBuffer<R> {
 		get {
 			let row = row.relative(to: 0..<rows)
@@ -77,8 +69,53 @@ extension MatrixBuffer: MutMatrix {
 	public var transpose: MatrixBuffer<R> {
 		.init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, data: data)
 	}
+	@inlinable
 	public func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, () async -> R) {
 		([ldr, ldc], {data})
+	}
+}
+extension MatrixBuffer {
+	@inlinable
+	public init(shape: (Int, Int), stride: (Int, Int), data buffer: R) {
+		precondition(capacity(alloc: [shape.0, shape.1], stride: [stride.0, stride.1]) <= buffer.count)
+		(rows, cols) = shape
+		(ldr, ldc) = stride
+		data = buffer
+	}
+}
+extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
+	@inlinable
+	public init(shape: (Int, Int), layout: MemoryStrategy = .rowMajor) {
+		(rows, cols) = shape
+		(ldr, ldc) = switch layout {
+		case.rowMajor:
+			(cols, 1)
+		case.columnMajor:
+			(1, rows)
+		}
+		data = .init(repeating: .zero, count: capacity(alloc: [rows, cols], stride: [ldr, ldc]))
+	}
+	@inlinable
+	public init(rows vec: some Collection<some Collection<Element>>) {
+		let counts = vec.map(\.count)
+		rows = vec.count
+		cols = counts.min() ?? 0
+		ldr = cols
+		ldc = 1
+		data = .init(vec.lazy.flatMap { [ldr] in $0.prefix(ldr) })
+	}
+	@inlinable
+	public init(cols vec: some Collection<some Collection<Element>>) {
+		let counts = vec.map(\.count)
+		cols = vec.count
+		rows = counts.min() ?? 0
+		ldc = rows
+		ldr = 1
+		data = .init(vec.lazy.flatMap { [ldc] in $0.prefix(ldc) })
+	}
+	@inlinable
+	public init(arrayLiteral elements: Array<Element>...) {
+		self.init(rows: elements)
 	}
 }
 extension MatrixBuffer: CustomStringConvertible {
