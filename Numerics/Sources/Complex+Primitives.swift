@@ -4,10 +4,13 @@
 //
 //  Created by Kota on 5/15/R7.
 //
-import Accelerate
-import simd
+import typealias Accelerate.vecLib.DSPComplex
+import typealias Accelerate.vecLib.DSPDoubleComplex
+import func simd.length
+import func simd.atan2f
+import func simd.atan2l
 import protocol Synchronization.AtomicRepresentable
-@frozen public struct Complex32: ComplexNumber {
+@frozen public struct Complex32: ComplexNumber & BitwiseCopyable {
 	public typealias FloatLiteralType = Float16
 	public let real: FloatLiteralType
 	public let imag: FloatLiteralType
@@ -24,34 +27,46 @@ import protocol Synchronization.AtomicRepresentable
 	public static let i = Self(real: 0, imag: 1)
 }
 extension Complex32: AtomicRepresentable {
+	public typealias AtomicRepresentation = FloatLiteralType.SIMD2Storage
 	@inlinable@inline(__always)
-	public static func decodeAtomicRepresentation(_ storage: consuming SIMD2<FloatLiteralType>) -> Self {
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		unsafeBitCast(value, to: AtomicRepresentation.self)
+	}
+	@inlinable@inline(__always)
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
+}
+@frozen public struct Complex64: ComplexNumber & BitwiseCopyable {
+	public typealias FloatLiteralType = Float32
+	public let real: FloatLiteralType
+	public let imag: FloatLiteralType
+	@inlinable
+	@inline(__always)
+	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
+		real = r
+		imag = i
+	}
+	@inlinable
+	@inline(__always)
+	public var magnitude: FloatLiteralType.Magnitude {
+		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
+	}
+	public static let i = Self(real: 0, imag: 1)
+}
+extension Complex64: AtomicRepresentable {
+	public typealias AtomicRepresentation = FloatLiteralType.SIMD2Storage
 	@inlinable@inline(__always)
-	public static func encodeAtomicRepresentation(_ value: consuming Self) -> SIMD2<FloatLiteralType> {
-		unsafeBitCast(value, to: SIMD2<FloatLiteralType>.self)
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		unsafeBitCast(value, to: AtomicRepresentation.self)
+	}
+	@inlinable@inline(__always)
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		unsafeBitCast(storage, to: Self.self)
 	}
 }
-//@frozen public struct Complex64: ComplexNumber {
-//	public typealias FloatLiteralType = Float32
-//	public let real: FloatLiteralType
-//	public let imag: FloatLiteralType
-//	@inlinable
-//	@inline(__always)
-//	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
-//		real = r
-//		imag = i
-//	}
-//	@inlinable
-//	@inline(__always)
-//	public var magnitude: FloatLiteralType.Magnitude {
-//		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
-//	}
-//	public static let i = Self(real: 0, imag: 1)
-//}
-public typealias Complex64 = DSPComplex
-extension Complex64: ComplexNumber, @unchecked Sendable {
+//public typealias Complex64 = DSPComplex
+extension DSPComplex: ComplexNumber, @unchecked Sendable {
 	public typealias FloatLiteralType = Float32
 	@inlinable @inline(__always)
 	public func hash(into hasher: inout Hasher) {
@@ -69,7 +84,7 @@ extension Complex64: ComplexNumber, @unchecked Sendable {
 	@inline(__always)
 	public static let i = Self(real: 0, imag: 1)
 }
-extension Complex64: AtomicRepresentable {
+extension DSPComplex: AtomicRepresentable {
 	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
 	@inlinable@inline(__always)
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
@@ -80,25 +95,36 @@ extension Complex64: AtomicRepresentable {
 		unsafeBitCast(storage, to: Self.self)
 	}
 }
-//@frozen public struct Complex128: ComplexNumber {
-//	public typealias FloatLiteralType = Float64
-//	public let real: FloatLiteralType
-//	public let imag: FloatLiteralType
-//	@inlinable
-//	@inline(__always)
-//	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
-//		real = r
-//		imag = i
-//	}
-//	@inlinable
-//	@inline(__always)
-//	public var magnitude: FloatLiteralType.Magnitude {
-//		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
-//	}
-//	public static let i = Self(real: 0, imag: 1)
-//}
-public typealias Complex128 = DSPDoubleComplex
-extension Complex128: ComplexNumber, @unchecked Sendable {
+@frozen public struct Complex128: ComplexNumber & BitwiseCopyable {
+	public typealias FloatLiteralType = Float64
+	public let real: FloatLiteralType
+	public let imag: FloatLiteralType
+	@inlinable
+	@inline(__always)
+	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
+		real = r
+		imag = i
+	}
+	@inlinable
+	@inline(__always)
+	public var magnitude: FloatLiteralType.Magnitude {
+		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
+	}
+	public static let i = Self(real: 0, imag: 1)
+}
+//public typealias Complex128 = DSPDoubleComplex
+extension Complex128: AtomicRepresentable {
+	public typealias AtomicRepresentation = FloatLiteralType.SIMD2Storage
+	@inlinable@inline(__always)
+	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
+		unsafeBitCast(value, to: AtomicRepresentation.self)
+	}
+	@inlinable@inline(__always)
+	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
+		unsafeBitCast(storage, to: Self.self)
+	}
+}
+extension DSPDoubleComplex: ComplexNumber, @unchecked Sendable {
 	public typealias FloatLiteralType = Float64
 	@inlinable@inline(__always)
 	public func hash(into hasher: inout Hasher) {
@@ -116,7 +142,7 @@ extension Complex128: ComplexNumber, @unchecked Sendable {
 	@inline(__always)
 	public static let i = Self(real: 0, imag: 1)
 }
-extension Complex128: AtomicRepresentable {
+extension DSPDoubleComplex: AtomicRepresentable {
 	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
 	@inlinable@inline(__always)
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
