@@ -5,6 +5,11 @@
 //  Created by Kota on 9/2/R7.
 //
 // solve optima pair by using Hungarian method, cost is row-major-matrix
+
+
+
+
+
 @inlinable@inline(__always)
 func hungarian<C: Numeric & Comparable>(m: Int, n: Int, cost table: Array<C>) -> Set<SIMD2<Int>> {
 	assert(m == n)
@@ -29,15 +34,26 @@ func hungarian<C: Numeric & Comparable>(m: Int, n: Int, cost table: Array<C>) ->
 		let na = Int.min
 		var uv = Array<Int>(repeating: na, count: m)
 		var vu = Array<Int>(repeating: na, count: n)
-		// Dummy Pair
-		for r in 0..<m {
-			for c in 0..<n where table[r*n+c] <= .zero && uv[r] == na && vu[c] == na {
-				uv[r] = c
-				vu[c] = r
+		do {
+			var queue = ArraySlice<Int>(0..<m)
+			while let r = queue.popLast() {
+				uv[r] = na
+				for c in 0..<n where table[r*n+c] == .zero {
+					if vu[c] == na {
+						uv[r] = c
+						vu[c] = r
+						break
+					} else {
+						queue.append(vu[c])
+						uv[vu[c]] = na
+					}
+					
+				}
 			}
 		}
+		
+		var queue = ArraySlice<Int>(uv.enumerated().filter { $1 != na }.map(\.0))
 		// Arg Path
-		var queue = ArraySlice<Int>(uv.enumerated().lazy.filter { $1 == na }.map(\.offset))
 		var cover = (
 			row: Set<Int>(0..<m),
 			col: Set<Int>()
