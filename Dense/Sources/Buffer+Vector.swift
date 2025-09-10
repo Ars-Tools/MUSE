@@ -7,12 +7,27 @@
 import protocol Accelerate.AccelerateMutableBuffer
 import func Layout.capacity
 import typealias Layout.MemoryStrategy
-public struct VectorBuffer<R: RandomAccessCollection & MutableCollection & AccelerateMutableBuffer & Sendable> where R.Index: BinaryInteger, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence == R {
-	public typealias U = R.Element
+@dynamicMemberLookup
+@frozen public struct VectorBuffer<R: RandomAccessCollection & MutableCollection & AccelerateMutableBuffer & Sendable> where R.Index: BinaryInteger, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence: AccelerateMutableBuffer & Sendable {
 	public let count: Int
 	public let inc: Int
 	@usableFromInline
 	private(set) var data: R
+}
+extension VectorBuffer {
+	@inlinable
+	public subscript<T>(dynamicMember lookup: KeyPath<R, T>) -> T {
+		data[keyPath: lookup]
+	}
+	@inlinable
+	public subscript<T>(dynamicMember lookup: ReferenceWritableKeyPath<R, T>) -> T {
+		_read {
+			yield data[keyPath: lookup]
+		}
+		_modify {
+			yield &data[keyPath: lookup]
+		}
+	}
 }
 extension VectorBuffer {
 	@inlinable@inline(__always)
@@ -25,8 +40,12 @@ extension VectorBuffer {
 	}
 }
 extension VectorBuffer: MutVector {
+	public typealias U = R.Element
+	public typealias S = VectorBuffer<R.SubSequence>
+	public typealias V = Self
+	public typealias T = Self
 	@inlinable
-	public subscript(position: Int) -> Element {
+	public subscript(position: Int) -> U {
 		_read {
 			yield data[data.startIndex.advanced(by: position * inc)]
 		}
@@ -34,20 +53,22 @@ extension VectorBuffer: MutVector {
 			yield &data[data.startIndex.advanced(by: position * inc)]
 		}
 	}
-	public subscript(bounds: some RangeExpression<Int>) -> VectorBuffer<R> {
+	public subscript(bounds: some RangeExpression<Int>) -> S {
 		get {
 			let range = bounds.relative(to: 0..<count)
-			return.init(count: range.count, inc: inc, data: data[data.startIndex.advanced(by: range.lowerBound * inc)..<data.startIndex.advanced(by: range.upperBound * inc)])
+			let lower = data.startIndex.advanced(by: range.lowerBound * inc)
+			let upper = lower.advanced(by: range.count * inc)
+			return.init(count: range.count, inc: inc, data: data[lower..<upper])
 		}
 		set {
 			let range = bounds.relative(to: 0..<count)
-			for (offset, element) in stride(from: data.startIndex.advanced(by: range.lowerBound * inc), to: data.startIndex.advanced(by: range.upperBound * inc), by: inc).enumerated() {
-				data[element] = newValue[offset]
+			for (offset, element) in range.enumerated() {
+				data[data.startIndex.advanced(by: element * inc)] = newValue[offset]
 			}
 		}
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, () async -> R) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
 		([inc], {data})
 	}
 }
@@ -59,6 +80,14 @@ extension VectorBuffer {
 		inc = stride
 		data = memory
 	}
+	@inlinable
+	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Vector, Source.R == R {
+		let (stride, result) = try source(for: layout)
+		precondition(stride.count == 1)
+		count = source.count
+		inc = stride[0]
+		data = await result()
+	}
 }
 extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
 	@inlinable
@@ -68,11 +97,24 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 		data = .init(repeating: .zero, count: count)
 	}
 	@inlinable
-	public init(arrayLiteral elements: Element...) {
+	public init(_ elements: some Collection<Element>) {
 		count = elements.count
 		inc = 1
 		data = .init(elements)
 	}
+	@inlinable
+	public init(arrayLiteral elements: Element...) {
+		self.init(elements)
+	}
+	@inlinable
+	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Vector, Source.Element == Element {
+		let (stride, result) = try source(for: layout)
+		precondition(stride.count == 1)
+		count = source.count
+		inc = stride[0]
+		data = await result().withUnsafeBufferPointer(R.init)
+	}
+	
 }
 extension VectorBuffer: CustomStringConvertible {
 	@inlinable
@@ -80,4 +122,4 @@ extension VectorBuffer: CustomStringConvertible {
 		(0..<count).lazy.map { data[data.startIndex.advanced(by: $0 * inc)] }.description
 	}
 }
-public typealias VecBuf<T: MutScalar> = VectorBuffer<ArraySlice<T>>
+public typealias VecBuf<T: MutScalar> = VectorBuffer<Array<T>>
