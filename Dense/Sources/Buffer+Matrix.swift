@@ -7,9 +7,10 @@
 import typealias Layout.MemoryStrategy
 import func Layout.offset
 import func Layout.capacity
+import func Layout.product
 import protocol Accelerate.AccelerateMutableBuffer
-public struct MatrixBuffer<R: RandomAccessCollection & MutableCollection & AccelerateMutableBuffer & Sendable> where R.Index: BinaryInteger, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence == R {
-	public typealias Element = R.Element
+@dynamicMemberLookup
+@frozen public struct MatrixBuffer<R: RandomAccessCollection & MutableCollection & AccelerateMutableBuffer & Sendable> where R.Index: BinaryInteger, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence: AccelerateMutableBuffer & Sendable {
 	public let rows: Int
 	public let cols: Int
 	@usableFromInline let ldr: Int
@@ -17,13 +18,34 @@ public struct MatrixBuffer<R: RandomAccessCollection & MutableCollection & Accel
 	@usableFromInline
 	private(set) var data: R
 }
-extension MatrixBuffer: MutMatrix {
-	public typealias S = Self
-	public typealias T = Self
-	public typealias U = R.Element
-	public typealias V = VectorBuffer<R>
+extension MatrixBuffer {
 	@inlinable
-	public subscript(row: Int, col: Int) -> R.Element {
+	public subscript<Λ>(dynamicMember lookup: KeyPath<R, Λ>) -> Λ {
+		data[keyPath: lookup]
+	}
+	@inlinable
+	public subscript<Λ>(dynamicMember lookup: ReferenceWritableKeyPath<R, Λ>) -> Λ {
+		_read {
+			yield data[keyPath: lookup]
+		}
+		_modify {
+			yield &data[keyPath: lookup]
+		}
+	}
+}
+extension MatrixBuffer: MutMatrix {
+	public typealias U = R.Element
+	public typealias S = MatrixBuffer<R.SubSequence>
+	public typealias V = VectorBuffer<R.SubSequence>
+	public typealias T = Self
+	public var diagonal: V {
+		.init(count: min(rows, cols), inc: ldr + ldc, data: data[data.startIndex..<data.endIndex])
+	}
+	public var transpose: T {
+		.init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, data: data)
+	}
+	@inlinable
+	public subscript(row: Int, col: Int) -> U {
 		_read {
 			yield data[data.startIndex.advanced(by: row * ldr + col * ldc)]
 		}
@@ -31,27 +53,33 @@ extension MatrixBuffer: MutMatrix {
 			yield &data[data.startIndex.advanced(by: row * ldr + col * ldc)]
 		}
 	}
-	public subscript(row: Int, col: some RangeExpression<Int>) -> VectorBuffer<R> {
+	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
 		get {
 			let col = col.relative(to: 0..<cols)
 			let idx = data.startIndex.advanced(by: row * ldr)
 			return.init(count: col.count, inc: ldc, data: data[idx.advanced(by: col.lowerBound * ldc)..<idx.advanced(by: col.upperBound * ldc)])
 		}
 		set {
-			fatalError()
+			let idx = data.startIndex.advanced(by: row * ldr)
+			for col in col.relative(to: 0..<cols) {
+				data[idx.advanced(by: col * ldc)] = newValue[col]
+			}
 		}
 	}
-	public subscript(row: some RangeExpression<Int>, col: Int) -> VectorBuffer<R> {
+	public subscript(row: some RangeExpression<Int>, col: Int) -> V {
 		get {
 			let row = row.relative(to: 0..<rows)
 			let idx = data.startIndex.advanced(by: col * ldc)
 			return.init(count: row.count, inc: ldr, data: data[idx.advanced(by: row.lowerBound * ldr)..<idx.advanced(by: row.upperBound * ldr)])
 		}
 		set {
-			fatalError()
+			let idx = data.startIndex.advanced(by: col * ldc)
+			for row in row.relative(to: 0..<rows) {
+				data[idx.advanced(by: row * ldr)] = newValue[row]
+			}
 		}
 	}
-	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> MatrixBuffer<R> {
+	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
 		get {
 			let row = row.relative(to: 0..<rows)
 			let col = col.relative(to: 0..<cols)
@@ -60,17 +88,13 @@ extension MatrixBuffer: MutMatrix {
 			return.init(rows: row.count, cols: col.count, ldr: ldr, ldc: ldc, data: data[lower..<upper])
 		}
 		set {
-			fatalError()
+			for (row, col) in product(row.relative(to: 0..<rows), col.relative(to: 0..<cols)) {
+				data[data.startIndex.advanced(by: row * ldr + col * ldc)] = newValue[row, col]
+			}
 		}
 	}
-	public var diagonal: VectorBuffer<R> {
-		.init(count: min(rows, cols), inc: ldr + ldc, data: data)
-	}
-	public var transpose: MatrixBuffer<R> {
-		.init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, data: data)
-	}
 	@inlinable
-	public func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, () async -> R) {
+	public func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
 		([ldr, ldc], {data})
 	}
 }
@@ -81,6 +105,16 @@ extension MatrixBuffer {
 		(rows, cols) = shape
 		(ldr, ldc) = stride
 		data = buffer
+	}
+	@inlinable
+	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Matrix, Source.R == R {
+		let (stride, result) = try source(for: layout)
+		precondition(stride.count == 2)
+		rows = source.rows
+		cols = source.cols
+		ldr = stride[0]
+		ldc = stride[1]
+		data = await result()
 	}
 }
 extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
@@ -117,6 +151,17 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init(arrayLiteral elements: Array<Element>...) {
 		self.init(rows: elements)
 	}
+	@_disfavoredOverload
+	@inlinable
+	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Matrix, Source.Element == Element {
+		let (stride, result) = try source(for: layout)
+		precondition(stride.count == 2)
+		rows = source.rows
+		cols = source.cols
+		ldr = stride[0]
+		ldc = stride[1]
+		data = await result().withUnsafeBufferPointer(R.init)
+	}
 }
 extension MatrixBuffer: CustomStringConvertible {
 	public var description: String {
@@ -128,4 +173,4 @@ extension MatrixBuffer: CustomStringConvertible {
 		}.joined(separator: ",\r\n ") + "]"
 	}
 }
-public typealias MatBuf<T: MutScalar> = MatrixBuffer<ArraySlice<T>>
+public typealias MatBuf<T: MutScalar> = MatrixBuffer<Array<T>>
