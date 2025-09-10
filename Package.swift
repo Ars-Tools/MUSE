@@ -12,7 +12,7 @@ let package = Package(
     products: [
 		.library(
 			name: "MUSE.Primitives",
-			targets: ["Numerics", "Dense"]
+			targets: ["Numerics", "Dense", "Sparse"]
 		),
 		.library(
 			name: "MUSE.Essentials",
@@ -22,7 +22,7 @@ let package = Package(
     targets: [
 		.target(
 			name: "Dense",
-			dependencies: ["Layout"],
+			dependencies: ["Layout", "Numerics"],
 			path: "Dense/Sources",
 			cSettings: [
 				.define("ACCELERATE_NEW_LAPACK"),
@@ -33,6 +33,20 @@ let package = Package(
 			name: "DenseTests",
 			dependencies: ["Dense"],
 			path: "Dense/Tests"
+		),
+		.target(
+			name: "Sparse",
+			dependencies: ["Dense"],
+			path: "Sparse/Sources",
+			cSettings: [
+				.define("ACCELERATE_NEW_LAPACK"),
+				.define("ACCELERATE_LAPACK_ILP64")
+			]
+		),
+		.testTarget(
+			name: "SparseTests",
+			dependencies: ["Sparse"],
+			path: "Sparse/Tests"
 		),
 		.target(
 			name: "Optimise",
