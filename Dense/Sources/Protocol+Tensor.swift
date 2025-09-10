@@ -19,7 +19,7 @@ public protocol Tensor<Element>: Sendable {
 	@inlinable var diagonal: V { get }
 	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get }
 	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get }
-	@inlinable func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, () async -> R)
+	@inlinable func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
 }
 public protocol MutTensor<Element>: Tensor where U == Element, R: AccelerateMutableBuffer {
 	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get set }
