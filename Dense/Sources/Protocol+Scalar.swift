@@ -87,7 +87,7 @@ extension MutScalar {
 		}
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, () async -> R) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
 		([], {.init(self)})
 	}
 }
