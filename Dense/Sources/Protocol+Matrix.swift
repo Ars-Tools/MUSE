@@ -23,6 +23,14 @@ extension Matrix {
 	public var shape: Array<Int> {
 		[rows, cols]
 	}
+	@inlinable
+	public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
+		self[position[0], position[1]]
+	}
+	@inlinable
+	public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
+		self[bounds[0], bounds[1]]
+	}
 }
 extension MutMatrix {
 	@inlinable
