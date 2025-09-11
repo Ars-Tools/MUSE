@@ -39,7 +39,14 @@ extension MatrixBuffer: MutMatrix {
 	public typealias V = VectorBuffer<R.SubSequence>
 	public typealias T = Self
 	public var diagonal: V {
-		.init(count: min(rows, cols), inc: ldr + ldc, data: data[data.startIndex..<data.endIndex])
+		get {
+			.init(count: min(rows, cols), inc: ldr + ldc, data: data[data.startIndex..<data.endIndex])
+		}
+		set {
+			for index in 0..<min(rows, cols) {
+				data[data.startIndex.advanced(by: index * (ldr + ldc))] = newValue[index]
+			}
+		}
 	}
 	public var transpose: T {
 		.init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, data: data)
@@ -119,7 +126,7 @@ extension MatrixBuffer {
 }
 extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
 	@inlinable
-	public init(shape: (Int, Int), layout: MemoryStrategy = .rowMajor) {
+	public init(shape: (Int, Int), layout: MemoryStrategy = .rowMajor, with value: Element) {
 		(rows, cols) = shape
 		(ldr, ldc) = switch layout {
 		case.rowMajor:
@@ -127,7 +134,7 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 		case.columnMajor:
 			(1, rows)
 		}
-		data = .init(repeating: .zero, count: capacity(alloc: [rows, cols], stride: [ldr, ldc]))
+		data = .init(repeating: value, count: capacity(alloc: [rows, cols], stride: [ldr, ldc]))
 	}
 	@inlinable
 	public init(rows vec: some Collection<some Collection<Element>>) {
