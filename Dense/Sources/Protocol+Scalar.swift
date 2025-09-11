@@ -8,7 +8,7 @@ import typealias Layout.MemoryStrategy
 import protocol Accelerate.AccelerateBuffer
 import protocol Accelerate.AccelerateMutableBuffer
 extension CollectionOfOne: @retroactive AccelerateBuffer & AccelerateMutableBuffer {}
-public protocol Scalar<Element>: Tensor & BitwiseCopyable & Sendable & Numeric & Hashable where S == Self, T == Self, U == Self, V == Self {}
+public protocol Scalar<Element>: Tensor & BitwiseCopyable & Sendable & Hashable where S == Self, T == Self, U == Self, V == Self {}
 public protocol MutScalar<Element>: MutTensor & Scalar where R == CollectionOfOne<Self> {}
 extension Scalar {
 	@inlinable
