@@ -7,6 +7,7 @@
 import typealias Numerics.Complex32
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
+extension Bool: MutScalar {}
 extension Int: MutScalar {}
 extension Int8: MutScalar {}
 extension Int16: MutScalar {}
