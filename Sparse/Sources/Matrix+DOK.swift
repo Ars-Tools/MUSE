@@ -10,7 +10,6 @@ import typealias Layout.MemoryStrategy
 import func simd.simd_reduce_min
 @dynamicMemberLookup
 @frozen public struct DOK<Element> where Element: SparseScalar<Element> {
-	public typealias U = Element
 	public let rows: Int
 	public let cols: Int
 	@usableFromInline
@@ -47,9 +46,11 @@ extension DOK {
 	}
 }
 extension DOK: MutSparseMatrix {
+	public typealias R = Array<Element>
 	public typealias S = Self
 	public typealias T = Self
-	public typealias R = Array<Element>
+	public typealias U = Element
+	public typealias V = SPV<Element>
 	public var transpose: DOK<Element> {
 		.init(rows: cols, cols: rows, store: .init(uniqueKeysWithValues: store.compactMap {
 			switch ($0.x, $0.y, $1) {
@@ -60,10 +61,17 @@ extension DOK: MutSparseMatrix {
 			}
 		}))
 	}
-	public var diagonal: SPV<Element> {
-		.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: store.lazy.compactMap {
-			$0.x == $0.y && $1 != .zero ? .some((simd_reduce_min($0), $1)) : .none
-		}))
+	public var diagonal: V {
+		get {
+			.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: store.lazy.compactMap {
+				$0.x == $0.y && $1 != .zero ? .some((simd_reduce_min($0), $1)) : .none
+			}))
+		}
+		set {
+			for (index, value) in newValue.coo {
+				self[index, index] = value
+			}
+		}
 	}
 	@inlinable
 	public subscript(row: Int, col: Int) -> U {
@@ -192,6 +200,7 @@ extension DOK {
 	}
 }
 extension DOK: ExpressibleByArrayLiteral {
+	@_disfavoredOverload
 	@inlinable
 	public init(arrayLiteral elements: Array<Element>...) {
 		self.init(rows: elements)
