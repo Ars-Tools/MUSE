@@ -25,18 +25,25 @@ extension COO {
 	}
 }
 extension COO: MutSparseMatrix {
+	public typealias R = Array<Element>
 	public typealias S = Self
 	public typealias T = Self
-	public typealias V = SPV<Element>
 	public typealias U = Element
-	public typealias R = Array<Element>
+	public typealias V = SPV<Element>
 	public var transpose: T {
 		.init(rows: cols, cols: rows, rowIndex: colIndex, colIndex: rowIndex, valArray: valArray)
 	}
 	public var diagonal: V {
-		.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: indices.enumerated().compactMap {
-			$1.0 == $1.1 ? .some((.init(min($1.0, $1.1)), valArray[$0])) : .none
-		}))
+		get {
+			.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: indices.enumerated().compactMap {
+				$1.0 == $1.1 ? .some((.init(min($1.0, $1.1)), valArray[$0])) : .none
+			}))
+		}
+		set {
+			for (index, value) in newValue.coo {
+				self[index, index] = value
+			}
+		}
 	}
 	@inlinable
 	public subscript(row: Int, col: Int) -> U {
@@ -187,6 +194,24 @@ extension COO {
 		}
 	}
 	@inlinable
+	public init(rows source: some Collection<some Collection<Element>>) {
+		let rows = source.count
+		let cols = source.map(\.count).min() ?? .zero
+		precondition([rows, cols].allSatisfy { .zero < $0 }, "size should be greater than 0")
+		self.init(shape: (rows, cols), source.enumerated().lazy.flatMap { row, col in
+			col.enumerated().lazy.map { (SIMD2<Int>(row, $0), $1) }
+		})
+	}
+	@inlinable
+	public init(cols source: some Collection<some Collection<Element>>) {
+		let rows = source.map(\.count).min() ?? .zero
+		let cols = source.count
+		precondition([rows, cols].allSatisfy { .zero < $0 }, "size should be greater than 0")
+		self.init(shape: (rows, cols), source.enumerated().lazy.flatMap { col, row in
+			row.enumerated().lazy.map { (SIMD2<Int>($0, col), $1) }
+		})
+	}
+	@inlinable
 	public init(_ source: some SparseMatrix<Element>) {
 		(rows, cols) = (source.rows, source.cols)
 		rowIndex = .init()
@@ -210,6 +235,13 @@ extension COO {
 				}
 			}
 		}
+	}
+}
+extension COO: ExpressibleByArrayLiteral {
+	@_disfavoredOverload
+	@inlinable
+	public init(arrayLiteral elements: Array<Element>...) {
+		self.init(rows: elements)
 	}
 }
 extension COO: CustomStringConvertible {}
