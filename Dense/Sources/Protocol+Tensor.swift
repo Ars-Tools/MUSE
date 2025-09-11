@@ -8,7 +8,7 @@ import protocol Accelerate.AccelerateBuffer
 import protocol Accelerate.AccelerateMutableBuffer
 import typealias Layout.MemoryStrategy
 public protocol Tensor<Element>: Sendable {
-	associatedtype Element: Numeric & BitwiseCopyable & Hashable & Sendable
+	associatedtype Element: BitwiseCopyable & Hashable & Sendable
 	associatedtype S: Tensor<Element>
 	associatedtype T: Tensor<Element>
 	associatedtype U: Tensor<Element>
@@ -25,3 +25,4 @@ public protocol MutTensor<Element>: Tensor where U == Element, R: AccelerateMuta
 	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get set }
 	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get set }
 }
+infix operator •: MultiplicationPrecedence
