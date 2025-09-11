@@ -20,51 +20,78 @@ extension CCS {
 		zip(rowIndex[colStart[col]..<colStart[col+1]].lazy.map(Int.init), valArray[colStart[col]..<colStart[col+1]])
 	}
 }
-extension CCS: SparseMatrix {
+extension CCS: MutSparseMatrix {
+	public typealias R = Array<Element>
 	public typealias S = CCS<Element>
 	public typealias T = CRS<Element>
-	public typealias V = SPV<Element>
 	public typealias U = Element
-	public typealias R = Array<Element>
-	public var diagonal: V {
-		.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: (0..<min(rows, cols)).flatMap { col in
-			coo(at: col).filter { $0.0 == col }
-		}))
-	}
+	public typealias V = SPV<Element>
 	public var transpose: T {
 		.init(rows: cols, cols: rows, rowStart: colStart, colIndex: rowIndex, valArray: valArray)
 	}
+	public var diagonal: V {
+		get {
+			.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: (0..<min(rows, cols)).flatMap { col in
+				coo(at: col).filter { $0.0 == col }
+			}))
+		}
+		set {
+			for (index, value) in newValue.coo {
+				self[index, index] = value
+			}
+		}
+	}
 	@inlinable
 	public subscript(row: Int, col: Int) -> U {
-		coo(at: col).first { $0.0 == row }.map(\.1) ?? .zero
+		get {
+			coo(at: col).first { $0.0 == row }.map(\.1) ?? .zero
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		let col = col.relative(to: 0..<cols)
-		return.init(count: col.count, store: .init(uniqueKeysWithValues: col.enumerated().lazy.flatMap { idx, col in
-			coo(at: col).lazy.compactMap {
-				$0 == row ? .some((idx, $1)) : .none
-			}
-		}))
+		get {
+			let col = col.relative(to: 0..<cols)
+			return.init(count: col.count, store: .init(uniqueKeysWithValues: col.enumerated().lazy.flatMap { idx, col in
+				coo(at: col).lazy.compactMap {
+					$0 == row ? .some((idx, $1)) : .none
+				}
+			}))
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 	public subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		let row = row.relative(to: 0..<rows)
-		return.init(count: row.count, store: .init(uniqueKeysWithValues: coo(at: col).compactMap {
-			switch ($0, $1) {
-			case (row, let v) where v != .zero:
-				.some(($0 - row.lowerBound, v))
-			default:
-				.none
-			}
-		}))
+		get {
+			let row = row.relative(to: 0..<rows)
+			return.init(count: row.count, store: .init(uniqueKeysWithValues: coo(at: col).compactMap {
+				switch ($0, $1) {
+				case (row, let v) where v != .zero:
+					.some(($0 - row.lowerBound, v))
+				default:
+					.none
+				}
+			}))
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
-		let row = row.relative(to: 0..<rows)
-		let col = col.relative(to: 0..<cols)
-		return.init(shape: (row.count, col.count), col.enumerated().lazy.flatMap { idx, col in
-			coo(at: col).lazy.compactMap {
-				row ~= $0 && $1 != .zero ? .some((SIMD2($0 - row.lowerBound, idx), $1)) : .none
-			}
-		})
+		get {
+			let row = row.relative(to: 0..<rows)
+			let col = col.relative(to: 0..<cols)
+			return.init(shape: (row.count, col.count), col.enumerated().lazy.flatMap { idx, col in
+				coo(at: col).lazy.compactMap {
+					row ~= $0 && $1 != .zero ? .some((SIMD2($0 - row.lowerBound, idx), $1)) : .none
+				}
+			})
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 }
 extension CCS {
@@ -133,8 +160,9 @@ extension CCS: ExpressibleByArrayLiteral {
 	}
 }
 extension CCS {
+	@_disfavoredOverload
 	@inlinable
-	public init(_ source: some Matrix<Element>, ε: Element.Magnitude = .zero) async throws {
+	public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
 		let (layout, result) = try source(for: .columnMajor)
 		precondition(layout.count == 2)
 		let ldr = layout[0]
