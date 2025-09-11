@@ -20,7 +20,7 @@ struct DOTTestCases {
 	}
 	@Test
 	func scaleMat() {
-		let x = [[2, 3, 5], [11, 13, 19]] as CRS
+		let x = CRS(rows: [[2, 3, 5], [11, 13, 19]])
 		let y = 7 * x
 		let z = CCS(y)
 		#expect(y[0, 0] == 14)
