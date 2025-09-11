@@ -7,11 +7,11 @@
 import typealias Layout.MemoryStrategy
 import protocol Dense.Matrix
 import protocol Dense.MutMatrix
-public protocol SparseMatrix<Element>: SparseTensor & Matrix where S: SparseMatrix, T: SparseMatrix, V: SparseVector {
+public protocol SparseMatrix<Element>: SparseTensor & Matrix where S: SparseMatrix<Element>, T: SparseMatrix<Element>, V: SparseVector<Element> {
 	associatedtype LIL: Collection where LIL.Index == Int, LIL.Element: Sequence, LIL.Element.Element == (Int, Element)
 	@inlinable func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL)
 }
-public protocol MutSparseMatrix<Element>: MutSparseTensor & MutMatrix & SparseMatrix where S: MutSparseMatrix, T: MutSparseMatrix, V: MutSparseVector {
+public protocol MutSparseMatrix<Element>: MutSparseTensor & MutMatrix & SparseMatrix where S: MutSparseMatrix<Element>, T: MutSparseMatrix<Element>, V: MutSparseVector<Element> {
 	@inlinable init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>)
 }
 extension SparseMatrix {
