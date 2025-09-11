@@ -91,10 +91,10 @@ extension VectorBuffer {
 }
 extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
 	@inlinable
-	public init(shape: Int) {
+	public init(shape: Int, with value: Element) {
 		count = shape
 		inc = 1
-		data = .init(repeating: .zero, count: count)
+		data = .init(repeating: value, count: count)
 	}
 	@inlinable
 	public init(_ elements: some Collection<Element>) {
