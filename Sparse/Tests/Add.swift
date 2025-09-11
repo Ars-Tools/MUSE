@@ -40,19 +40,139 @@ struct AddTestCases {
 		}
 	}
 	@Test(arguments: [
-		([[2, 1]], [[6, 7]]),
-		([[2, 4]], [[3, 0]]),
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
 	])
-	func bc(lhs: Array<Array<Int>>, rhs: Array<Array<Int>>) {
-		let x = CCS(cols: lhs)
-		let y = CRS(rows: rhs)
-		let z = x + y
-		#expect(z.rows == 2)
-		#expect(z.cols == 2)
-		for (row, col) in product(0..<2, 0..<2) {
-//			print(z[row, col])
-			#expect(z[row, col] == x[row, 0] + y[0, col])
+	func CCC(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CCS(x) + CCS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CCS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
 		}
-		
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func RCC(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CRS(x) + CCS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CCS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func CRC(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CCS(x) + CRS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CCS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func RRC(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CRS(x) + CRS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CRS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func CCR(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CCS(x) + CCS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CRS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func RCR(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CRS(x) + CCS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CRS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func CRR(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CCS(x) + CRS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CRS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
+	}
+	@Test(arguments: [
+		(repeatElement(-12...12, count: 6).map(Int.random(in:)), repeatElement(-12...12, count: 6).map(Int.random(in:)))
+	])
+	func RRR(x: Array<Int>, y: Array<Int>) {
+		let x = DOK(rows: [x])
+		let y = DOK(cols: [y])
+		let z = CRS(x) + CRS(y)
+		#expect(z.rows == 6)
+		#expect(z.cols == 6)
+		let w = CRS(z)
+		#expect(w.rows == 6)
+		#expect(w.cols == 6)
+		for (row, col) in product(0..<z.rows, 0..<z.cols) {
+			#expect(z[row, col] == x[0, col] + y[row, 0])
+			#expect(w[row, col] == x[0, col] + y[row, 0])
+		}
 	}
 }
