@@ -7,7 +7,7 @@
 import protocol Dense.MutScalar
 import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
-@frozen public struct SPV<Element: MutScalar> {
+@frozen public struct SPV<Element: SparseScalar<Element>> {
 	public typealias U = Element
 	public typealias R = Array<Element>
 	public let count: Int
