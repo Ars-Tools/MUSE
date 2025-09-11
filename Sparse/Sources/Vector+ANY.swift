@@ -7,7 +7,7 @@
 import protocol Accelerate.AccelerateBuffer
 import protocol Dense.MutScalar
 @usableFromInline
-@frozen struct ANY<Element: MutScalar> {
+@frozen struct ANY<Element: SparseScalar<Element>> {
 	@usableFromInline let core: any SparseVector<Element>
 }
 extension ANY: SparseVector {
