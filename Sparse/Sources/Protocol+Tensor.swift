@@ -9,15 +9,15 @@ import protocol Dense.MutTensor
 import protocol Dense.MutScalar
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
-public typealias SparseScalar<Element> = MutScalar<Element>
-public protocol SparseTensor<Element>: Tensor where U: SparseScalar<Element>, R == Array<U>, S: SparseTensor, T: SparseTensor, V: SparseTensor {
+public typealias SparseScalar<Element> = MutScalar<Element> & Numeric
+public protocol SparseTensor<Element>: Tensor where R == Array<Element>, S: SparseTensor, T: SparseTensor, U: SparseScalar<Element>, V: SparseTensor {
 	associatedtype Nonzero: Sequence where Nonzero.Element == (Array<Int>, Element)
 	var nonzero: Nonzero { get }
 }
 public protocol MutSparseTensor<Element>: MutTensor & SparseTensor {}
 extension SparseTensor {
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
 		let layout = strategy.stride(for: shape)
 		let memory = Array<Element>(unsafeUninitializedCapacity: capacity(alloc: shape, stride: layout)) {
 			$0.initialize(repeating: .zero)
