@@ -17,46 +17,80 @@ func transpose<Element: Numeric>(lil: some Collection<some Sequence<(Int, Elemen
 	}
 }
 @inlinable@inline(__always)
-func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: some Sequence<(Int, Element)>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
-	lhs.merging(rhs, uniquingKeysWith: +)
-		.lazy.compactMap {
-			$1 == .zero ? .none : .some(($0, $1))
-		}
-}
-@inlinable@inline(__always)
-func+<Element: Numeric>(lhs: some Sequence<(Int, Element)>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
-	rhs.merging(lhs, uniquingKeysWith: +)
-		.lazy.compactMap {
-			$1 == .zero ? .none : .some(($0, $1))
-		}
-}
-@inlinable@inline(__always)
-func-<Element: SignedNumeric>(lhs: some Sequence<(Int, Element)>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
-	rhs.mapValues(-).merging(lhs, uniquingKeysWith: +)
-		.lazy.compactMap {
-			$1 == .zero ? .none : .some(($0, $1))
-		}
-}
-@inlinable@inline(__always)
-func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
-	if lhs.count < rhs.count {
-		lhs.lazy.compactMap {
-			if let rhs = rhs[$0] {
-				.some(($0, $1 * rhs))
-			} else {
-				.none
-			}
-		}
-	} else {
-		rhs.lazy.compactMap {
-			if let lhs = lhs[$0] {
-				.some(($0, lhs * $1))
-			} else {
-				.none
-			}
+func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
+	let key = switch (lhs.keys, rhs.keys) {
+	case (let l, let r) where l.count < r.count:
+		Set(r).union(l)
+	case (let l, let r):
+		Set(l).union(r)
+	}
+	return key.lazy.compactMap {
+		switch lhs[$0, default: .zero] + rhs[$0, default: .zero] {
+		case.zero:
+			.none
+		case let v:
+			.some(($0, v))
 		}
 	}
 }
+@inlinable@inline(__always)
+func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
+	let key = switch (lhs.keys, rhs.keys) {
+	case (let l, let r) where l.count < r.count:
+		Set(r).intersection(l)
+	case (let l, let r):
+		Set(l).intersection(r)
+	}
+	return key.lazy.compactMap {
+		switch lhs[$0, default: .zero] * rhs[$0, default: .zero] {
+		case.zero:
+			.none
+		case let v:
+			.some(($0, v))
+		}
+	}
+}
+//@inlinable@inline(__always)
+//func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
+//	return if lhs.count < rhs.count {
+//		rhs.merging(lhs, uniquingKeysWith: +)
+//			.lazy.compactMap {
+//				$1 == .zero ? .none : .some(($0, $1))
+//			}
+//	} else {
+//		lhs.merging(rhs, uniquingKeysWith: +)
+//			.lazy.compactMap {
+//				$1 == .zero ? .none : .some(($0, $1))
+//			}
+//	}
+//}
+//@inlinable@inline(__always)
+//func-<Element: SignedNumeric>(lhs: some Sequence<(Int, Element)>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
+//	rhs.mapValues(-).merging(lhs, uniquingKeysWith: +)
+//		.lazy.compactMap {
+//			$1 == .zero ? .none : .some(($0, $1))
+//		}
+//}
+//@inlinable@inline(__always)
+//func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)> {
+//	if lhs.count < rhs.count {
+//		lhs.lazy.compactMap {
+//			if let rhs = rhs[$0] {
+//				.some(($0, $1 * rhs))
+//			} else {
+//				.none
+//			}
+//		}
+//	} else {
+//		rhs.lazy.compactMap {
+//			if let lhs = lhs[$0] {
+//				.some(($0, lhs * $1))
+//			} else {
+//				.none
+//			}
+//		}
+//	}
+//}
 @inlinable@inline(__always)
 func dot<Element: Numeric>(lhs: some Sequence<(Int, Element)>, rhs: some Sequence<(Int, Element)>) -> Element {
 	switch (Dictionary(uniqueKeysWithValues: lhs), Dictionary(uniqueKeysWithValues: rhs)) {
