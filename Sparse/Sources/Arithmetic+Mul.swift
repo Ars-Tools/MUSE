@@ -33,7 +33,8 @@ extension MulVector: SparseVector {
 	}
 	@inlinable
 	var coo: some Sequence<(Int, Element)> {
-		Dictionary<Int, Element>(uniqueKeysWithValues: lhs.coo) * Dictionary(uniqueKeysWithValues: rhs.coo)
+		Dictionary<Int, Element>(uniqueKeysWithValues: lhs.coo) *
+		Dictionary<Int, Element>(uniqueKeysWithValues: rhs.coo)
 	}
 }
 @usableFromInline
@@ -84,16 +85,38 @@ extension MulMatrix: SparseMatrix {
 			  rhs: rhs[narrowcast(bounds: row, target: rows, source: rhs.rows), narrowcast(bounds: col, target: cols, source: rhs.cols)])
 	}
 	@inlinable
-	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)>>) {
+	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)>>) {
 		switch (layout, lhs.lil(for: layout), rhs.lil(for: layout)) {
-		case (.columnMajor, (.columnMajor, let lhs), (.columnMajor, let rhs)), (.rowMajor, (.columnMajor, let lhs), (.columnMajor, let rhs)):
-			(.columnMajor, zip(lhs.lazy.map(Dictionary.init(uniqueKeysWithValues:)), rhs.lazy.map(Dictionary.init(uniqueKeysWithValues:))).map(*))
-		case (.columnMajor, (.rowMajor, let lhs), (.rowMajor, let rhs)), (.rowMajor, (.rowMajor, let lhs), (.rowMajor, let rhs)):
-			(.rowMajor, zip(lhs.lazy.map(Dictionary.init(uniqueKeysWithValues:)), rhs.lazy.map(Dictionary.init(uniqueKeysWithValues:))).map(*))
-		case (.columnMajor, (.columnMajor, let lhs), (.rowMajor, let rhs)), (.rowMajor, (.rowMajor, let lhs), (.columnMajor, let rhs)):
-			(layout, zip(lhs.lazy.map(Dictionary.init(uniqueKeysWithValues:)), Sparse.transpose(lil: rhs, for: lhs.count)).map(*))
-		case (.columnMajor, (.rowMajor, let lhs), (.columnMajor, let rhs)), (.rowMajor, (.columnMajor, let lhs), (.rowMajor, let rhs)):
-			(layout, zip(Sparse.transpose(lil: lhs, for: rhs.count), rhs.lazy.map(Dictionary.init(uniqueKeysWithValues:))).map(*))
+		case (.columnMajor, (.columnMajor, let l), (.columnMajor, let r)), (.rowMajor, (.columnMajor, let l), (.columnMajor, let r)):
+			(.columnMajor, zip(
+				`repeat`(lil: l, count: (cols / lhs.cols, rows / lhs.rows)),
+				`repeat`(lil: r, count: (cols / rhs.cols, rows / rhs.rows))
+			).lazy.map(*))
+		case (.columnMajor, (.rowMajor, let l), (.rowMajor, let r)), (.rowMajor, (.rowMajor, let l), (.rowMajor, let r)):
+			(.rowMajor, zip(
+				`repeat`(lil: l, count: (rows / lhs.rows, cols / lhs.cols)),
+				`repeat`(lil: r, count: (rows / rhs.rows, cols / rhs.cols))
+			).lazy.map(*))
+		case (.columnMajor, (.columnMajor, let l), (.rowMajor, let r)):
+			(.columnMajor, zip(
+				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.cols), count: (cols / rhs.cols, rows / rhs.rows)),
+				`repeat`(lil: l, count: (cols / lhs.cols, rows / lhs.rows))
+			).lazy.map(*))
+		case (.rowMajor, (.rowMajor, let l), (.columnMajor, let r)):
+			(.rowMajor, zip(
+				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.rows), count: (rows / rhs.rows, cols / rhs.cols)),
+				`repeat`(lil: l, count: (rows / lhs.rows, cols / lhs.cols))
+			).lazy.map(*))
+		case (.columnMajor, (.rowMajor, let l), (.columnMajor, let r)):
+			(.columnMajor, zip(
+				`repeat`(lil: Sparse.transpose(lil: l, for: lhs.cols), count: (cols / lhs.cols, rows / lhs.rows)),
+				`repeat`(lil: r, count: (cols / rhs.cols, rows / rhs.rows))
+			).lazy.map(*))
+		case (.rowMajor, (.columnMajor, let l), (.rowMajor, let r)):
+			(.rowMajor, zip(
+				`repeat`(lil: Sparse.transpose(lil: l, for: lhs.rows), count: (rows / lhs.rows, cols / lhs.cols)),
+				`repeat`(lil: r, count: (rows / rhs.rows, cols / rhs.cols))
+			).lazy.map(*))
 		}
 	}
 }
