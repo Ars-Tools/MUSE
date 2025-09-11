@@ -20,64 +20,78 @@ extension CRS {
 		zip(colIndex[rowStart[row]..<rowStart[row+1]].lazy.map(Int.init), valArray[rowStart[row]..<rowStart[row+1]])
 	}
 }
-extension CRS: SparseMatrix {
+extension CRS: MutSparseMatrix {
+	public typealias R = Array<Element>
 	public typealias S = CRS<Element>
 	public typealias T = CCS<Element>
-	public typealias V = SPV<Element>
 	public typealias U = Element
-	public typealias R = Array<Element>
-	public var diagonal: V {
-		.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: (0..<min(rows, cols)).flatMap { row in
-			coo(at: row).filter { $0.0 == row }
-		}))
-	}
+	public typealias V = SPV<Element>
 	public var transpose: T {
 		.init(rows: cols, cols: rows, colStart: rowStart, rowIndex: colIndex, valArray: valArray)
 	}
+	public var diagonal: V {
+		get {
+			.init(count: min(rows, cols), store: .init(uniqueKeysWithValues: (0..<min(rows, cols)).flatMap { row in
+				coo(at: row).filter { $0.0 == row }
+			}))
+		}
+		set {
+			for (index, value) in newValue.coo {
+				self[index, index] = value
+			}
+		}
+	}
 	@inlinable
 	public subscript(row: Int, col: Int) -> U {
-		coo(at: row).first { $0.0 == col }.map(\.1) ?? .zero
+		get {
+			coo(at: row).first { $0.0 == col }.map(\.1) ?? .zero
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		let col = col.relative(to: 0..<cols)
-		SOV(count: col.count, coo: coo(at: row).compactMap {
-			switch ($0, $1) {
-			case (col, let v) where v != .zero:
-				.some(($0 - col.lowerBound, v))
-			default:
-				.none
-			}
-		})
-		return.init(count: col.count, store: .init(uniqueKeysWithValues: coo(at: row).compactMap {
-			switch ($0, $1) {
-			case (col, let v) where v != .zero:
-				.some(($0 - col.lowerBound, v))
-			default:
-				.none
-			}
-		}))
+		get {
+			let col = col.relative(to: 0..<cols)
+			return.init(count: col.count, store: .init(uniqueKeysWithValues: coo(at: row).compactMap {
+				switch ($0, $1) {
+				case (col, let v) where v != .zero:
+					.some(($0 - col.lowerBound, v))
+				default:
+					.none
+				}
+			}))
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 	public subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		let row = row.relative(to: 0..<rows)
-		SOV(count: row.count, coo: row.enumerated().lazy.flatMap { idx, row in
-			coo(at: row).lazy.compactMap {
-				$0 == col ? .some((idx, $1)) : .none
-			}
-		})
-		return.init(count: row.count, store: .init(uniqueKeysWithValues: row.enumerated().lazy.flatMap { idx, row in
-			coo(at: row).lazy.compactMap {
-				$0 == col ? .some((idx, $1)) : .none
-			}
-		}))
+		get {
+			let row = row.relative(to: 0..<rows)
+			return.init(count: row.count, store: .init(uniqueKeysWithValues: row.enumerated().lazy.flatMap { idx, row in
+				coo(at: row).lazy.compactMap {
+					$0 == col ? .some((idx, $1)) : .none
+				}
+			}))
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
-		let row = row.relative(to: 0..<rows)
-		let col = col.relative(to: 0..<cols)
-		return.init(shape: (row.count, col.count), row.enumerated().lazy.flatMap { idx, row in
-			coo(at: row).lazy.compactMap {
-				col ~= $0 && $1 != .zero ? .some((SIMD2(idx, $0 - col.lowerBound), $1)) : .none
-			}
-		})
+		get {
+			let row = row.relative(to: 0..<rows)
+			let col = col.relative(to: 0..<cols)
+			return.init(shape: (row.count, col.count), row.enumerated().lazy.flatMap { idx, row in
+				coo(at: row).lazy.compactMap {
+					col ~= $0 && $1 != .zero ? .some((SIMD2(idx, $0 - col.lowerBound), $1)) : .none
+				}
+			})
+		}
+		set {
+			assertionFailure("not implemented")
+		}
 	}
 }
 extension CRS {
@@ -146,8 +160,9 @@ extension CRS: ExpressibleByArrayLiteral {
 	}
 }
 extension CRS {
+	@_disfavoredOverload
 	@inlinable
-	public init(_ source: some Matrix<Element>, ε: Element.Magnitude = .zero) async throws {
+	public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
 		let (layout, result) = try source(for: .columnMajor)
 		precondition(layout.count == 2)
 		let ldr = layout[0]
