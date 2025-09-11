@@ -17,30 +17,31 @@ public protocol MutSparseVector<Element>: MutSparseTensor & MutVector & SparseVe
 }
 extension SparseVector {
 	@inlinable
-	var dense: Array<Element> {
-		.init(unsafeUninitializedCapacity: count) {
-			$0.initialize(repeating: .zero)
-			for (i, v) in coo {
-				$0[i] = v
-			}
-			$1 = $0.count
-		}
-	}
-}
-extension SparseVector {
-	@inlinable
 	public var nonzero: LazyMapSequence<COO, (Array<Int>, Element)> {
 		coo.lazy.map { ([$0], $1) }
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		([1], {dense})
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+		let result = Array<Element>(unsafeUninitializedCapacity: count) {
+			$0.initialize(repeating: .zero)
+			for (key, val) in coo {
+				$0[key] = val
+			}
+			$1 = $0.count
+		}
+		return ([1], {result})
 	}
 }
 extension SparseVector {
 	@inlinable
 	public var description: String {
-		dense.description
+		Array<Element>(unsafeUninitializedCapacity: count) {
+			$0.initialize(repeating: .zero)
+			for (key, val) in coo {
+				$0[key] = val
+			}
+			$1 = $0.count
+		}.description
 	}
 }
 extension MutSparseVector {
