@@ -5,11 +5,10 @@
 //  Created by Kota on 9/9/R7.
 //
 import protocol Dense.Matrix
-import protocol Dense.MutScalar
 import typealias Layout.MemoryStrategy
 import func simd.simd_reduce_min
 @dynamicMemberLookup
-@frozen public struct DOK<Element> where Element: SparseScalar<Element> {
+@frozen public struct DOK<Element: SparseScalar<Element> & Numeric> {
 	public let rows: Int
 	public let cols: Int
 	@usableFromInline
