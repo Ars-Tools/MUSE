@@ -4,10 +4,10 @@
 //
 //  Created by Kota on 9/9/R7.
 //
-import protocol Dense.MutScalar
+import protocol Dense.Vector
 import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
-@frozen public struct SPV<Element: SparseScalar<Element>> {
+@frozen public struct SPV<Element: SparseScalar<Element> & Numeric> {
 	public typealias U = Element
 	public typealias R = Array<Element>
 	public let count: Int
