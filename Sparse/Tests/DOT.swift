@@ -149,4 +149,12 @@ struct DOTTestCases {
 			#expect(z[0..., idx].state == w[0..., idx].state)
 		}
 	}
+	@Test
+	func solver() {
+		let x = SPV<Float32>(arrayLiteral: 1, 2, 4, 8)
+		let y = SPV<Float32>(arrayLiteral: 1, 2, 4, 8)
+		let z = x • y
+		#expect(z == 85)
+		
+	}
 }
