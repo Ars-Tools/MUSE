@@ -288,6 +288,7 @@ extension Arithmetic.DOT.MM: SparseMatrix {
 		}
 	}
 }
+@_disfavoredOverload
 @inlinable
 public func •<Element: Numeric>(_ lhs: some SparseVector<Element>, _ rhs: some SparseVector<Element>) -> Element {
 	precondition(lhs.count == rhs.count, "dot length should be same")
