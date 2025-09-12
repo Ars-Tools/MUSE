@@ -9,7 +9,6 @@ import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
 @frozen public struct SPV<Element: SparseScalar<Element> & Numeric> {
 	public typealias U = Element
-	public typealias R = Array<Element>
 	public let count: Int
 	@usableFromInline
 	private(set) var store: Dictionary<Int, Element>
@@ -66,6 +65,10 @@ extension SPV: MutSparseVector {
 	@inlinable
 	public var coo: some Sequence<(Int, Element)> {
 		store.lazy.map(\.self)
+	}
+	@inlinable
+	public var state: Set<Int> {
+		.init(store.keys)
 	}
 	@inlinable
 	public init(shape: (Int), _ nonzero: some Sequence<(Int, Element)>) {
