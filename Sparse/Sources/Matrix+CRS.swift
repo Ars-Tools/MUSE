@@ -9,18 +9,32 @@ import typealias Layout.MemoryStrategy
 @frozen public struct CRS<Element: SparseScalar<Element> & Numeric> {
 	public let rows: Int
 	public let cols: Int
-	@usableFromInline let rowStart: Array<Int>
-	@usableFromInline let colIndex: Array<Int32>
-	@usableFromInline let valArray: Array<Element>
+	@usableFromInline private(set) var rowStart: Array<Int>
+	@usableFromInline private(set) var colIndex: Array<Int32>
+	@usableFromInline private(set) var valArray: Array<Element>
 }
 extension CRS {
 	@inlinable
 	func coo(at row: Int) -> Zip2Sequence<LazyMapSequence<ArraySlice<Int32>, Int>, ArraySlice<Element>> {
 		zip(colIndex[rowStart[row]..<rowStart[row+1]].lazy.map(Int.init), valArray[rowStart[row]..<rowStart[row+1]])
 	}
+	@inlinable
+	mutating func alt(change: (inout Array<Dictionary<Int32, Element>>) throws -> Void) rethrows {
+		var lil = (0..<rows).map {
+			Dictionary(uniqueKeysWithValues: zip(colIndex[rowStart[$0]..<rowStart[$0+1]], valArray[rowStart[$0]..<rowStart[$0+1]]))
+		}
+		try change(&lil)
+		(rowStart, colIndex, valArray) = lil.reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
+			for (col, val) in $1 where val != .zero {
+				$0.2.append(val)
+				$0.1.append(.init(col))
+			}
+			assert($0.1.count == $0.2.count)
+			$0.0.append($0.1.count)
+		}
+	}
 }
 extension CRS: MutSparseMatrix {
-	public typealias R = Array<Element>
 	public typealias S = CRS<Element>
 	public typealias T = CCS<Element>
 	public typealias U = Element
@@ -35,8 +49,13 @@ extension CRS: MutSparseMatrix {
 			}))
 		}
 		set {
-			for (index, value) in newValue.coo {
-				self[index, index] = value
+			alt { [rows, cols] in
+				for index in 0..<min(rows, cols) {
+					$0[index].removeValue(forKey: .init(index))
+				}
+				for (index, value) in newValue.store where value != .zero {
+					$0[index].updateValue(value, forKey: .init(index))
+				}
 			}
 		}
 	}
@@ -46,7 +65,9 @@ extension CRS: MutSparseMatrix {
 			coo(at: row).first { $0.0 == col }.map(\.1) ?? .zero
 		}
 		set {
-			assertionFailure("not implemented")
+			alt {
+				$0[row].updateValue(newValue, forKey: .init(col))
+			}
 		}
 	}
 	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
@@ -55,14 +76,22 @@ extension CRS: MutSparseMatrix {
 			return.init(count: col.count, store: .init(uniqueKeysWithValues: coo(at: row).compactMap {
 				switch ($0, $1) {
 				case (col, let v) where v != .zero:
-					.some(($0 - col.lowerBound, v))
+					.some(($0 &- col.lowerBound, v))
 				default:
 					.none
 				}
 			}))
 		}
 		set {
-			assertionFailure("not implemented")
+			let col = col.relative(to: 0..<cols)
+			alt {
+				for col in col {
+					$0[row].removeValue(forKey: .init(col))
+				}
+				for (idx, val) in newValue.store where val != .zero {
+					$0[row].updateValue(val, forKey: .init(idx &+ col.lowerBound))
+				}
+			}
 		}
 	}
 	public subscript(row: some RangeExpression<Int>, col: Int) -> V {
@@ -75,7 +104,15 @@ extension CRS: MutSparseMatrix {
 			}))
 		}
 		set {
-			assertionFailure("not implemented")
+			let row = row.relative(to: 0..<rows)
+			alt {
+				for row in row {
+					$0[row].removeValue(forKey: .init(col))
+				}
+				for (idx, val) in newValue.store {
+					$0[idx &+ row.lowerBound].updateValue(val, forKey: .init(col))
+				}
+			}
 		}
 	}
 	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
@@ -89,7 +126,19 @@ extension CRS: MutSparseMatrix {
 			})
 		}
 		set {
-			assertionFailure("not implemented")
+			let row = row.relative(to: 0..<rows)
+			let col = col.relative(to: 0..<cols)
+			alt {
+				for row in row {
+					for col in col {
+						$0[row].removeValue(forKey: .init(col))
+					}
+				}
+				for (idx, row) in row.enumerated() {
+					$0[row].merge(zip((newValue.colIndex[newValue.rowStart[idx]..<newValue.rowStart[idx+1]]).lazy.map { $0 &+ .init(col.lowerBound) },
+									  (newValue.valArray[newValue.rowStart[idx]..<newValue.rowStart[idx+1]])), uniquingKeysWith: +)
+				}
+			}
 		}
 	}
 }
@@ -162,13 +211,14 @@ extension CRS {
 	@_disfavoredOverload
 	@inlinable
 	public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
-		let (layout, result) = try source(for: .columnMajor)
+		rows = source.rows
+		cols = source.cols
+		let (layout, source) = try source(for: .columnMajor)
+		async let result = source()
 		precondition(layout.count == 2)
 		let ldr = layout[0]
 		let ldc = layout[1]
-		rows = source.rows
-		cols = source.cols
-		(rowStart, colIndex, valArray) = await result().withUnsafeBufferPointer { [rows, cols] buffer in
+		(rowStart, colIndex, valArray) = await result.withUnsafeBufferPointer { [rows, cols] buffer in
 			(0..<rows).reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
 				for si in 0..<cols where ε < buffer[$1 * ldr + si * ldc].magnitude {
 					$0.2.append(buffer[$1 * ldr + si * ldc])
