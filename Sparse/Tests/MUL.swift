@@ -5,6 +5,7 @@
 //  Created by Kota on 9/10/R7.
 //
 import Testing
+import Dense
 import func Layout.product
 @testable import Sparse
 @Suite
