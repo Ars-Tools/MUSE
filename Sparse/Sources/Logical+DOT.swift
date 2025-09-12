@@ -6,6 +6,7 @@
 //
 import protocol Accelerate.AccelerateBuffer
 import protocol Dense.Matrix
+import typealias Layout.MemoryStrategy
 import func Layout.product
 extension Logical {
 	@usableFromInline
@@ -205,6 +206,7 @@ extension Logical.DOT.MM: SparseMatrix {
 		})
 	}
 }
+@_disfavoredOverload
 public func •(_ lhs: some SparseVector<Bool>, _ rhs: some SparseVector<Bool>) -> Bool {
 	precondition(lhs.count == rhs.count, "dot length should be same")
 	return !lhs.state.intersection(rhs.state).isEmpty
