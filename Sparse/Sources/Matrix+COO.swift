@@ -25,7 +25,6 @@ extension COO {
 	}
 }
 extension COO: MutSparseMatrix {
-	public typealias R = Array<Element>
 	public typealias S = Self
 	public typealias T = Self
 	public typealias U = Element
@@ -40,8 +39,17 @@ extension COO: MutSparseMatrix {
 			}))
 		}
 		set {
-			for (index, value) in newValue.coo {
-				self[index, index] = value
+			(rowIndex, colIndex, valArray) = zip(zip(rowIndex, colIndex), valArray).reduce(into: (Array<Int32>(), Array<Int32>(), Array<Element>())) {
+				if $1.0.0 != $1.0.1 {
+					$0.0.append($1.0.0)
+					$0.1.append($1.0.1)
+					$0.2.append($1.1)
+				}
+			}
+			for (index, value) in newValue.store {
+				rowIndex.append(.init(index))
+				colIndex.append(.init(index))
+				valArray.append(value)
 			}
 		}
 	}
@@ -94,10 +102,10 @@ extension COO: MutSparseMatrix {
 					return
 				}
 			}
-			for (offset, element) in col.enumerated() {
+			for (idx, val) in newValue.store where val != .zero {
 				rowIndex.append(.init(row))
-				colIndex.append(.init(element))
-				valArray.append(newValue[offset])
+				colIndex.append(.init(idx &+ col.lowerBound))
+				valArray.append(val)
 			}
 		}
 	}
@@ -126,10 +134,10 @@ extension COO: MutSparseMatrix {
 					return
 				}
 			}
-			for (offset, element) in row.enumerated() {
-				rowIndex.append(.init(element))
+			for (idx, val) in newValue.store where val != .zero {
+				rowIndex.append(.init(idx &+ row.lowerBound))
 				colIndex.append(.init(col))
-				valArray.append(newValue[offset])
+				valArray.append(val)
 			}
 		}
 	}
@@ -157,10 +165,10 @@ extension COO: MutSparseMatrix {
 					return
 				}
 			}
-			for (row, col) in product(row.enumerated(), col.enumerated()) {
-				rowIndex.append(.init(row.1))
-				colIndex.append(.init(col.1))
-				valArray.append(newValue[row.0, col.0])
+			for ((r, c), val) in zip(zip(newValue.rowIndex, newValue.colIndex), newValue.valArray) where val != .zero {
+				rowIndex.append(r &+ .init(row.lowerBound))
+				colIndex.append(c &+ .init(col.lowerBound))
+				valArray.append(val)
 			}
 		}
 	}
