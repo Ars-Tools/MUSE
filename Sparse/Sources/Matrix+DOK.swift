@@ -30,22 +30,25 @@ extension DOK {
 	}
 }
 extension DOK {
-	public typealias LIL = Array<Array<(Int, Element)>>
-	public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL) {
+	@inlinable
+	public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Array<(Int, Element)>>) {
 		switch layout {
 		case.rowMajor:
-			(.rowMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: [], count: rows)) {
+			(.rowMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: rows)) {
 				$0[$1.0.x].append(($1.0.y, $1.1))
 			})
 		case.columnMajor:
-			(.columnMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: [], count: cols)) {
+			(.columnMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: cols)) {
 				$0[$1.0.y].append(($1.0.x, $1.1))
 			})
 		}
 	}
+	@inlinable
+	public var state: Set<SIMD2<Int>> {
+		.init(store.keys)
+	}
 }
 extension DOK: MutSparseMatrix {
-	public typealias R = Array<Element>
 	public typealias S = Self
 	public typealias T = Self
 	public typealias U = Element
@@ -53,7 +56,9 @@ extension DOK: MutSparseMatrix {
 	public var transpose: DOK<Element> {
 		.init(rows: cols, cols: rows, store: .init(uniqueKeysWithValues: store.compactMap {
 			switch ($0.x, $0.y, $1) {
-			case (0..<rows, 0..<cols, let v) where v != .zero:
+			case (0..<rows, 0..<cols, .zero):
+				.none
+			case (0..<rows, 0..<cols, let v):
 				.some((.init($0.y, $0.x), v))
 			default:
 				.none
@@ -67,8 +72,17 @@ extension DOK: MutSparseMatrix {
 			}))
 		}
 		set {
-			for (index, value) in newValue.coo {
-				self[index, index] = value
+			let index = store.indices.filter {
+				switch store[$0].key {
+				case let key:
+					key.x == key.y
+				}
+			}
+			for index in index {
+				store.remove(at: index)
+			}
+			for (index, value) in newValue.store where value != .zero {
+				store.updateValue(value, forKey: .init(index, index))
 			}
 		}
 	}
@@ -87,7 +101,7 @@ extension DOK: MutSparseMatrix {
 			return.init(count: col.count, store: .init(uniqueKeysWithValues: store.lazy.compactMap {
 				switch ($0.x, $0.y, $1) {
 				case (row, col, let v) where v != .zero:
-					.some(($0.y - col.lowerBound, v))
+					.some(($0.y &- col.lowerBound, v))
 				default:
 					.none
 				}
@@ -99,7 +113,7 @@ extension DOK: MutSparseMatrix {
 				store.removeValue(forKey: key)
 			}
 			store.merge(newValue.store.compactMap {
-				$1 != .zero ? .some((.init(row, $0 &- col.lowerBound), $1)) : .none
+				$1 != .zero ? .some((.init(row, $0 &+ col.lowerBound), $1)) : .none
 			}, uniquingKeysWith: +)
 		}
 	}
@@ -121,7 +135,7 @@ extension DOK: MutSparseMatrix {
 				store.removeValue(forKey: key)
 			}
 			store.merge(newValue.store.compactMap {
-				$1 != .zero ? .some((.init($0 &- row.lowerBound, col), $1)) : .none
+				$1 != .zero ? .some((.init($0 &+ row.lowerBound, col), $1)) : .none
 			}, uniquingKeysWith: +)
 		}
 	}
@@ -145,7 +159,7 @@ extension DOK: MutSparseMatrix {
 				store.removeValue(forKey: key)
 			}
 			store.merge(newValue.store.compactMap {
-				$1 != .zero ? .some(($0 &- .init(row.lowerBound, col.lowerBound), $1)) : .none
+				$1 != .zero ? .some(($0 &+ .init(row.lowerBound, col.lowerBound), $1)) : .none
 			}, uniquingKeysWith: +)
 		}
 	}
