@@ -4,10 +4,10 @@
 //
 //  Created by Kota on 9/9/R7.
 //
-import protocol Dense.MutScalar
+import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
 import func Layout.product
-@frozen public struct COO<Element> where Element: SparseScalar<Element> {
+@frozen public struct COO<Element: SparseScalar<Element> & Numeric> {
 	public let rows: Int
 	public let cols: Int
 	@usableFromInline private(set) var rowIndex: Array<Int32>
@@ -166,17 +166,16 @@ extension COO: MutSparseMatrix {
 	}
 }
 extension COO {
-	public typealias LIL = Array<LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)>>
-	public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL) {
+	public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Array<(Int, Element)>>) {
 		switch layout {
 		case.rowMajor:
-			(.rowMajor, valArray.enumerated().reduce(into: Array<Dictionary<Int, Element>>(repeating: .init(), count: rows)) {
-				$0[.init(rowIndex[$1.0])].updateValue($1.1, forKey: .init(colIndex[$1.0]))
-			}.map(unpack))
+			(.rowMajor, valArray.enumerated().reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: rows)) {
+				$0[.init(rowIndex[$1.0])].append((.init(colIndex[$1.0]), $1.1))
+			})
 		case.columnMajor:
-			(.columnMajor, valArray.enumerated().reduce(into: Array<Dictionary<Int, Element>>(repeating: .init(), count: cols)) {
-				$0[.init(colIndex[$1.0])].updateValue($1.1, forKey: .init(rowIndex[$1.0]))
-			}.map(unpack))
+			(.columnMajor, valArray.enumerated().reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: cols)) {
+				$0[.init(colIndex[$1.0])].append((.init(rowIndex[$1.0]), $1.1))
+			})
 		}
 	}
 }
