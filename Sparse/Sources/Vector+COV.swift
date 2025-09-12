@@ -5,11 +5,9 @@
 //  Created by Kota on 9/9/R7.
 //
 import protocol Accelerate.AccelerateBuffer
-import protocol Dense.Scalar
-import protocol Dense.MutScalar
 extension LazyMapSequence: @retroactive @unchecked Sendable {}
 @usableFromInline
-@frozen struct COV<Element: SparseScalar<Element>, COO: Sequence<(Int, Element)> & Sendable> {
+@frozen struct COV<Element: SparseScalar<Element> & Numeric, COO: Sequence<(Int, Element)> & Sendable> {
 	@usableFromInline let count: Int
 	@usableFromInline let coo: COO
 }
