@@ -5,9 +5,8 @@
 //  Created by Kota on 9/9/R7.
 //
 import protocol Dense.Matrix
-import protocol Dense.MutScalar
 import typealias Layout.MemoryStrategy
-@frozen public struct CCS<Element> where Element: SparseScalar<Element> {
+@frozen public struct CCS<Element: SparseScalar<Element> & Numeric> {
 	public let rows: Int
 	public let cols: Int
 	@usableFromInline let colStart: Array<Int>
