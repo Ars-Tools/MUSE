@@ -9,6 +9,7 @@ import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
 @frozen public struct VSK {
 	public typealias Element = Bool
+	public typealias U = Element
 	public let count: Int
 	private(set) public var state: Set<Int>
 }
@@ -28,7 +29,6 @@ extension VSK {
 	}
 }
 extension VSK {
-	public typealias U = Element
 	public subscript(position: Int) -> Element {
 		get {
 			state.contains(position)
@@ -77,6 +77,12 @@ extension VSK {
 	public init(_ source: some SparseVector) {
 		count = source.count
 		state = source.state
+	}
+}
+extension VSK: ExpressibleByArrayLiteral {
+	public init(arrayLiteral elements: Bool...) {
+		count = elements.count
+		state = .init(elements.enumerated().lazy.filter(\.1).map(\.0))
 	}
 }
 extension VSK: CustomStringConvertible {}
