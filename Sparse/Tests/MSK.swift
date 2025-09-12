@@ -5,6 +5,7 @@
 //  Created by Kota on 9/10/R7.
 //
 import Testing
+import Dense
 @testable import Sparse
 @Suite
 struct MSKTestCases {
@@ -27,11 +28,6 @@ struct MSKTestCases {
 		])
 		#expect(ccs[1, 1] == .zero)
 		#expect(ccs[1, 0] != .zero)
-	}
-	@Test
-	func identity() {
-		let s = MSK(identity: 10)
-		print(s)
 	}
 }
 
