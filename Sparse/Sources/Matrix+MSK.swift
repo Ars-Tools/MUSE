@@ -4,15 +4,15 @@
 //
 //  Created by Kota on 9/10/R7.
 //
-import protocol Dense.MutMatrix
+import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
 import func simd.simd_reduce_min
 @dynamicMemberLookup
 @frozen public struct MSK {
+	public typealias Element = Bool
 	public let rows: Int
 	public let cols: Int
-	@usableFromInline
-	private(set) var state: Set<SIMD2<Int>>
+	private(set) public var state: Set<SIMD2<Int>>
 }
 extension MSK {
 	@inlinable
@@ -29,8 +29,7 @@ extension MSK {
 		}
 	}
 }
-extension MSK: MutMatrix {
-	public typealias Element = Bool
+extension MSK {
 	public typealias S = Self
 	public typealias T = Self
 	public typealias U = Element
@@ -57,18 +56,18 @@ extension MSK: MutMatrix {
 	}
 	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
 		get {
-			let col = col.relative(to: 0..<rows)
+			let col = col.relative(to: 0..<cols)
 			return.init(count: col.count, state: .init(state.lazy.compactMap {
 				switch ($0.x, $0.y) {
 				case (row, col):
-					.some($0.x &- col.lowerBound)
+					.some($0.y &- col.lowerBound)
 				default:
 					.none
 				}
 			}))
 		}
 		set {
-			let col = col.relative(to: 0..<rows)
+			let col = col.relative(to: 0..<cols)
 			state.subtract(state.filter { col.contains($0.y) })
 			for index in newValue.state {
 				state.insert(.init(row, index &+ col.lowerBound))
@@ -124,65 +123,26 @@ extension MSK: MutMatrix {
 			}
 		}
 	}
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Bool>) {
-		switch strategy {
-		case.rowMajor:
-			let result = Array<Bool>(unsafeUninitializedCapacity: rows * cols) {
-				$0.initialize(repeating: false)
-				for index in state {
-					$0[index.x * cols + index.y] = true
-				}
-				$1 = $0.count
-			}
-			return ([cols, 1], {result})
-		case.columnMajor:
-			let result = Array<Bool>(unsafeUninitializedCapacity: rows * cols) {
-				$0.initialize(repeating: false)
-				for index in state {
-					$0[index.x + rows * index.y] = true
-				}
-				$1 = $0.count
-			}
-			return ([1, rows], {result})
-		}
-	}
 }
-extension MSK {
+extension MSK: MutSparseMatrix {
 	public init(shape: (Int, Int)) {
 		(rows, cols) = shape
 		state = .init()
+	}
+	public init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>) {
+		(rows, cols) = shape
+		state = nonzero.reduce(into: .init()) {
+			if $1.1 {
+				$0.insert($1.0)
+			}
+		}
 	}
 }
 extension MSK {
 	public init(_ source: some SparseMatrix) {
 		rows = source.rows
 		cols = source.cols
-		state = switch source.lil(for: .rowMajor) {
-		case (.rowMajor, let lil):
-			.init(lil.enumerated().lazy.flatMap { row, col in
-				col.compactMap { $1 == .zero ? .none : .some(.init(row, $0)) }
-			})
-		case (.columnMajor, let lil):
-			.init(lil.enumerated().lazy.flatMap { col, row in
-				row.compactMap { $1 == .zero ? .none : .some(.init($0, col)) }
-			})
-		}
+		state = source.state
 	}
 }
-extension MSK: CustomStringConvertible {
-	public var description: String {
-		var rows = Array<Set<Int>>(repeating: .init(), count: rows)
-		for index in state {
-			rows[index.x].insert(index.y)
-		}
-		return "[" + rows.map { state in
-			Array<Bool>(unsafeUninitializedCapacity: cols) {
-				$0.initialize(repeating: false)
-				for index in state {
-					$0[index] = true
-				}
-				$1 = $0.count
-			}.description
-		}.joined(separator: ",\r\n ") + "]"
-	}
-}
+extension MSK: CustomStringConvertible {}
