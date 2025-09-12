@@ -1,5 +1,5 @@
 //
-//  Logical+SUB.swift
+//  Logical+INHIBIT.swift
 //  MUSE
 //
 //  Created by Kota on 9/12/R7.
@@ -75,7 +75,27 @@ extension Logical.INHIBIT.Matrix: SparseMatrix {
 	}
 	@usableFromInline
 	var diagonal: V {
-		.init(lhs: lhs.diagonal, rhs: rhs.diagonal)
+		let lhs = switch (rows / lhs.rows, cols / lhs.cols) {
+		case (1, 1):
+			lhs.diagonal
+		case (1, 2...):
+			lhs[0, 0...]
+		case (2..., 1):
+			lhs[0..., 0]
+		default:
+			lhs.diagonal
+		}
+		let rhs = switch (rows / rhs.rows, cols / rhs.cols) {
+		case (1, 1):
+			rhs.diagonal
+		case (1, 2...):
+			rhs[0, 0...]
+		case (2..., 1):
+			rhs[0..., 0]
+		default:
+			rhs.diagonal
+		}
+		return.init(lhs: lhs, rhs: rhs)
 	}
 	@usableFromInline
 	var transpose: T {
