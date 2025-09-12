@@ -19,6 +19,9 @@ let package = Package(
 			targets: ["Layout", "Optimise"]
 		),
     ],
+	dependencies: [
+		.package(url: "https://github.com/ars-tools/MUCE", branch: "release")
+	],
     targets: [
 		.target(
 			name: "Dense",
@@ -36,7 +39,7 @@ let package = Package(
 		),
 		.target(
 			name: "Sparse",
-			dependencies: ["Dense"],
+			dependencies: ["Dense", .productItem(name: "MUCE.Auxiliary", package: "MUCE", moduleAliases: .none, condition: .none)],
 			path: "Sparse/Sources",
 			cSettings: [
 				.define("ACCELERATE_NEW_LAPACK"),
