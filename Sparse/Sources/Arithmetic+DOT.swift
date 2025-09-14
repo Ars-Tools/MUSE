@@ -86,19 +86,27 @@ extension Arithmetic.DOT.Outer: SparseMatrix {
 		.init(lhs: lhs[row], rhs: rhs[col])
 	}
 	@inlinable@inline(__always)
-	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LazyMapSequence<Range<Int>, OptionalSequence<LazyMapSequence<Array<(Int, Element)>, (Int, Element)>>>) {
+	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LazyMapSequence<Range<Int>, Optional<LazyMapSequence<Array<(Int, Element)>, (Int, Element)>>>) {
 		switch layout {
 		case.rowMajor:
 			let l = Dictionary(uniqueKeysWithValues: lhs.coo)
 			let r = Array(rhs.coo)
 			return (.rowMajor, (0..<lhs.count).lazy.map {
-				OptionalSequence(rawValue: l[$0].map { l in r.lazy.map { ($0, l * $1) } })
+				if let l = l[$0] {
+					.some(r.lazy.map { ($0, l * $1) })
+				} else {
+					.none
+				}
 			})
 		case.columnMajor:
 			let l = Array(lhs.coo)
 			let r = Dictionary(uniqueKeysWithValues: rhs.coo)
 			return (.columnMajor, (0..<rhs.count).lazy.map {
-				OptionalSequence(rawValue: r[$0].map { r in l.lazy.map { ($0, $1 * r) } })
+				if let r = r[$0] {
+					.some(l.lazy.map { ($0, $1 * r) })
+				} else {
+					.none
+				}
 			})
 		}
 	}
@@ -119,7 +127,7 @@ extension Arithmetic.DOT.Diagonal: SparseVector {
 		switch (lhs.lil(for: .rowMajor), rhs.lil(for: .columnMajor)) {
 		case ((.rowMajor, let lhs), (.columnMajor, let rhs)):
 			return zip(lhs, rhs).enumerated().compactMap {
-				switch dot(lhs: $1.0, rhs: $1.1) {
+				switch $1.0 • $1.1 {
 				case.zero:
 					.none
 				case let value:
@@ -186,10 +194,14 @@ extension Arithmetic.DOT.MV: SparseVector {
 				$1 == .zero ? .none : .some(($0, $1))
 			}
 		case (.rowMajor, let lhs):
-			let rhs = Dictionary(uniqueKeysWithValues: rhs.coo)
+			let rhs = rhs.coo
 			return lhs.enumerated().compactMap {
-				let a = (Dictionary(uniqueKeysWithValues: $1) * rhs).reduce(0 as Element) { $0 + $1.1 }
-				return a == .zero ? .none : .some(($0, a))
+				switch $0.1 • rhs {
+				case.zero:
+					.none
+				case let v:
+					.some(($0.0, v))
+				}
 			}
 		}
 	}
@@ -209,10 +221,14 @@ extension Arithmetic.DOT.VM: SparseVector {
 	var coo: Array<(Int, Element)> {
 		switch rhs.lil(for: .columnMajor) {
 		case (.columnMajor, let rhs):
-			let lhs = Dictionary(uniqueKeysWithValues: lhs.coo)
+			let lhs = lhs.coo
 			return rhs.enumerated().compactMap {
-				let a = (lhs * Dictionary(uniqueKeysWithValues: $1)).reduce(0 as Element) { $0 + $1.1 }
-				return a == .zero ? .none : .some(($0, a))
+				switch lhs • $0.1 {
+				case.zero:
+					.none
+				case let v:
+					.some(($0.0, v))
+				}
 			}
 		case (.rowMajor, let rhs):
 			return lhs.coo.reduce(into: Dictionary<Int, Element>()) { a, x in
@@ -292,7 +308,7 @@ extension Arithmetic.DOT.MM: SparseMatrix {
 @inlinable
 public func •<Element: Numeric>(_ lhs: some SparseVector<Element>, _ rhs: some SparseVector<Element>) -> Element {
 	precondition(lhs.count == rhs.count, "dot length should be same")
-	return dot(lhs: lhs.coo, rhs: rhs.coo)
+	return lhs.coo • rhs.coo
 }
 public func •<Element: Numeric>(_ lhs: some SparseMatrix<Element>, _ rhs: some SparseVector<Element>) -> some SparseVector<Element> {
 	precondition(lhs.cols == rhs.count, "dot length should be same")
