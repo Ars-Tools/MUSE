@@ -1,8 +1,8 @@
 //
-//  Arithmetic+ADD.swift
+//  Arithmetic+SUB.swift
 //  MUSE
 //
-//  Created by Kota on 9/10/R7.
+//  Created by Kota on 9/13/R7.
 //
 import protocol Dense.Tensor
 import typealias Layout.MemoryStrategy
@@ -10,7 +10,7 @@ import func Layout.broadcast
 import func Layout.narrowcast
 extension Arithmetic {
 	@usableFromInline
-	@frozen enum ADD {
+	@frozen enum SUB {
 		@usableFromInline
 		@frozen struct Vector<Element: Numeric, LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
 			@usableFromInline typealias R = Array<Element>
@@ -31,14 +31,14 @@ extension Arithmetic {
 		}
 	}
 }
-extension Arithmetic.ADD.Vector: SparseVector {
+extension Arithmetic.SUB.Vector: SparseVector {
 	@inlinable
 	var count: Int {
 		broadcast(x: lhs.count, y: rhs.count)
 	}
 	@inlinable
 	subscript(position: Int) -> Element {
-		lhs[narrowcast(point: position, shape: lhs.count)] +
+		lhs[narrowcast(point: position, shape: lhs.count)] -
 		rhs[narrowcast(point: position, shape: rhs.count)]
 	}
 	@usableFromInline
@@ -48,11 +48,11 @@ extension Arithmetic.ADD.Vector: SparseVector {
 	}
 	@inlinable
 	var coo: some Sequence<(Int, Element)> {
-		lhs.coo
-//		lhs.coo + rhs.coo
+		Dictionary<Int, Element>(uniqueKeysWithValues: lhs.coo) -
+		Dictionary<Int, Element>(uniqueKeysWithValues: rhs.coo)
 	}
 }
-extension Arithmetic.ADD.Matrix: SparseMatrix {
+extension Arithmetic.SUB.Matrix: SparseMatrix {
 	@inlinable
 	var rows: Int {
 		broadcast(x: lhs.rows, y: rhs.rows)
@@ -91,7 +91,7 @@ extension Arithmetic.ADD.Matrix: SparseMatrix {
 	}
 	@inlinable
 	subscript(row: Int, col: Int) -> Element {
-		lhs[narrowcast(point: row, shape: lhs.rows), narrowcast(point: col, shape: lhs.cols)] +
+		lhs[narrowcast(point: row, shape: lhs.rows), narrowcast(point: col, shape: lhs.cols)] -
 		rhs[narrowcast(point: row, shape: rhs.rows), narrowcast(point: col, shape: rhs.cols)]
 	}
 	@usableFromInline
@@ -116,38 +116,38 @@ extension Arithmetic.ADD.Matrix: SparseMatrix {
 			(.columnMajor, zip(
 				`repeat`(lil: l, count: (cols / lhs.cols, rows / lhs.rows)),
 				`repeat`(lil: r, count: (cols / rhs.cols, rows / rhs.rows))
-			).lazy.map(+))
+			).lazy.map(-))
 		case (.columnMajor, (.rowMajor, let l), (.rowMajor, let r)), (.rowMajor, (.rowMajor, let l), (.rowMajor, let r)):
 			(.rowMajor, zip(
 				`repeat`(lil: l, count: (rows / lhs.rows, cols / lhs.cols)),
 				`repeat`(lil: r, count: (rows / rhs.rows, cols / rhs.cols))
-			).lazy.map(+))
+			).lazy.map(-))
 		case (.columnMajor, (.columnMajor, let l), (.rowMajor, let r)):
 			(.columnMajor, zip(
 				`repeat`(lil: l, count: (cols / lhs.cols, rows / lhs.rows)),
 				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.cols), count: (cols / rhs.cols, rows / rhs.rows))
-			).lazy.map(+))
+			).lazy.map(-))
 		case (.rowMajor, (.rowMajor, let l), (.columnMajor, let r)):
 			(.rowMajor, zip(
 				`repeat`(lil: l, count: (rows / lhs.rows, cols / lhs.cols)),
 				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.rows), count: (rows / rhs.rows, cols / rhs.cols))
-			).lazy.map(+))
+			).lazy.map(-))
 		case (.columnMajor, (.rowMajor, let l), (.columnMajor, let r)):
 			(.columnMajor, zip(
 				`repeat`(lil: Sparse.transpose(lil: l, for: lhs.cols), count: (cols / lhs.cols, rows / lhs.rows)),
 				`repeat`(lil: r, count: (cols / rhs.cols, rows / rhs.rows))
-			).lazy.map(+))
+			).lazy.map(-))
 		case (.rowMajor, (.columnMajor, let l), (.rowMajor, let r)):
 			(.rowMajor, zip(
 				`repeat`(lil: Sparse.transpose(lil: l, for: lhs.rows), count: (rows / lhs.rows, cols / lhs.cols)),
 				`repeat`(lil: r, count: (rows / rhs.rows, cols / rhs.cols))
-			).lazy.map(+))
+			).lazy.map(-))
 		}
 	}
 }
-public func+<Element: Numeric>(lhs: some SparseVector<Element>, rhs: some SparseVector<Element>) -> some SparseVector<Element> {
-	Arithmetic.ADD.Vector(lhs: lhs, rhs: rhs)
+public func-<Element: Numeric>(lhs: some SparseVector<Element>, rhs: some SparseVector<Element>) -> some SparseVector<Element> {
+	Arithmetic.SUB.Vector(lhs: lhs, rhs: rhs)
 }
-public func+<Element: Numeric>(lhs: some SparseMatrix<Element>, rhs: some SparseMatrix<Element>) -> some SparseMatrix<Element> {
-	Arithmetic.ADD.Matrix(lhs: lhs, rhs: rhs)
+public func-<Element: Numeric>(lhs: some SparseMatrix<Element>, rhs: some SparseMatrix<Element>) -> some SparseMatrix<Element> {
+	Arithmetic.SUB.Matrix(lhs: lhs, rhs: rhs)
 }

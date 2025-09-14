@@ -48,8 +48,7 @@ extension Arithmetic.MUL.Vector: SparseVector {
 	}
 	@inlinable
 	var coo: some Sequence<(Int, Element)> {
-		Dictionary<Int, Element>(uniqueKeysWithValues: lhs.coo) *
-		Dictionary<Int, Element>(uniqueKeysWithValues: rhs.coo)
+		lhs.coo * rhs.coo
 	}
 }
 extension Arithmetic.MUL.Matrix: SparseMatrix {
@@ -124,13 +123,13 @@ extension Arithmetic.MUL.Matrix: SparseMatrix {
 			).lazy.map(*))
 		case (.columnMajor, (.columnMajor, let l), (.rowMajor, let r)):
 			(.columnMajor, zip(
-				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.cols), count: (cols / rhs.cols, rows / rhs.rows)),
-				`repeat`(lil: l, count: (cols / lhs.cols, rows / lhs.rows))
+				`repeat`(lil: l, count: (cols / lhs.cols, rows / lhs.rows)),
+				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.cols), count: (cols / rhs.cols, rows / rhs.rows))
 			).lazy.map(*))
 		case (.rowMajor, (.rowMajor, let l), (.columnMajor, let r)):
 			(.rowMajor, zip(
-				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.rows), count: (rows / rhs.rows, cols / rhs.cols)),
-				`repeat`(lil: l, count: (rows / lhs.rows, cols / lhs.cols))
+				`repeat`(lil: l, count: (rows / lhs.rows, cols / lhs.cols)),
+				`repeat`(lil: Sparse.transpose(lil: r, for: rhs.rows), count: (rows / rhs.rows, cols / rhs.cols))
 			).lazy.map(*))
 		case (.columnMajor, (.rowMajor, let l), (.columnMajor, let r)):
 			(.columnMajor, zip(
