@@ -151,6 +151,14 @@ extension CCS {
 }
 extension CCS {
 	@inlinable
+	public init(shape: (Int, Int)) {
+		(rows, cols) = shape
+		precondition([rows, cols].allSatisfy { .zero < $0 }, "size should be greater than 0")
+		colStart = .init(arrayLiteral: 0)
+		rowIndex = .init()
+		valArray = .init()
+	}
+	@inlinable
 	public init(shape: (Int, Int), _ source: some Sequence<(SIMD2<Int>, Element)>) {
 		(rows, cols) = shape
 		(colStart, rowIndex, valArray) = source.reduce(into: Array<Dictionary<Int, Element>>(repeating: .init(), count: cols)) {
