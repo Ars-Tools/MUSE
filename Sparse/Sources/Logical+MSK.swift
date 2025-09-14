@@ -132,7 +132,7 @@ extension Logical.MSK.Matrix: SparseMatrix {
 							 narrowcast(bounds: col, target: cols, source: masker.cols)])
 	}
 	@usableFromInline
-	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<OptionalSequence<LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)>>>) {
+	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Optional<LazyMapSequence<LazyFilterSequence<LazyMapSequence<Dictionary<Int, Element>, Optional<(Int, Element)>>>, (Int, Element)>>>) {
 		let (row, col) = `repeat`(position: masker.state, count: (rows / masker.rows, cols / masker.cols)).reduce(into: (Set<Int>(), Set<Int>())) {
 			$0.0.insert($1.x)
 			$0.1.insert($1.y)
@@ -140,15 +140,15 @@ extension Logical.MSK.Matrix: SparseMatrix {
 		return switch maskee.lil(for: layout) {
 		case (.rowMajor, let lil):
 			(.rowMajor, `repeat`(lil: lil, count: (rows / maskee.rows, cols / maskee.cols)).enumerated().map {
-				OptionalSequence(rawValue: row.contains($0) ? .some($1.lazy.compactMap {
+				row.contains($0) ? .some($1.lazy.compactMap {
 					col.contains($0) && $1 != .zero ? .some(($0, $1)) : .none
-				}) : .none)
+				}) : .none
 			})
 		case (.columnMajor, let lil):
 			(.columnMajor, `repeat`(lil: lil, count: (cols / maskee.cols, rows / maskee.rows)).enumerated().map {
-				OptionalSequence(rawValue: col.contains($0) ? .some($1.lazy.compactMap {
+				col.contains($0) ? .some($1.lazy.compactMap {
 					row.contains($0) && $1 != .zero ? .some(($0, $1)) : .none
-				}) : .none)
+				}) : .none
 			})
 		}
 	}
