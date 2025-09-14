@@ -90,18 +90,18 @@ extension PaddedMatrix: SparseMatrix {
 		)
 	}
 	@usableFromInline
-	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<OptionalSequence<LazyMapSequence<Source.LIL.Element, (Int, Element)>>>) {
+	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Optional<LazyMapSequence<Source.LIL.Element, (Int, Element)>>>) {
 		switch source.lil(for: layout) {
 		case (.rowMajor, let lil):
 			return (.rowMajor,
-					repeatElement(.init(rawValue: .none), count: t) +
-					lil.map { OptionalSequence(rawValue: $0.lazy.map { ($0 + l, $1) }) } +
-					repeatElement(.init(rawValue: .none), count: b))
+					repeatElement(.none, count: t) +
+					lil.map { .some($0.lazy.map { ($0 + l, $1) }) } +
+					repeatElement(.none, count: b))
 		case (.columnMajor, let lil):
 			return (.columnMajor,
-					repeatElement(.init(rawValue: .none), count: l) +
-					lil.map { OptionalSequence(rawValue: $0.lazy.map { ($0 + t, $1) }) } +
-					repeatElement(.init(rawValue: .none), count: r))
+					repeatElement(.none, count: l) +
+					lil.map { .some($0.lazy.map { ($0 + t, $1) }) } +
+					repeatElement(.none, count: r))
 		}
 	}
 }
