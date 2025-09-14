@@ -169,9 +169,9 @@ extension MutSparseMatrix {
 	public init(_ vector: some SparseVector<Element>, layout: MemoryStrategy) {
 		switch layout {
 		case.rowMajor:
-			self.init(shape: (1, vector.count), vector.coo.lazy.map { (SIMD2(0, $0), $1) })
+			self.init(shape: (1, vector.count), vector.coo.lazy.map { (SIMD2<Int>(0, $0), $1) })
 		case.columnMajor:
-			self.init(shape: (vector.count, 1), vector.coo.lazy.map { (SIMD2($0, 0), $1) })
+			self.init(shape: (vector.count, 1), vector.coo.lazy.map { (SIMD2<Int>($0, 0), $1) })
 		}
 	}
 }
