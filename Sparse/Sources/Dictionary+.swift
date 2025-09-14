@@ -18,56 +18,36 @@ func transpose<Element>(lil: some Collection<some Sequence<(Int, Element)>>, for
 	}
 }
 @inlinable@inline(__always)
-func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
-	let key = switch (lhs.keys, rhs.keys) {
-	case (let l, let r) where l.count < r.count:
-		Set(r).union(l)
-	case (let l, let r):
-		Set(l).union(r)
-	}
-	return key.lazy.compactMap {
-		switch lhs[$0, default: .zero] + rhs[$0, default: .zero] {
-		case.zero:
-			.none
-		case let v:
-			.some(($0, v))
+func`repeat`<Λ, Element>(lil: Λ, count: (Int, Int)) -> LazySequence<FlattenSequence<LazyMapSequence<Repeated<LazyMapSequence<Λ, ChoiceSequence<Λ.Element, LazySequence<FlattenSequence<LazyMapSequence<Λ.Element, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>, (Int, Element)>>>, LazyMapSequence<Λ, ChoiceSequence<Λ.Element, LazySequence<FlattenSequence<LazyMapSequence<Λ.Element, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>, (Int, Element)>>>>> where Λ: Collection, Λ.Element: Sequence, Λ.Element.Element == (Int, Element) {
+	repeatElement(lil.lazy.map {
+		switch count.1 {
+		case 1:
+			ChoiceSequence<Λ.Element,
+						   LazySequence<FlattenSequence<LazyMapSequence<Λ.Element, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>,
+						   (Int, Element)>.A($0)
+		case let count:
+			ChoiceSequence<Λ.Element,
+						   LazySequence<FlattenSequence<LazyMapSequence<Λ.Element, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>,
+						   (Int, Element)>.B($0.lazy.flatMap { repeatElement($1, count: count).enumerated().lazy.map(\.self) })
 		}
-	}
+	}, count: count.0).lazy.flatMap(\.self)
 }
 @inlinable@inline(__always)
-func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
-	let key = switch (lhs.keys, rhs.keys) {
-	case (let l, let r) where l.count < r.count:
-		Set(r).intersection(l)
-	case (let l, let r):
-		Set(l).intersection(r)
-	}
-	return key.lazy.compactMap {
-		switch lhs[$0, default: .zero] * rhs[$0, default: .zero] {
-		case.zero:
-			.none
-		case let v:
-			.some(($0, v))
+func`repeat`<Λ, Element>(lil: Λ, count: (Int, Int)) -> LazySequence<FlattenSequence<LazyMapSequence<Repeated<LazyMapSequence<Λ, ChoiceSequence<LazyMapSequence<Dictionary<Int, Element>, (Int, Element)>, LazySequence<FlattenSequence<LazyMapSequence<Dictionary<Int, Element>, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>, (Int, Element)>>>, LazyMapSequence<Λ, ChoiceSequence<LazyMapSequence<Dictionary<Int, Element>, (Int, Element)>, LazySequence<FlattenSequence<LazyMapSequence<Dictionary<Int, Element>, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>, (Int, Element)>>>>> where Λ: Collection, Λ.Element == Dictionary<Int, Element> {
+	repeatElement(lil.lazy.map {
+		switch count.1 {
+		case 1:
+			ChoiceSequence<LazyMapSequence<Dictionary<Int, Element>, (Int, Element)>,
+						   LazySequence<FlattenSequence<LazyMapSequence<Dictionary<Int, Element>, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>,
+						   (Int, Element)>.A($0.lazy.map(\.self))
+		case let count:
+			ChoiceSequence<LazyMapSequence<Dictionary<Int, Element>, (Int, Element)>,
+						   LazySequence<FlattenSequence<LazyMapSequence<Dictionary<Int, Element>, LazyMapSequence<EnumeratedSequence<Repeated<Element>>, (Int, Element)>>>>,
+						   (Int, Element)>.B($0.lazy.flatMap { repeatElement($1, count: count).enumerated().lazy.map(\.self) })
 		}
-	}
+	}, count: count.0).lazy.flatMap(\.self)
 }
-@inlinable@inline(__always)
-func dot<Element: Numeric>(lhs: some Sequence<(Int, Element)>, rhs: some Sequence<(Int, Element)>) -> Element {
-	switch (Dictionary(uniqueKeysWithValues: lhs), Dictionary(uniqueKeysWithValues: rhs)) {
-	case (let lhs, let rhs) where lhs.count < rhs.count:
-		lhs.reduce(into: .zero) {
-			if let rhs = rhs[$1.0] {
-				$0 += $1.1 * rhs
-			}
-		}
-	case (let lhs, let rhs):
-		rhs.reduce(into: .zero) {
-			if let lhs = lhs[$1.0] {
-				$0 += lhs * $1.1
-			}
-		}
-	}
-}
+@_disfavoredOverload
 @inlinable@inline(__always)
 func`repeat`<Λ, Element>(lil: Λ, count: (Int, Int)) -> LazySequence<FlattenSequence<LazyMapSequence<Repeated<LazyMapSequence<Λ, Dictionary<Int, Element>>>, LazyMapSequence<Λ, Dictionary<Int, Element>>>>> where Λ: Collection, Λ.Element: Sequence, Λ.Element.Element == (Int, Element) {
 	repeatElement(lil.lazy.map {
@@ -79,6 +59,7 @@ func`repeat`<Λ, Element>(lil: Λ, count: (Int, Int)) -> LazySequence<FlattenSeq
 		}
 	}, count: count.0).lazy.flatMap(\.self)
 }
+@_disfavoredOverload
 @inlinable@inline(__always)
 func`repeat`<Λ, Element>(lil: Λ, count: (Int, Int)) -> LazySequence<FlattenSequence<LazyMapSequence<Repeated<LazyMapSequence<Λ, Dictionary<Int, Element>>>, LazyMapSequence<Λ, Dictionary<Int, Element>>>>> where Λ: Collection, Λ.Element == Dictionary<Int, Element> {
 	repeatElement(lil.lazy.map {
@@ -105,36 +86,5 @@ func`repeat`(position: Set<SIMD2<Int>>, count: (Int, Int)) -> Set<SIMD2<Int>> {
 		})
 	case let (l, r):
 		position.isEmpty ? .init() : .init(product(0..<l, 0..<r))
-	}
-}
-@usableFromInline
-@frozen struct OptionalSequence<Wrapped: Sequence>: RawRepresentable {
-	@usableFromInline typealias RawValue = Optional<Wrapped>
-	@usableFromInline let rawValue: Optional<Wrapped>
-	@usableFromInline
-	init(rawValue: Optional<Wrapped>) {
-		self.rawValue = rawValue
-	}
-}
-extension OptionalSequence: Sequence, @unchecked Sendable {
-	@usableFromInline typealias Element = Wrapped.Element
-	@usableFromInline
-	@frozen struct Iterator: IteratorProtocol & RawRepresentable {
-		@usableFromInline
-		typealias RawValue = Optional<Wrapped.Iterator>
-		@usableFromInline
-		var rawValue: RawValue
-		@inlinable
-		mutating func next() -> Optional<Wrapped.Element> {
-			rawValue?.next()
-		}
-		@inlinable
-		init(rawValue: RawValue) {
-			self.rawValue = rawValue
-		}
-	}
-	@inlinable
-	func makeIterator() -> Iterator {
-		.init(rawValue: rawValue?.makeIterator())
 	}
 }
