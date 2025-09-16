@@ -154,6 +154,8 @@ func+<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequen
 		case (.none, .none):
 			return.none
 		}
+	}.lazy.filter {
+		$1 != .zero
 	}
 }
 @_disfavoredOverload
@@ -210,6 +212,8 @@ func-<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequen
 		case (.none, .none):
 			return.none
 		}
+	}.lazy.filter {
+		$1 != .zero
 	}
 }
 @_disfavoredOverload
@@ -248,9 +252,15 @@ func*<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequen
 	var lhs = lhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
 	var rhs = rhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
 	return sequence(state: (lhs.next(), rhs.next())) {
-		while let x = $0.0 ?? lhs.next(), let y = $0.0 ?? rhs.next() {
+		while let x = $0.0 ?? lhs.next(), let y = $0.1 ?? rhs.next() {
 			if x.0 == y.0 {
-				return.some((min(x.0, y.0), x.1 * y.1))
+				$0 = (lhs.next(), rhs.next())
+				switch x.1 * y.1 {
+				case.zero:
+					continue
+				case let v:
+					return.some((min(x.0, y.0), v))
+				}
 			} else if x.0 < y.0 {
 				$0.0 = lhs.next()
 			} else if x.0 > y.0 {
@@ -303,6 +313,8 @@ func •<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Seq
 	var a = Element.zero
 	while let x = l ?? lhs.next(), let y = r ?? rhs.next() {
 		if x.0 == y.0 {
+			l = lhs.next()
+			r = rhs.next()
 			a += x.1 * y.1
 		} else if x.0 < y.0 {
 			l = lhs.next()

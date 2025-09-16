@@ -48,8 +48,7 @@ extension Arithmetic.ADD.Vector: SparseVector {
 	}
 	@inlinable
 	var coo: some Sequence<(Int, Element)> {
-		lhs.coo
-//		lhs.coo + rhs.coo
+		lhs.coo + rhs.coo
 	}
 }
 extension Arithmetic.ADD.Matrix: SparseMatrix {
