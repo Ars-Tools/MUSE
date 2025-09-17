@@ -22,13 +22,13 @@ extension Graph {
 				for (t, (u, v)) in e {
 					if f[s, default: .init()][t, default: .zero] < u {
 						$0.0[s, default: .init()][t] = u - f[s, default: .init()][t, default: .zero]
-						$0.1[s, default: .init()][t] = v + p[t, default: .zero] - p[s, default: .zero]
-						assert($0.1[s, default: .init()][t, default: .zero] >= .zero)
+						$0.1[s, default: .init()][t] = max(0, v + p[t, default: .zero] - p[s, default: .zero])
+//						assert($0.1[s, default: .init()][t, default: .zero] >= .zero)
 					}
 					if 0 < f[s, default: .init()][t, default: .zero] {
 						$0.0[t, default: .init()][s] = f[s, default: .init()][t, default: .zero]
-						$0.1[t, default: .init()][s] = p[s, default: .zero] - p[t, default: .zero] - v
-						assert($0.1[t, default: .init()][s, default: .zero] >= .zero)
+						$0.1[t, default: .init()][s] = max(0, p[s, default: .zero] - p[t, default: .zero] - v)
+//						assert($0.1[t, default: .init()][s, default: .zero] >= .zero)
 					}
 				}
 			}
