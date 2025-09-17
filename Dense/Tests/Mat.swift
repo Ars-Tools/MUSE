@@ -19,10 +19,10 @@ struct MatrixTestCases {
 	@Test
 	func arrayLiteral() {
 		let m = MatBuf(rows: [
-			[0, 1, 2],
+			[0, 1, 2, 8],
 			[3, 4, 5, 6],
-			[7, 8, 9]
+			[7, 8, 9, 4]
 		])
-		print(m)
+		print(m[1, 0...])
 	}
 }
