@@ -53,7 +53,7 @@ let package = Package(
 		),
 		.target(
 			name: "Optimise",
-			dependencies: ["Numerics"],
+			dependencies: ["Dense", "Sparse"],
 			path: "Optimise/Sources"
 		),
 		.testTarget(
