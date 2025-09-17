@@ -90,23 +90,23 @@ extension VectorBuffer {
 	}
 }
 extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
-	@inlinable
+	@inlinable@_transparent
 	public init(shape: Int, with value: Element) {
 		count = shape
 		inc = 1
 		data = .init(repeating: value, count: count)
 	}
-	@inlinable
+	@inlinable@_transparent
 	public init(_ elements: some Collection<Element>) {
 		count = elements.count
 		inc = 1
 		data = .init(elements)
 	}
-	@inlinable
+	@inlinable@_transparent
 	public init(arrayLiteral elements: Element...) {
 		self.init(elements)
 	}
-	@inlinable
+	@inlinable@_transparent
 	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Vector, Source.Element == Element {
 		let (stride, result) = try source(for: layout)
 		precondition(stride.count == 1)
@@ -116,8 +116,18 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	}
 	
 }
+extension VectorBuffer: RandomAccessCollection {
+	@inlinable@_transparent
+	public var startIndex: Int {
+		0
+	}
+	@inlinable@_transparent
+	public var endIndex: Int {
+		count
+	}
+}
 extension VectorBuffer: CustomStringConvertible {
-	@inlinable
+	@inlinable@_transparent
 	public var description: String {
 		(0..<count).lazy.map { data[data.startIndex.advanced(by: $0 * inc)] }.description
 	}
