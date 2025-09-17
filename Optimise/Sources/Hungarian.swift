@@ -129,22 +129,3 @@ public func hungarian<U: Collection<S>, V: Collection<S>, S: SIMDScalar, T: Floa
 	}).map {.init(u[$0.x], v[$0.y])})
 }
 // solve optima pair by brute-force, cost is row-major-matrix, to validate other algorithms
-@inlinable
-func bruteforceAssignment<C: Numeric & Comparable>(size: Int, cost table: Array<C>) -> Set<SIMD2<Int>> {
-	func permutation(head: Array<Int>, tail: Set<Int>) -> Array<Int> {
-		tail.lazy.map {
-			permutation(head: head + [$0], tail: tail.subtracting([$0]))
-		}.min {
-//			assert($0.count == size)
-//			assert($1.count == size)
-			$0.enumerated().reduce(C.zero) {
-				$0 + table[$1.0 * size + $1.1]
-			}
-			<
-			$1.enumerated().reduce(C.zero) {
-				$0 + table[$1.0 * size + $1.1]
-			}
-		} ?? head
-	}
-	return.init(permutation(head: .init(), tail: .init(0..<size)).enumerated().lazy.map(SIMD2<Int>.init(x:y:)))
-}
