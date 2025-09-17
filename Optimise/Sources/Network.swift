@@ -6,8 +6,7 @@
 //
 import typealias Foundation.KeyPathComparator
 import Sparse
-@usableFromInline
-enum Network {}
+public enum Network {}
 extension Network {
 	@usableFromInline // Linked-List to share parent nodes
 	indirect enum List<Element> {
