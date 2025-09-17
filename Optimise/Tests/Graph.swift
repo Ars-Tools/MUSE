@@ -1,5 +1,5 @@
 //
-//  Network.swift
+//  Graph.swift
 //  MUSE
 //
 //  Created by Kota on 9/16/R7.
@@ -8,10 +8,10 @@ import Testing
 import Dense
 @testable import Optimise
 @Suite
-struct NetworkTestCases {
+struct GraphTestCases {
 	@Test
 	func priorityQueue() {
-		var queue = Network.PriorityQueue<Int, String>()
+		var queue = Graph.PriorityQueue<Int, String>()
 		queue.insert(element: "A", as: 1)
 		#expect(queue.popMin().map(\.1) == "A")
 		queue.insert(element: "E", as: 5)
@@ -41,8 +41,8 @@ struct NetworkTestCases {
 			10: [(4, 8), (6, 11)],
 			11: [(4, 34), (8, 7)]
 		]
-		#expect(Network.Djikstra(source: 4, target: 9, weight: graph.mapValues(Dictionary.init(uniqueKeysWithValues:))).1 == [4, 2, 1, 9])
-		#expect(Network.Djikstra(source: 4, target: 9, weight: graph.mapValues(Dictionary.init(uniqueKeysWithValues:))).map(\.0) == [4, 2, 1, 9])
+		#expect(Graph.Djikstra(source: 4, target: 9, weight: graph.mapValues(Dictionary.init(uniqueKeysWithValues:))).1 == [4, 2, 1, 9])
+		#expect(Graph.Djikstra(source: 4, target: 9, weight: graph.mapValues(Dictionary.init(uniqueKeysWithValues:))).map(\.0) == [4, 2, 1, 9])
 	}
 	@Test(arguments: 4..<9)
 	func minCostMatch(n: Int) {
@@ -50,12 +50,12 @@ struct NetworkTestCases {
 			repeatElement(1 ... 4096, count: $0).lazy.map(Int.random(in:))
 		}
 		let m = MatBuf(rows: rows)
-		let p = Network.Match(table: m)
-		#expect(p == Network.bruteforceAssignment(table: m))
+		let p = Graph.Match(table: m)
+		#expect(p == Graph.bruteforceAssignment(table: m))
 	}
 	@Test
 	func minCostFlow() {
-		let e = Network.SuccessiveShortestPath(source: "s", target: "t", demand: 4, weight: [
+		let e = Graph.SuccessiveShortestPath(source: "s", target: "t", demand: 4, weight: [
 //			1: [2: (30, 3), 3: (60, 9)],
 //			2: [3: (40, 5), 4: (50, 7)],
 //			3: [4: (20, 8), 5: (50, 6)],

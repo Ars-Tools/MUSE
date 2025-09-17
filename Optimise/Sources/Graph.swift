@@ -1,13 +1,13 @@
 //
-//  Network.swift
+//  Graph.swift
 //  MUSE
 //
 //  Created by Kota on 9/16/R7.
 //
 import typealias Foundation.KeyPathComparator
 import Sparse
-public enum Network {}
-extension Network {
+public enum Graph {}
+extension Graph {
 	@usableFromInline // Linked-List to share parent nodes
 	indirect enum List<Element> {
 		case root(Element)
@@ -21,7 +21,7 @@ extension Network {
 		private(set) var unscented: Array<(Score, Element)>
 	}
 }
-extension Network.List where Element: Comparable {
+extension Graph.List where Element: Comparable {
 	@inlinable@inline(__always)
 	func contains(_ body: Element) -> Bool {
 		switch self {
@@ -36,7 +36,7 @@ extension Network.List where Element: Comparable {
 		}
 	}
 }
-extension Network.List {
+extension Graph.List {
 	@inlinable@inline(__always)@_transparent
 	init(_ body: Element) {
 		self = .root(body)
@@ -104,7 +104,7 @@ extension Network.List {
 		}
 	}
 }
-extension Network.PriorityQueue {
+extension Graph.PriorityQueue {
 	@inlinable@inline(__always)@_transparent
 	init() {
 		sorted = .init()
@@ -148,7 +148,7 @@ extension Network.PriorityQueue {
 		sorted.removeAll(where: \.isEmpty)
 	}
 }
-extension Network { // Djikstra Solvers
+extension Graph { // Djikstra Solvers
 	// Dictionary
 	@_disfavoredOverload
 	@inlinable@inline(__always)@_transparent

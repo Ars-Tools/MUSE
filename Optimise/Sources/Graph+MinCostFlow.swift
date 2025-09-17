@@ -1,5 +1,5 @@
 //
-//  Network+MinCostFlow.swift
+//  Graph+MinCostFlow.swift
 //  MUSE
 //
 //  Created by Kota on 9/16/R7.
@@ -8,7 +8,7 @@ import protocol Accelerate.AccelerateBuffer
 import typealias Foundation.KeyPathComparator
 import protocol Dense.MutMatrix
 import typealias Dense.MatBuf
-extension Network {
+extension Graph {
 	public static func SuccessiveShortestPath<K: Hashable, F: Numeric & Comparable, C: Numeric & Comparable>(source: K,
 																											 target: K,
 																											 demand d: F,
@@ -32,7 +32,7 @@ extension Network {
 					}
 				}
 			}
-			let (score, route) = Network.Djikstra(source: source, target: target, weight: r.c)
+			let (score, route) = Graph.Djikstra(source: source, target: target, weight: r.c)
 			for (key, val) in score where val != .zero {
 				p[key, default: .zero] -= val
 			}
@@ -55,7 +55,7 @@ extension Network {
 		}
 	}
 }
-extension Network {
+extension Graph {
 	public static func Match<Element: Numeric & Comparable>(table: MatBuf<Element>) -> Set<SIMD2<Int>> {
 		precondition(table.rows == table.cols, "table should be square")
 		let n = max(table.rows, table.cols)
@@ -74,7 +74,7 @@ extension Network {
 		})
 	}
 }
-extension Network {
+extension Graph {
 	@inlinable@inline(__always)@_transparent
 	public static func bruteforceAssignment<Element: Numeric & Comparable>(table: MatBuf<Element>) -> Set<SIMD2<Int>> {
 		func permutation(head: Array<Int>, tail: Set<Int>) -> Array<Int> {
