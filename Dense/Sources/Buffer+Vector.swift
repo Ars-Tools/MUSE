@@ -4,11 +4,17 @@
 //
 //  Created by Kota on 9/8/R7.
 //
+import protocol Accelerate.AccelerateBuffer
 import protocol Accelerate.AccelerateMutableBuffer
 import func Layout.capacity
 import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
-@frozen public struct VectorBuffer<R: RandomAccessCollection & MutableCollection & AccelerateMutableBuffer & Sendable> where R.Index: BinaryInteger, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence: AccelerateMutableBuffer & Sendable {
+@frozen public struct VectorBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence: Storage {
+	public typealias Element = R.Element
+	public typealias S = VectorBuffer<R.SubSequence>
+	public typealias T = Self
+	public typealias U = Element
+	public typealias V = Self
 	public let count: Int
 	public let inc: Int
 	@usableFromInline
@@ -39,11 +45,23 @@ extension VectorBuffer {
 		stride(from: data.startIndex, to: data.startIndex.advanced(by: count * inc), by: inc)
 	}
 }
-extension VectorBuffer: MutVector {
-	public typealias U = R.Element
-	public typealias S = VectorBuffer<R.SubSequence>
-	public typealias V = Self
-	public typealias T = Self
+extension VectorBuffer: Vector & Immediate {
+	@inlinable
+	public subscript(position: Int) -> U {
+		data[data.startIndex.advanced(by: position * inc)]
+	}
+	public subscript(bounds: some RangeExpression<Int>) -> S {
+		let range = bounds.relative(to: 0..<count)
+		let lower = data.startIndex.advanced(by: range.lowerBound * inc)
+		let upper = lower.advanced(by: range.count * inc)
+		return.init(count: range.count, inc: inc, data: data[lower..<upper])
+	}
+	@inlinable
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+		([inc], {data})
+	}
+}
+extension VectorBuffer: MutTensor & MutVector where R: MutableStorage, R.SubSequence: MutableStorage {
 	@inlinable
 	public subscript(position: Int) -> U {
 		_read {
@@ -67,10 +85,6 @@ extension VectorBuffer: MutVector {
 			}
 		}
 	}
-	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		([inc], {data})
-	}
 }
 extension VectorBuffer {
 	@inlinable
@@ -80,16 +94,72 @@ extension VectorBuffer {
 		inc = stride
 		data = memory
 	}
-	@inlinable
-	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Vector, Source.R == R {
-		let (stride, result) = try source(for: layout)
-		precondition(stride.count == 1)
-		count = source.count
-		inc = stride[0]
-		data = await result()
+	@inlinable@_transparent
+	public init<Source>(_ source: Source, for layout: MemoryStrategy = .rowMajor) throws where Source: Immediate, Source.R == R {
+		switch layout {
+		case.rowMajor:
+			let (stride, kernel) = try source(for: .rowMajor)
+			count = source.shape.last ?? 1
+			inc = stride.last ?? 0
+			data = kernel()
+		case.columnMajor:
+			let (stride, kernel) = try source(for: .columnMajor)
+			count = source.shape.first ?? 1
+			inc = stride.first ?? 0
+			data = kernel()
+		}
+	}
+	@inlinable@_transparent
+	public init<Source>(_ source: Source, for layout: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R == R {
+		switch layout {
+		case.rowMajor:
+			let (stride, kernel) = try source(for: .rowMajor)
+			async let result = kernel()
+			count = source.shape.last ?? 1
+			inc = stride.last ?? 0
+			data = await result
+		case.columnMajor:
+			let (stride, kernel) = try source(for: .columnMajor)
+			async let result = kernel()
+			count = source.shape.first ?? 1
+			inc = stride.first ?? 0
+			data = await result
+		}
 	}
 }
 extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
+	@inlinable@_transparent
+	public init<Source>(_ source: Source, for layout: MemoryStrategy = .rowMajor) throws where Source: Immediate, Source.R.Element == Element {
+		switch layout {
+		case.rowMajor:
+			let (stride, kernel) = try source(for: .rowMajor)
+			count = source.shape.last ?? 1
+			inc = stride.last ?? 0
+			data = kernel().withUnsafeBufferPointer(R.init)
+		case.columnMajor:
+			let (stride, kernel) = try source(for: .columnMajor)
+			count = source.shape.first ?? 1
+			inc = stride.first ?? 0
+			data = kernel().withUnsafeBufferPointer(R.init)
+		}
+	}
+	@inlinable@_transparent
+	public init<Source>(_ source: Source, for layout: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R.Element == Element {
+		switch layout {
+		case.rowMajor:
+			let (stride, kernel) = try source(for: .rowMajor)
+			async let result = kernel()
+			count = source.shape.last ?? 1
+			inc = stride.last ?? 0
+			data = await result.withUnsafeBufferPointer(R.init)
+		case.columnMajor:
+			let (stride, kernel) = try source(for: .columnMajor)
+			async let result = kernel()
+			count = source.shape.first ?? 1
+			inc = stride.first ?? 0
+			data = await result.withUnsafeBufferPointer(R.init)
+		}
+	}
 	@inlinable@_transparent
 	public init(shape: Int, with value: Element) {
 		count = shape
@@ -106,15 +176,12 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init(arrayLiteral elements: Element...) {
 		self.init(elements)
 	}
+}
+extension VectorBuffer: CustomStringConvertible {
 	@inlinable@_transparent
-	public init<Source>(_ source: Source, layout: MemoryStrategy = .rowMajor) async throws where Source: Vector, Source.Element == Element {
-		let (stride, result) = try source(for: layout)
-		precondition(stride.count == 1)
-		count = source.count
-		inc = stride[0]
-		data = await result().withUnsafeBufferPointer(R.init)
+	public var description: String {
+		(0..<count).lazy.map { data[data.startIndex.advanced(by: $0 * inc)] }.description
 	}
-	
 }
 extension VectorBuffer: RandomAccessCollection {
 	@inlinable@_transparent
@@ -124,12 +191,6 @@ extension VectorBuffer: RandomAccessCollection {
 	@inlinable@_transparent
 	public var endIndex: Int {
 		count
-	}
-}
-extension VectorBuffer: CustomStringConvertible {
-	@inlinable@_transparent
-	public var description: String {
-		(0..<count).lazy.map { data[data.startIndex.advanced(by: $0 * inc)] }.description
 	}
 }
 public typealias VecBuf<T: MutScalar> = VectorBuffer<Array<T>>
