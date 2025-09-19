@@ -11,6 +11,5 @@ struct VectorTestCases {
 	@Test
 	func arrayLiteral() {
 		let x = [1, 2, 3, 4] as VecBuf
-		print(x[0..<3][1...])
 	}
 }
