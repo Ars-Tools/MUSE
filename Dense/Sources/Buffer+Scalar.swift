@@ -4,6 +4,8 @@
 //
 //  Created by Kota on 9/8/R7.
 //
+import protocol Accelerate.AccelerateBuffer
+import protocol Accelerate.AccelerateMutableBuffer
 import typealias Numerics.Complex32
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
