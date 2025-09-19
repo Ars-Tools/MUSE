@@ -153,8 +153,7 @@ struct DOTTestCases {
 	func solver() {
 		let x = SPV<Float32>(arrayLiteral: 1, 2, 4, 8)
 		let y = SPV<Float32>(arrayLiteral: 1, 2, 4, 8)
-		let z = x • y
+		let z: Float32 = x • y
 		#expect(z == 85)
-		
 	}
 }
