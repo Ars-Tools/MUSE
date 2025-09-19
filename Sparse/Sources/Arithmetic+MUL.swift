@@ -12,20 +12,20 @@ extension Arithmetic {
 	@usableFromInline
 	@frozen enum MUL {
 		@usableFromInline
-		@frozen struct Vector<Element: Numeric, LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
+		@frozen struct Vector<LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Vector<Element, LHS.S, RHS.S>
+			@usableFromInline typealias S = Vector<LHS.S, RHS.S>
 			@usableFromInline typealias U = Element
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct Matrix<Element: Numeric, LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
+		@frozen struct Matrix<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Matrix<Element, LHS.S, RHS.S>
-			@usableFromInline typealias T = Matrix<Element, LHS.T, RHS.T>
+			@usableFromInline typealias S = Matrix<LHS.S, RHS.S>
+			@usableFromInline typealias T = Matrix<LHS.T, RHS.T>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias V = Vector<Element, LHS.V, RHS.V>
+			@usableFromInline typealias V = Vector<LHS.V, RHS.V>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}

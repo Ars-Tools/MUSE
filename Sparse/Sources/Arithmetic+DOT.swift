@@ -11,46 +11,46 @@ extension Arithmetic {
 	@usableFromInline
 	@frozen enum DOT {
 		@usableFromInline
-		@frozen struct Outer<Element: Numeric, LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
+		@frozen struct Outer<LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias T = Outer<Element, RHS.T, LHS.T>
-			@usableFromInline typealias V = ANY<Element>
-			@usableFromInline typealias S = Outer<Element, LHS.S, RHS.S>
+			@usableFromInline typealias T = Outer<RHS.T, LHS.T>
+			@usableFromInline typealias V = ANY
+			@usableFromInline typealias S = Outer<LHS.S, RHS.S>
 			@usableFromInline typealias U = Element
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct Diagonal<Element: Numeric, LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
+		@frozen struct Diagonal<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias S = Diagonal<Element, LHS.S, RHS.S>
+			@usableFromInline typealias S = Diagonal<LHS.S, RHS.S>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct MV<Element: Numeric, LHS: SparseMatrix<Element>, RHS: SparseVector<Element>> {
+		@frozen struct MV<LHS: SparseMatrix<Element>, RHS: SparseVector<Element>> {
 			@usableFromInline typealias R = Array<Element>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias S = MV<Element, LHS.S, RHS>
+			@usableFromInline typealias S = MV<LHS.S, RHS>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct VM<Element: Numeric, LHS: SparseVector<Element>, RHS: SparseMatrix<Element>> {
+		@frozen struct VM<LHS: SparseVector<Element>, RHS: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias S = VM<Element, LHS, RHS.S>
+			@usableFromInline typealias S = VM<LHS, RHS.S>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct MM<Element: Numeric, LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
+		@frozen struct MM<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = MM<Element, LHS.S, RHS.S>
-			@usableFromInline typealias T = MM<Element, RHS.T, LHS.T>
+			@usableFromInline typealias S = MM<LHS.S, RHS.S>
+			@usableFromInline typealias T = MM<RHS.T, LHS.T>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias V = ANY<Element>
+			@usableFromInline typealias V = ANY
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
@@ -323,5 +323,5 @@ public func •<Element: Numeric>(_ lhs: some SparseMatrix<Element>, _ rhs: some
 	return Arithmetic.DOT.MM(lhs: lhs, rhs: rhs)
 }
 public func outer<Element: Numeric>(_ lhs: some SparseVector<Element>, _ rhs: some SparseVector<Element>) -> some SparseMatrix<Element> {
-	Arithmetic.DOT.Outer(lhs: lhs, rhs: rhs)
+	Arithmetic<Element>.DOT.Outer(lhs: lhs, rhs: rhs)
 }

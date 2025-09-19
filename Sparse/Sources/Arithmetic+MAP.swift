@@ -10,19 +10,19 @@ extension Arithmetic {
 	@usableFromInline
 	@frozen enum MAP {
 		@usableFromInline
-		@frozen struct Vector<Element: SparseScalar<Element> & Numeric, Source: SparseVector> {
+		@frozen struct Vector<Source: SparseVector> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Vector<Element, Source.S>
+			@usableFromInline typealias S = Vector<Source.S>
 			@usableFromInline typealias U = Element
 			@usableFromInline let source: Source
 			@usableFromInline let transform: @Sendable (Source.Element) -> Element
 		}
 		@usableFromInline
-		@frozen struct Matrix<Element: SparseScalar<Element> & Numeric, Source: SparseMatrix> {
+		@frozen struct Matrix<Source: SparseMatrix> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Matrix<Element, Source.S>
-			@usableFromInline typealias T = Matrix<Element, Source.T>
-			@usableFromInline typealias V = Vector<Element, Source.V>
+			@usableFromInline typealias S = Matrix<Source.S>
+			@usableFromInline typealias T = Matrix<Source.T>
+			@usableFromInline typealias V = Vector<Source.V>
 			@usableFromInline typealias U = Element
 			@usableFromInline let source: Source
 			@usableFromInline let transform: @Sendable (Source.Element) -> Element
