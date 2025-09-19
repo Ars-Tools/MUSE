@@ -7,19 +7,14 @@
 import typealias Layout.MemoryStrategy
 import protocol Dense.Vector
 import protocol Dense.MutVector
-public protocol SparseVector<Element>: SparseTensor & Vector where S: SparseVector {
+import protocol Dense.Immediate
+public protocol SparseVector<Element>: Vector & Immediate where S: SparseVector<Element>, T: SparseVector<Element>, U: SparseScalar<Element>, V: SparseVector<Element> {
 	associatedtype COO: Sequence where COO.Element == (Int, Element)
 	@inlinable var coo: COO { get }
 	@inlinable var state: Set<Int> { get }
 }
-public protocol MutSparseVector<Element>: MutSparseTensor & MutVector & SparseVector where S: MutSparseVector {
+public protocol MutSparseVector<Element>: MutVector & SparseVector where S: MutSparseVector<Element>, T: MutSparseVector<Element>, U: MutSparseScalar<Element>, V: MutSparseVector<Element> {
 	@inlinable init(shape: (Int), _ nonzero: some Sequence<(Int, Element)>)
-}
-extension SparseVector {
-	@inlinable
-	public var nonzero: LazyMapSequence<COO, (Array<Int>, Element)> {
-		coo.lazy.map { ([$0], $1) }
-	}
 }
 extension SparseVector where Element: Numeric {
 	@inlinable
@@ -29,7 +24,7 @@ extension SparseVector where Element: Numeric {
 		})
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let result = Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: .zero)
 			for (key, val) in coo {
@@ -56,7 +51,7 @@ extension SparseVector where Element == Bool {
 		state.lazy.map { ($0, true) }
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let result = Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: false)
 			for index in state {
