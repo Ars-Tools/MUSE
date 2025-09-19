@@ -10,10 +10,10 @@ import protocol Dense.Vector
 import typealias Layout.MemoryStrategy
 import Auxiliary
 @usableFromInline
-@frozen enum Arithmetic {}
+@frozen enum Arithmetic<Element: Numeric & MutSparseScalar<Element>> {}
 extension Arithmetic {
 	@usableFromInline
-	@frozen struct ANY<Element: SparseScalar<Element> & Numeric> {
+	@frozen struct ANY {
 		@usableFromInline let core: any SparseVector<Element>
 	}
 }
@@ -42,20 +42,20 @@ extension Arithmetic {
 	@usableFromInline
 	@frozen enum Scale {
 		@usableFromInline
-		@frozen struct Vector<Element: SparseScalar<Element> & Numeric, Source: SparseVector<Element>> {
+		@frozen struct Vector<Source: SparseVector<Element>> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Vector<Element, Source.S>
+			@usableFromInline typealias S = Vector<Source.S>
 			@usableFromInline typealias U = Element
 			@usableFromInline let factor: Element
 			@usableFromInline let source: Source
 		}
 		@usableFromInline
-		@frozen struct Matrix<Element: Numeric, Source: SparseMatrix<Element>> {
+		@frozen struct Matrix<Source: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Matrix<Element, Source.S>
-			@usableFromInline typealias T = Matrix<Element, Source.T>
+			@usableFromInline typealias S = Matrix<Source.S>
+			@usableFromInline typealias T = Matrix<Source.T>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias V = Vector<Element, Source.V>
+			@usableFromInline typealias V = Vector<Source.V>
 			@usableFromInline let factor: Element
 			@usableFromInline let source: Source
 		}
@@ -115,23 +115,23 @@ extension Arithmetic.Scale.Matrix: SparseMatrix {
 	}
 }
 public func*<Element: Numeric>(lhs: Element, rhs: some SparseVector<Element>) -> some SparseVector<Element> {
-	Arithmetic.Scale.Vector(factor: lhs, source: rhs)
+	Arithmetic<Element>.Scale.Vector(factor: lhs, source: rhs)
 }
 public func*<Element: Numeric>(lhs: Element, rhs: some SparseMatrix<Element>) -> some SparseMatrix<Element> {
-	Arithmetic.Scale.Matrix(factor: lhs, source: rhs)
+	Arithmetic<Element>.Scale.Matrix(factor: lhs, source: rhs)
 }
 // MARK: Scale
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func*<Element: Numeric, Source: Sequence<(Int, Element)>>(_ factor: Element, _ source: Source) -> LazyMapSequence<Source, (Int, Element)> {
 	source.lazy.map { ($0, factor * $1) }
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func*<Element: Numeric>(_ factor: Element, _ source: Dictionary<Int, Element>) -> some Sequence<(Int, Element)> {
 	source.lazy.map { ($0, factor * $1) }
 }
 // MARK: ADD
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func+<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequence<(Int, Element)>) -> some Sequence<(Int, Element)> {
 	var lhs = lhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
 	var rhs = rhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
@@ -159,19 +159,19 @@ func+<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequen
 	}
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func+<Element: Numeric>(lhs: some Sequence<(Int, Element)>, rhs: Dictionary<Int, Element>) -> some Sequence<(Int, Element)> {
 	let rhs: some Sequence<(Int, Element)> = rhs.lazy.map(\.self)
 	return lhs + rhs
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: some Sequence<(Int, Element)>) -> some Sequence<(Int, Element)> {
 	let lhs: some Sequence<(Int, Element)> = lhs.lazy.map(\.self)
 	return lhs + rhs
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
 	let key = switch (lhs.keys, rhs.keys) {
 	case (let l, let r) where l.count < r.count:
@@ -189,7 +189,7 @@ func+<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Elem
 	}
 }
 // MARK: SUB
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func-<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequence<(Int, Element)>) -> some Sequence<(Int, Element)> {
 	var lhs = lhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
 	var rhs = rhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
@@ -217,19 +217,19 @@ func-<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequen
 	}
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func-<Element: Numeric>(lhs: some Sequence<(Int, Element)>, rhs: Dictionary<Int, Element>) -> some Sequence<(Int, Element)> {
 	let rhs: some Sequence<(Int, Element)> = rhs.lazy.map(\.self)
 	return lhs - rhs
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func-<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: some Sequence<(Int, Element)>) -> some Sequence<(Int, Element)> {
 	let lhs: some Sequence<(Int, Element)> = lhs.lazy.map(\.self)
 	return lhs - rhs
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func-<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
 	let key = switch (lhs.keys, rhs.keys) {
 	case (let l, let r) where l.count < r.count:
@@ -247,7 +247,7 @@ func-<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Elem
 	}
 }
 // MARK: MUL
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func*<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequence<(Int, Element)>) -> some Sequence<(Int, Element)> {
 	var lhs = lhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
 	var rhs = rhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
@@ -274,19 +274,19 @@ func*<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequen
 	}
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func*<Element: Numeric>(lhs: some Sequence<(Int, Element)>, rhs: Dictionary<Int, Element>) -> some Sequence<(Int, Element)> {
 	let rhs: some Sequence<(Int, Element)> = rhs.lazy.map(\.self)
 	return lhs * rhs
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: some Sequence<(Int, Element)>) -> some Sequence<(Int, Element)> {
 	let lhs: some Sequence<(Int, Element)> = lhs.lazy.map(\.self)
 	return lhs * rhs
 }
 @_disfavoredOverload
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Element>) -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Set<Int>, Optional<(Int, Element)>>>, (Int, Element)> {
 	let key = switch (lhs.keys, rhs.keys) {
 	case (let l, let r) where l.count < r.count:
@@ -304,7 +304,7 @@ func*<Element: Numeric>(lhs: Dictionary<Int, Element>, rhs: Dictionary<Int, Elem
 	}
 }
 // MARK: DOT
-@inlinable@inline(__always)
+@inlinable@inline(__always)@_transparent
 func •<Element: Numeric>(_ lhs: some Sequence<(Int, Element)>, _ rhs: some Sequence<(Int, Element)>) -> Element {
 	var lhs = lhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
 	var rhs = rhs.sorted(using: KeyPathComparator(\.0)).makeIterator()
