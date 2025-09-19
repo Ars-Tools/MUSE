@@ -5,7 +5,7 @@
 //  Created by Kota on 5/16/R7.
 //
 @_disfavoredOverload
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func zip<X, Y, Z>(_ x: some Sequence<X>, _ y: some Sequence<Y>, _ z: some Sequence<Z>) -> some Sequence<(X, Y, Z)> {
 	sequence(state: (x.makeIterator(), y.makeIterator(), z.makeIterator())) {
 		switch ($0.0.next(), $0.1.next(), $0.2.next()) {
@@ -17,7 +17,7 @@ public func zip<X, Y, Z>(_ x: some Sequence<X>, _ y: some Sequence<Y>, _ z: some
 	}
 }
 @_disfavoredOverload
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func zip<X, Y, Z, W>(_ x: some Sequence<X>, _ y: some Sequence<Y>, _ z: some Sequence<Z>, _ w: some Sequence<W>) -> some Sequence<(X, Y, Z, W)> {
 	sequence(state: (x.makeIterator(), y.makeIterator(), z.makeIterator(), w.makeIterator())) {
 		switch ($0.0.next(), $0.1.next(), $0.2.next(), $0.3.next()) {
@@ -28,7 +28,7 @@ public func zip<X, Y, Z, W>(_ x: some Sequence<X>, _ y: some Sequence<Y>, _ z: s
 		}
 	}
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func zip<S: SIMDScalar>(_ x: some Sequence<S>, _ y: some Sequence<S>) -> some Sequence<SIMD2<S>> {
 	sequence(state: (x.makeIterator(), y.makeIterator())) {
 		switch ($0.0.next(), $0.1.next()) {
@@ -39,7 +39,7 @@ public func zip<S: SIMDScalar>(_ x: some Sequence<S>, _ y: some Sequence<S>) -> 
 		}
 	}
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func zip<S: SIMDScalar>(_ x: some Sequence<S>, _ y: some Sequence<S>, _ z: some Sequence<S>) -> some Sequence<SIMD3<S>> {
 	sequence(state: (x.makeIterator(), y.makeIterator(), z.makeIterator())) {
 		switch ($0.0.next(), $0.1.next(), $0.2.next()) {
@@ -50,7 +50,7 @@ public func zip<S: SIMDScalar>(_ x: some Sequence<S>, _ y: some Sequence<S>, _ z
 		}
 	}
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func zip<S: SIMDScalar>(_ x: some Sequence<S>, _ y: some Sequence<S>, _ z: some Sequence<S>, _ w: some Sequence<S>) -> some Sequence<SIMD4<S>> {
 	sequence(state: (x.makeIterator(), y.makeIterator(), z.makeIterator(), w.makeIterator())) {
 		switch ($0.0.next(), $0.1.next(), $0.2.next(), $0.3.next()) {

@@ -7,7 +7,7 @@
 @_exported import enum Accelerate.AccelerateMatrixOrder
 public typealias MemoryStrategy = AccelerateMatrixOrder
 extension MemoryStrategy {
-	@inlinable
+	@inlinable@inline(__always)@_transparent
 	public var transpose: Self {
 		switch self {
 		case.rowMajor:
@@ -18,6 +18,7 @@ extension MemoryStrategy {
 	}
 }
 extension MemoryStrategy {
+	@inlinable@inline(__always)@_transparent
 	public func stride(for shape: some BidirectionalCollection<Int>) -> Array<Int> {
 		switch self {
 		case.columnMajor:

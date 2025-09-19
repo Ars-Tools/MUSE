@@ -5,7 +5,7 @@
 //  Created by Kota on 5/16/R7.
 //
 extension Array where Element == (Int) {
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let v0 = $0 &* stride
@@ -14,7 +14,7 @@ extension Array where Element == (Int) {
 	}
 }
 extension Array where Element == SIMD2<Int> {
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let v0 = $0 &* stride
@@ -23,7 +23,7 @@ extension Array where Element == SIMD2<Int> {
 	}
 }
 extension Array where Element == SIMD3<Int> {
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let v0 = $0 &* stride
@@ -32,7 +32,7 @@ extension Array where Element == SIMD3<Int> {
 	}
 }
 extension Array where Element == SIMD4<Int> {
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let xs = $0 &* stride
@@ -41,7 +41,7 @@ extension Array where Element == SIMD4<Int> {
 	}
 }
 extension Array where Element == (Int, Int) {
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let v0 = $0 * stride.0
@@ -51,7 +51,7 @@ extension Array where Element == (Int, Int) {
 	}
 }
 extension Array where Element == (Int, Int, Int) {
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let v0 = $0 * stride.0
@@ -62,8 +62,7 @@ extension Array where Element == (Int, Int, Int) {
 	}
 }
 extension Array where Element == (Int, Int, Int, Int) {
-	@inline(__always)
-	@inlinable
+	@inlinable@inline(__always)@_transparent
 	func flatten(length: Int, stride: Element) -> Self {
 		(0..<length).flatMap {
 			let v0 = $0 * stride.0
@@ -74,32 +73,31 @@ extension Array where Element == (Int, Int, Int, Int) {
 		}
 	}
 }
-@inlinable
-@inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, (Int), Array<(Int)>), source: (Int, (Int))) -> (Int, (Int), Array<(Int)>) {
 	source.1 == (result.0 * result.1) ?
 	(result.0 * source.0, result.1, result.2) :
 	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, (Int, Int), Array<(Int, Int)>), source: (Int, (Int, Int))) -> (Int, (Int, Int), Array<(Int, Int)>) {
 	source.1 == (result.0 * result.1.0, result.0 * result.1.1) ?
 	(result.0 * source.0, result.1, result.2) :
 	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, (Int, Int, Int), Array<(Int, Int, Int)>), source: (Int, (Int, Int, Int))) -> (Int, (Int, Int, Int), Array<(Int, Int, Int)>) {
 	source.1 == (result.0 * result.1.0, result.0 * result.1.1, result.0 * result.1.2) ?
 	(result.0 * source.0, result.1, result.2) :
 	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, (Int, Int, Int, Int), Array<(Int, Int, Int, Int)>), source: (Int, (Int, Int, Int, Int))) -> (Int, (Int, Int, Int, Int), Array<(Int, Int, Int, Int)>) {
 	source.1 == (result.0 * result.1.0, result.0 * result.1.1, result.0 * result.1.2, result.0 * result.1.3) ?
 	(result.0 * source.0, result.1, result.2) :
 	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, SIMD2<Int>, Array<SIMD2<Int>>), source: (Int, SIMD2<Int>)) -> (Int, SIMD2<Int>, Array<SIMD2<Int>>) {
 	switch source.1 {
 	case.zero:
@@ -113,7 +111,7 @@ func flatten(result: (Int, SIMD2<Int>, Array<SIMD2<Int>>), source: (Int, SIMD2<I
 //	(result.0 * source.0, result.1, result.2) :
 //	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, SIMD3<Int>, Array<SIMD3<Int>>), source: (Int, SIMD3<Int>)) -> (Int, SIMD3<Int>, Array<SIMD3<Int>>) {
 	switch source.1 {
 	case.zero:
@@ -127,7 +125,7 @@ func flatten(result: (Int, SIMD3<Int>, Array<SIMD3<Int>>), source: (Int, SIMD3<I
 //	(result.0 * source.0, result.1, result.2) :
 //	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 func flatten(result: (Int, SIMD4<Int>, Array<SIMD4<Int>>), source: (Int, SIMD4<Int>)) -> (Int, SIMD4<Int>, Array<SIMD4<Int>>) {
 	switch source.1 {
 	case.zero:
@@ -141,7 +139,7 @@ func flatten(result: (Int, SIMD4<Int>, Array<SIMD4<Int>>), source: (Int, SIMD4<I
 //	(result.0 * source.0, result.1, result.2) :
 //	(result.0, result.1, result.2.flatten(length: source.0, stride: source.1))
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func flatten(shape: some BidirectionalCollection<Int>,
 					xs: some BidirectionalCollection<Int>) -> (Int, (Int), Array<(Int)>) {
 	let layout = zip(shape.reversed(), xs.reversed())
@@ -150,7 +148,7 @@ public func flatten(shape: some BidirectionalCollection<Int>,
 	let (length, stride) = layout.first ?? (1, (0))
 	return layout.dropFirst().reduce((length, stride, [(0)]), flatten)
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func flatten(shape: some BidirectionalCollection<Int>,
 					xs: some BidirectionalCollection<Int>,
 					ys: some BidirectionalCollection<Int>) -> (Int, SIMD2<Int>, Array<SIMD2<Int>>) {
@@ -160,7 +158,7 @@ public func flatten(shape: some BidirectionalCollection<Int>,
 	let (length, stride) = layout.first ?? (1, SIMD2<Int>())
 	return layout.dropFirst().reduce((length, stride, [SIMD2<Int>()]), flatten)
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func flatten(shape: some BidirectionalCollection<Int>,
 					xs: some BidirectionalCollection<Int>,
 					ys: some BidirectionalCollection<Int>,
@@ -171,7 +169,7 @@ public func flatten(shape: some BidirectionalCollection<Int>,
 	let (length, stride) = layout.first ?? (1, SIMD3<Int>())
 	return layout.dropFirst().reduce((length, stride, [SIMD3<Int>()]), flatten)
 }
-@inlinable @inline(__always)
+@inlinable@inline(__always)@_transparent
 public func flatten(shape: some BidirectionalCollection<Int>,
 					xs: some BidirectionalCollection<Int>,
 					ys: some BidirectionalCollection<Int>,

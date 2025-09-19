@@ -19,7 +19,7 @@ struct ContractionTests {
 		#expect(offset == [.zero])
 	}
 	@Test
-	func verRHS() {
+	func vecRHS() {
 		let ((m, k), ldb, ldc, layout, offset) = contraction(lhs: ([4,5], [1,4]), rhs: 5, strategy: .rowMajor)
 		#expect(m == 4)
 		#expect(k == 5)
