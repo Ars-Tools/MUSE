@@ -60,6 +60,6 @@ extension ComplexNumber where FloatLiteralType == Float64 {
 		unsafeBitCast(SIMD2(
 			dot(unsafeBitCast(lhs, to: SIMD2<FloatLiteralType>.self), SIMD2( rhs.real, rhs.imag)),
 			dot(unsafeBitCast(lhs, to: SIMD2<FloatLiteralType>.self), SIMD2(-rhs.imag, rhs.real))
-		) / rhs.magnitude, to: Self.self)
+		) / length_squared(unsafeBitCast(rhs, to: SIMD2<FloatLiteralType>.self)), to: Self.self)
 	}
 }
