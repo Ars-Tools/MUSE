@@ -8,11 +8,13 @@ import protocol Accelerate.AccelerateBuffer
 import protocol Dense.Matrix
 import func Layout.product
 @usableFromInline
-@frozen enum Logical {}
+@frozen enum Logical {
+	@usableFromInline typealias Element = Bool
+}
 extension Logical {
 	@usableFromInline
 	@frozen struct ANY {
-		@usableFromInline let core: any SparseVector<Bool>
+		@usableFromInline let core: any SparseVector<Element>
 	}
 }
 extension Logical.ANY: SparseVector {
