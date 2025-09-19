@@ -7,28 +7,14 @@
 import typealias Layout.MemoryStrategy
 import protocol Dense.Matrix
 import protocol Dense.MutMatrix
-public protocol SparseMatrix<Element>: SparseTensor & Matrix where S: SparseMatrix<Element>, T: SparseMatrix<Element>, V: SparseVector<Element> {
+import protocol Dense.Immediate
+public protocol SparseMatrix<Element>: Matrix & Immediate where S: SparseMatrix<Element>, T: SparseMatrix<Element>, U: SparseScalar<Element>, V: SparseVector<Element> {
 	associatedtype LIL: RandomAccessCollection where LIL.Index == Int, LIL.Element: Sequence, LIL.Element.Element == (Int, Element)
 	@inlinable func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL)
 	@inlinable var state: Set<SIMD2<Int>> { get }
 }
-public protocol MutSparseMatrix<Element>: MutSparseTensor & MutMatrix & SparseMatrix where S: MutSparseMatrix<Element>, T: MutSparseMatrix<Element>, V: MutSparseVector<Element> {
+public protocol MutSparseMatrix<Element>: MutMatrix & SparseMatrix where S: MutSparseMatrix<Element>, T: MutSparseMatrix<Element>, U: MutSparseScalar<Element>, V: MutSparseVector<Element> {
 	@inlinable init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>)
-}
-extension SparseMatrix {
-	@inlinable
-	public var nonzero: LazySequence<FlattenSequence<LazyMapSequence<EnumeratedSequence<LIL>, LazyMapSequence<LIL.Element, (Array<Int>, Element)>>>> {
-		switch lil(for: .rowMajor) {
-		case(.rowMajor, let lil):
-			lil.enumerated().lazy.flatMap { row, col in
-				col.lazy.map { ([row, $0], $1) }
-			}
-		case(.columnMajor, let lil):
-			lil.enumerated().lazy.flatMap { col, row in
-				row.lazy.map { ([$0, col], $1) }
-			}
-		}
-	}
 }
 extension SparseMatrix where Element: Numeric {
 	@inlinable
@@ -49,7 +35,7 @@ extension SparseMatrix where Element: Numeric {
 		}
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let (layout, memory) = switch lil(for: strategy) {
 		case(.rowMajor, let lil):
 			([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
@@ -115,7 +101,7 @@ extension SparseMatrix where Element == Bool {
 		}
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let (layout, result) = switch strategy {
 		case.rowMajor:
 			([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) { [state] in
