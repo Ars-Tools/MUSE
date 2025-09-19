@@ -6,18 +6,19 @@
 //
 import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
-@usableFromInline
-@frozen struct FlipMatrix<Source: SparseMatrix> where Source.Element: Numeric {
-	@usableFromInline let source: Source
-	@usableFromInline let axis: MemoryStrategy
+extension Axes {
+	@usableFromInline
+	@frozen struct FlipMatrix<Source: SparseMatrix<Element>> {
+		@usableFromInline typealias R = Array<Element>
+		@usableFromInline typealias S = FlipMatrix<Source.S>
+		@usableFromInline typealias T = FlipMatrix<Source.T>
+		@usableFromInline typealias U = Element
+		@usableFromInline typealias V = COV<Element, LazyMapSequence<Range<Int>, (Int, Element)>>
+		@usableFromInline let source: Source
+		@usableFromInline let axis: MemoryStrategy
+	}
 }
-extension FlipMatrix: SparseMatrix {
-	@usableFromInline typealias Element = Source.Element
-	@usableFromInline typealias R = Array<Element>
-	@usableFromInline typealias S = FlipMatrix<Source.S>
-	@usableFromInline typealias T = FlipMatrix<Source.T>
-	@usableFromInline typealias U = Element
-	@usableFromInline typealias V = COV<Element, LazyMapSequence<Range<Int>, (Int, Element)>>
+extension Axes.FlipMatrix: SparseMatrix {
 	@usableFromInline var rows: Int { source.rows }
 	@usableFromInline var cols: Int { source.cols }
 	@usableFromInline
@@ -100,5 +101,5 @@ extension FlipMatrix: SparseMatrix {
 	}
 }
 public func flip<Element: Numeric>(_ source: some SparseMatrix<Element>, axis: MemoryStrategy) -> some SparseMatrix<Element> {
-	FlipMatrix(source: source, axis: axis)
+	Axes.FlipMatrix(source: source, axis: axis)
 }

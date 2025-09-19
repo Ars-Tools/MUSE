@@ -6,21 +6,22 @@
 //
 import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
-@usableFromInline
-@frozen struct PaddedMatrix<Source: SparseMatrix> where Source.Element: Numeric {
-	@usableFromInline let source: Source
-	@usableFromInline let t: Int
-	@usableFromInline let b: Int
-	@usableFromInline let l: Int
-	@usableFromInline let r: Int
+extension Axes {
+	@usableFromInline
+	@frozen struct PaddedMatrix<Source: SparseMatrix<Element>> {
+		@usableFromInline typealias R = Array<Element>
+		@usableFromInline typealias S = PaddedMatrix<Source.S>
+		@usableFromInline typealias T = PaddedMatrix<Source.T>
+		@usableFromInline typealias U = Element
+		@usableFromInline typealias V = COV<Element, LazyMapSequence<LazyFilterSequence<LazyMapSequence<Range<Int>, Optional<(Int, Element)>>>, (Int, Element)>>
+		@usableFromInline let source: Source
+		@usableFromInline let t: Int
+		@usableFromInline let b: Int
+		@usableFromInline let l: Int
+		@usableFromInline let r: Int
+	}
 }
-extension PaddedMatrix: SparseMatrix {
-	@usableFromInline typealias Element = Source.Element
-	@usableFromInline typealias R = Array<Element>
-	@usableFromInline typealias S = PaddedMatrix<Source.S>
-	@usableFromInline typealias T = PaddedMatrix<Source.T>
-	@usableFromInline typealias U = Element
-	@usableFromInline typealias V = COV<Element, LazyMapSequence<LazyFilterSequence<LazyMapSequence<Range<Int>, Optional<(Int, Element)>>>, (Int, Element)>>
+extension Axes.PaddedMatrix: SparseMatrix {
 	@usableFromInline
 	var rows: Int { t + source.rows + b }
 	@usableFromInline
@@ -106,5 +107,5 @@ extension PaddedMatrix: SparseMatrix {
 	}
 }
 public func padding<Element: Numeric>(_ source: some SparseMatrix<Element>, rows: (Int, Int), cols: (Int, Int)) -> some SparseMatrix<Element> {
-	PaddedMatrix(source: source, t: rows.0, b: rows.1, l: cols.0, r: cols.1)
+	Axes.PaddedMatrix(source: source, t: rows.0, b: rows.1, l: cols.0, r: cols.1)
 }
