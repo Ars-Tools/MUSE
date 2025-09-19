@@ -4,12 +4,12 @@
 //
 //  Created by Kota on 9/8/R7.
 //
-public protocol Vector<Element>: Tensor where S: Vector<Element>, U: Scalar<Element>, V == Self, T == Self {
+public protocol Vector<Element>: Tensor where S: Vector<Element>, T: Vector<Element>, U: Scalar<Element>, V: Vector<Element>{
 	@inlinable var count: Int { get }
 	@inlinable subscript(position: Int) -> U { get }
 	@inlinable subscript(bounds: some RangeExpression<Int>) -> S { get }
 }
-public protocol MutVector<Element>: MutTensor & Vector where S: MutVector<Element> {
+public protocol MutVector<Element>: MutTensor & Vector where S: MutVector<Element>, T: MutVector<Element>, U: MutScalar<Element>, V: MutVector<Element> {
 	@inlinable subscript(position: Int) -> U { get set }
 	@inlinable subscript(bounds: some RangeExpression<Int>) -> S { get set }
 }
@@ -28,30 +28,30 @@ extension Vector {
 	}
 	@inlinable
 	public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
-		self[position[0]]
+		self[position.first.unsafelyUnwrapped]
 	}
 	@inlinable
 	public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
-		self[bounds[0]]
+		self[bounds.first.unsafelyUnwrapped]
 	}
 }
 extension MutVector {
 	@inlinable
 	public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
 		_read {
-			yield self[position[0]]
+			yield self[position.first.unsafelyUnwrapped]
 		}
 		_modify {
-			yield &self[position[0]]
+			yield &self[position.first.unsafelyUnwrapped]
 		}
 	}
 	@inlinable
 	public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
 		_read {
-			yield self[bounds[0]]
+			yield self[bounds.first.unsafelyUnwrapped]
 		}
 		_modify {
-			yield &self[bounds[0]]
+			yield &self[bounds.first.unsafelyUnwrapped]
 		}
 	}
 }
