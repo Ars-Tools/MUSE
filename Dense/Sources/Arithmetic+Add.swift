@@ -4,22 +4,29 @@
 //
 //  Created by Kota on 9/17/R7.
 //
-import Layout
+import typealias Layout.MemoryStrategy
+import func Layout.broadcast
+import func Layout.capacity
+import func Layout.flatten
 extension Arithmetic {
 	@usableFromInline
-	struct Add<LHS: Tensor<Element>, RHS: Tensor<Element>> {
+	@frozen struct Add<X: Tensor<Element>, Y: Tensor<Element>> {
 		@usableFromInline typealias R = Array<Element>
-		@usableFromInline typealias S = Add<LHS.S, RHS.S>
-		@usableFromInline typealias T = Add<LHS.T, RHS.T>
-		@usableFromInline typealias U = Add<LHS.U, RHS.U>
-		@usableFromInline typealias V = Add<LHS.V, RHS.V>
-		@usableFromInline let lhs: LHS
-		@usableFromInline let rhs: RHS
+		@usableFromInline typealias S = Add<X.S, Y.S>
+		@usableFromInline typealias T = Add<X.T, Y.T>
+		@usableFromInline typealias U = Add<X.U, Y.U>
+		@usableFromInline typealias V = Add<X.V, Y.V>
+		@usableFromInline let x: X
+		@usableFromInline let y: Y
+		@inlinable init(x: X, y: Y) {
+			self.x = x
+			self.y = y
+		}
 	}
 }
 extension Arithmetic.Add {
-	@inlinable
-	func`operator`(x: (Array<Int>, Array<Int>), y: (Array<Int>, Array<Int>), z: (Array<Int>, Array<Int>)) -> @Sendable (LHS.R, RHS.R) -> R {
+	@inlinable@inline(__always)@_transparent
+	static func`operator`(x: (Array<Int>, Array<Int>), y: (Array<Int>, Array<Int>), z: (Array<Int>, Array<Int>)) -> @Sendable (X.R, Y.R) -> R {
 		let xs = broadcast(target: z.0, source: x.0, stride: x.1)
 		let ys = broadcast(target: z.0, source: y.0, stride: y.1)
 		let capacity = capacity(alloc: z.0, stride: z.1)
@@ -40,134 +47,65 @@ extension Arithmetic.Add {
 		}
 	}
 }
-extension Arithmetic.Add: Tensor {
-	@inlinable@inline(__always)@_transparent
-	var shape: Array<Int> {
-		broadcast(lhs: lhs.shape, rhs: rhs.shape)
-	}
-	@usableFromInline
-	@inline(__always)
-	var transpose: T {
-		.init(lhs: lhs.transpose, rhs: rhs.transpose)
-	}
-	@usableFromInline
-	@inline(__always)
-	var diagonal: V {
-		.init(lhs: lhs.diagonal, rhs: rhs.diagonal)
-	}
-	@usableFromInline
-	@inline(__always)
-	subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
-		.init(lhs: lhs[narrowcast(point: position, shape: lhs.shape)],
-			  rhs: rhs[narrowcast(point: position, shape: rhs.shape)])
-	}
-	@usableFromInline
-	@inline(__always)
-	subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
-		.init(lhs: lhs[narrowcast(ranges: bounds, target: shape, source: lhs.shape)],
-			  rhs: rhs[narrowcast(ranges: bounds, target: shape, source: rhs.shape)])
-	}
-	@usableFromInline
-	@inline(__always)
-	func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		switch try (lhs(for: strategy), rhs(for: strategy)) {
+extension Arithmetic.Add: Scalar & Operators.BinaryScalar where X: Scalar, Y: Scalar {}
+extension Arithmetic.Add: Vector & Operators.BinaryVector where X: Vector, Y: Vector {}
+extension Arithmetic.Add: Matrix & Operators.BinaryMatrix where X: Matrix, Y: Matrix {}
+extension Arithmetic.Add: Tensor & Operators.BinaryTensor where X: Tensor, Y: Tensor {
+	@usableFromInline@inline(__always)
+	func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+		switch try (x(as: strategy), y(as: strategy)) {
 		case ((let xs, let xm), (let ys, let ym)):
 			let zs = strategy.stride(for: shape)
-			let zm = `operator`(x: (lhs.shape, xs), y: (rhs.shape, ys), z: (shape, zs))
+            let zm = Self.operator(x: (x.shape, xs), y: (y.shape, ys), z: (shape, zs))
 			return (zs, {await zm(xm(), ym())})
 		}
 	}
 }
-extension Arithmetic.Add: Immediate where LHS: Immediate, RHS: Immediate {
-	@usableFromInline
-	@inline(__always)
-	func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-		switch try (lhs(for: strategy), rhs(for: strategy)) {
+extension Arithmetic.Add: InstantScalar where X: InstantScalar, Y: InstantScalar {}
+extension Arithmetic.Add: InstantVector where X: InstantVector, Y: InstantVector {}
+extension Arithmetic.Add: InstantMatrix where X: InstantMatrix, Y: InstantMatrix {}
+extension Arithmetic.Add: InstantTensor where X: InstantTensor, Y: InstantTensor {
+	@usableFromInline@inline(__always)
+	func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+		switch try (x(by: strategy), y(by: strategy)) {
 		case ((let xs, let xm), (let ys, let ym)):
 			let zs = strategy.stride(for: shape)
-			let zm = `operator`(x: (lhs.shape, xs), y: (rhs.shape, ys), z: (shape, zs))
+            let zm = Self.operator(x: (x.shape, xs), y: (y.shape, ys), z: (shape, zs))
 			return (zs, {zm(xm(), ym())})
 		}
-	}
-}
-extension Arithmetic.Add: Scalar where LHS: Scalar, RHS: Scalar {}
-extension Arithmetic.Add: Vector where LHS: Vector, RHS: Vector {
-	@inlinable@inline(__always)@_transparent
-	var count: Int {
-		broadcast(x: lhs.count, y: rhs.count)
-	}
-	@usableFromInline@inline(__always)
-	subscript(position: Int) -> U {
-		.init(lhs: lhs[narrowcast(point: position, shape: count)],
-			  rhs: rhs[narrowcast(point: position, shape: count)])
-	}
-	@usableFromInline@inline(__always)
-	subscript(bounds: some RangeExpression<Int>) -> S {
-		.init(lhs: lhs[narrowcast(bounds: bounds, target: count, source: lhs.count)],
-			  rhs: rhs[narrowcast(bounds: bounds, target: count, source: rhs.count)])
-	}
-}
-extension Arithmetic.Add: Matrix where LHS: Matrix, RHS: Matrix {
-	@inlinable@inline(__always)@_transparent
-	var rows: Int {
-		broadcast(x: lhs.rows, y: rhs.rows)
-	}
-	@inlinable@inline(__always)@_transparent
-	var cols: Int {
-		broadcast(x: lhs.cols, y: rhs.cols)
-	}
-	@usableFromInline@inline(__always)
-	subscript(row: Int, col: Int) -> U {
-		.init(lhs: lhs[narrowcast(point: row, shape: lhs.rows), narrowcast(point: col, shape: lhs.cols)],
-			  rhs: rhs[narrowcast(point: row, shape: rhs.rows), narrowcast(point: col, shape: rhs.cols)])
-	}
-	@usableFromInline@inline(__always)
-	subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		.init(lhs: lhs[narrowcast(point: row, shape: lhs.rows), narrowcast(bounds: col, target: cols, source: lhs.cols)],
-			  rhs: rhs[narrowcast(point: row, shape: rhs.rows), narrowcast(bounds: col, target: cols, source: rhs.cols)])
-	}
-	@usableFromInline@inline(__always)
-	subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		.init(lhs: lhs[narrowcast(bounds: row, target: rows, source: lhs.rows), narrowcast(point: col, shape: lhs.cols)],
-			  rhs: rhs[narrowcast(bounds: row, target: rows, source: rhs.rows), narrowcast(point: col, shape: rhs.cols)])
-	}
-	@usableFromInline@inline(__always)
-	subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
-		.init(lhs: lhs[narrowcast(bounds: row, target: rows, source: lhs.rows), narrowcast(bounds: col, target: cols, source: lhs.cols)],
-			  rhs: rhs[narrowcast(bounds: row, target: rows, source: rhs.rows), narrowcast(bounds: col, target: cols, source: rhs.cols)])
 	}
 }
 // Tensor
 @_disfavoredOverload
 public func +<Element: ArithmeticElement>(_ lhs: some Scalar<Element>, _ rhs: some Scalar<Element>) -> some Scalar<Element> {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func +<Element: ArithmeticElement>(_ lhs: some Vector<Element>, _ rhs: some Vector<Element>) -> some Vector<Element> {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func +<Element: ArithmeticElement>(_ lhs: some Matrix<Element>, _ rhs: some Matrix<Element>) -> some Matrix<Element> {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func +<Element: ArithmeticElement>(_ lhs: some Tensor<Element>, _ rhs: some Tensor<Element>) -> some Tensor<Element> {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 // Tensor
 @_disfavoredOverload
-public func +<Element: ArithmeticElement>(_ lhs: some Scalar<Element> & Immediate, _ rhs: some Scalar<Element> & Immediate) -> some Scalar<Element> & Immediate {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+public func +<Element: ArithmeticElement>(_ lhs: some InstantScalar<Element>, _ rhs: some InstantScalar<Element>) -> some InstantScalar<Element> {
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 @_disfavoredOverload
-public func +<Element: ArithmeticElement>(_ lhs: some Vector<Element> & Immediate, _ rhs: some Vector<Element> & Immediate) -> some Vector<Element> & Immediate {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+public func +<Element: ArithmeticElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantVector<Element>) -> some InstantVector<Element> {
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 @_disfavoredOverload
-public func +<Element: ArithmeticElement>(_ lhs: some Matrix<Element> & Immediate, _ rhs: some Matrix<Element> & Immediate) -> some Matrix<Element> & Immediate {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+public func +<Element: ArithmeticElement>(_ lhs: some InstantMatrix<Element>, _ rhs: some InstantMatrix<Element>) -> some InstantMatrix<Element> {
+	Arithmetic.Add(x: lhs, y: rhs)
 }
 @_disfavoredOverload
-public func +<Element: ArithmeticElement>(_ lhs: some Tensor<Element> & Immediate, _ rhs: some Tensor<Element> & Immediate) -> some Tensor<Element> & Immediate {
-	Arithmetic.Add(lhs: lhs, rhs: rhs)
+public func +<Element: ArithmeticElement>(_ lhs: some InstantTensor<Element>, _ rhs: some InstantTensor<Element>) -> some InstantTensor<Element> {
+	Arithmetic.Add(x: lhs, y: rhs)
 }
