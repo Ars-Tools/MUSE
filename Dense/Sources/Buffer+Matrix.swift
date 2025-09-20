@@ -84,7 +84,7 @@ extension MatrixBuffer: MutableTensor & MutableMatrix where R: MutableStorage, R
 	public typealias S = MatrixBuffer<R.SubSequence>
 	public typealias V = VectorBuffer<R.SubSequence>
 	public typealias T = Self
-    @inline(__always)@_transparent
+    @inline(__always)
 	public var diagonal: V {
 		get {
 			.init(count: min(rows, cols), inc: ldr + ldc, data: data[data.startIndex..<data.endIndex])
