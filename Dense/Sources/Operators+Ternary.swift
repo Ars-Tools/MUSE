@@ -18,6 +18,31 @@ extension Operators {
 		@usableFromInline let y: Y
 		@usableFromInline let z: Z
 	}
+    @usableFromInline
+	protocol TernaryScalar: Scalar & TernaryVector & TernaryMatrix & TernaryTensor where X: Scalar, Y: Scalar, Z: Scalar {}
+    @usableFromInline
+	protocol TernaryVector: Vector & TernaryTensor where S: TernaryVector, T: TernaryVector, U: TernaryScalar, V: TernaryVector, X: Vector, Y: Vector, Z: Vector,
+														 S.X == X.S, T.X == X.T, U.X == X.U, V.X == X.V,
+														 S.Y == Y.S, T.Y == Y.T, U.Y == Y.U, V.Y == Y.V,
+														 S.Z == Z.S, T.Z == Z.T, U.Z == Z.U, V.Z == Z.V {}
+    @usableFromInline
+	protocol TernaryMatrix: Matrix & TernaryTensor where S: TernaryMatrix, T: TernaryMatrix, U: TernaryScalar, V: TernaryVector, X: Matrix, Y: Matrix, Z: Matrix,
+														 S.X == X.S, T.X == X.T, U.X == X.U, V.X == X.V,
+														 S.Y == Y.S, T.Y == Y.T, U.Y == Y.U, V.Y == Y.V,
+														 S.Z == Z.S, T.Z == Z.T, U.Z == Z.U, V.Z == Z.V {}
+    @usableFromInline
+	protocol TernaryTensor: Tensor where S: TernaryTensor, T: TernaryTensor, U: TernaryScalar, V: TernaryVector,
+										 S.X == X.S, T.X == X.T, U.X == X.U, V.X == X.V,
+										 S.Y == Y.S, T.Y == Y.T, U.Y == Y.U, V.Y == Y.V,
+										 S.Z == Z.S, T.Z == Z.T, U.Z == Z.U, V.Z == Z.V {
+		associatedtype X: Tensor
+		associatedtype Y: Tensor
+		associatedtype Z: Tensor
+		@inlinable var x: X { get }
+		@inlinable var y: Y { get }
+		@inlinable var z: Z { get }
+		@inlinable init(x: X, y: Y, z: Z)
+	}
 }
 extension Operators.Ternary {
 	@inlinable@inline(__always)@_transparent
@@ -78,22 +103,30 @@ extension Operators.Ternary: Tensor {
 	}
 	@usableFromInline
 	@inline(__always)
-	func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		let (xs, xk) = try x(for: strategy)
-		let (ys, yk) = try y(for: strategy)
-		let (zs, zk) = try z(for: strategy)
+	func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+		let (xs, xk) = try x(as: strategy)
+		let (ys, yk) = try y(as: strategy)
+		let (zs, zk) = try z(as: strategy)
 		let ws = strategy.stride(for: shape)
 		let wk = `operator`(x: (x.shape, xs), y: (y.shape, ys), z: (z.shape, zs), w: (shape, ws))
 		return (ws, {await wk(xk(), yk(), zk())})
 	}
 }
-extension Operators.Ternary: Immediate where X: Immediate, Y: Immediate, Z: Immediate {
+extension Operators.Ternary: InstantScalar where X: InstantScalar, Y: InstantScalar, Z: InstantScalar {
+	@usableFromInline
+	subscript() -> Element {
+		fatalError()
+	}
+}
+extension Operators.Ternary: InstantVector where X: InstantVector, Y: InstantVector, Z: InstantVector {}
+extension Operators.Ternary: InstantMatrix where X: InstantMatrix, Y: InstantMatrix, Z: InstantMatrix {}
+extension Operators.Ternary: InstantTensor where X: InstantTensor, Y: InstantTensor, Z: InstantTensor {
 	@usableFromInline
 	@inline(__always)
-	func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		let (xs, xk) = try x(for: strategy)
-		let (ys, yk) = try y(for: strategy)
-		let (zs, zk) = try z(for: strategy)
+	func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+		let (xs, xk) = try x(by: strategy) as (Array<Int>, @Sendable () -> X.R)
+		let (ys, yk) = try y(by: strategy) as (Array<Int>, @Sendable () -> Y.R)
+		let (zs, zk) = try z(by: strategy) as (Array<Int>, @Sendable () -> Z.R)
 		let ws = strategy.stride(for: shape)
 		let wk = `operator`(x: (x.shape, xs), y: (y.shape, ys), z: (z.shape, zs), w: (shape, ws))
 		return (ws, {wk(xk(), yk(), zk())})
