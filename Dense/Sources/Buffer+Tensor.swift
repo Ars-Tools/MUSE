@@ -13,7 +13,7 @@ import func Layout.broadcast
 import func Layout.product
 import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
-@frozen public struct TensorBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: MutScalar, R.SubSequence: Storage {
+@frozen public struct TensorBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: MutableScalar, R.SubSequence: Storage {
 	public typealias Element = R.Element
 	public typealias S = TensorBuffer<R.SubSequence>
 	public typealias T = Self
@@ -38,7 +38,7 @@ extension TensorBuffer {
 		}
 	}
 }
-extension TensorBuffer: Tensor & Immediate {
+extension TensorBuffer: InstantTensor {
 	public var transpose: T {
 		.init(shape: shape.reversed(), pitch: pitch.reversed(), store: store)
 	}
@@ -61,11 +61,11 @@ extension TensorBuffer: Tensor & Immediate {
 		let upper = lower.advanced(by: capacity(slice: shape, stride: pitch))
 		return.init(shape: shape, pitch: pitch, store: store[lower..<upper])
 	}
-	public func callAsFunction(for strategy: MemoryStrategy) -> (Array<Int>, @Sendable () -> R) {
+	public func callAsFunction(by strategy: MemoryStrategy) -> (Array<Int>, @Sendable () -> R) {
 		(zip(shape, pitch).compactMap { $0 == .zero ? .none : .some($1) }, {store})
 	}
 }
-extension TensorBuffer: MutTensor where R: MutableStorage, R.SubSequence: MutableStorage {
+extension TensorBuffer: MutableTensor where R: MutableStorage, R.SubSequence: MutableStorage {
 	@_disfavoredOverload
 	public subscript<P>(position: P) -> U where P: RandomAccessCollection, P.Index == Int, P.Element == Int {
 		get {
@@ -127,18 +127,18 @@ extension TensorBuffer: CustomStringConvertible {
 }
 extension TensorBuffer {
 	@inlinable
-	public init<Source: Immediate>(_ source: Source, for layout: MemoryStrategy) throws where Source.R == R {
+	public init<Source: InstantTensor>(_ source: Source, by strategy: MemoryStrategy) throws where Source.R == R {
 		shape = source.shape
-		(pitch, store) = switch try source(for: layout) {
+		(pitch, store) = switch try source(by: strategy) {
 		case (let stride, let kernel):
 			(stride, kernel())
 		}
 	}
 	@_disfavoredOverload
 	@inlinable
-	public init<Source: Tensor>(_ source: Source, for layout: MemoryStrategy) async throws where Source.R == R {
+	public init<Source: Tensor>(_ source: Source, as strategy: MemoryStrategy) async throws where Source.R == R {
 		shape = source.shape
-		(pitch, store) = switch try source(for: layout) {
+		(pitch, store) = switch try source(as: strategy) {
 		case (let stride, let kernel):
 			(stride, await kernel())
 		}
@@ -146,16 +146,15 @@ extension TensorBuffer {
 }
 extension TensorBuffer where R: RangeReplaceableCollection {
 	@inlinable
-	public init(shape specify: some Sequence<Int>, for layout: MemoryStrategy = .rowMajor, with value: Element) {
+	public init(shape specify: some Sequence<Int>, as strategy: MemoryStrategy = .rowMajor, with value: Element) {
 		shape = .init(specify)
-		pitch = layout.stride(for: shape)
+		pitch = strategy.stride(for: shape)
 		store = .init(repeating: value, count: capacity(alloc: shape, stride: pitch))
 	}
-	@_disfavoredOverload
 	@inlinable
-	public init<Source: Tensor>(_ source: Source, for layout: MemoryStrategy = .rowMajor) async throws where Source.R.Element == Element {
+	public init<Source: Tensor>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source.R.Element == Element {
 		shape = source.shape
-		(pitch, store) = switch try source(for: layout) {
+		(pitch, store) = switch try source(as: strategy) {
 		case (let stride, let kernel):
 			(stride, await kernel().withUnsafeBufferPointer(R.init))
 		}
