@@ -8,89 +8,113 @@ import protocol Accelerate.AccelerateBuffer
 import Layout
 extension DOT {
 	@usableFromInline
-	struct Inner<LHS: Vector<Element>, RHS: Vector<Element>> {
-		@usableFromInline let lhs: LHS
-		@usableFromInline let rhs: RHS
+	struct Inner<X: Vector<Element>, Y: Vector<Element>> {
+		@usableFromInline let x: X
+		@usableFromInline let y: Y
 	}
 	@usableFromInline
-	struct Outer<LHS: Vector<Element>, RHS: Vector<Element>> {
+	struct Outer<X: Vector<Element>, Y: Vector<Element>> {
 		@usableFromInline typealias R = Array<Element>
-		@usableFromInline typealias S = Outer<LHS.S, RHS.S>
-		@usableFromInline typealias T = Outer<RHS.T, LHS.T>
-		@usableFromInline typealias U = Arithmetic<Element>.Mul<LHS.U, RHS.U>
-		@usableFromInline typealias V = ANY<Element>.Vector
-		@usableFromInline let lhs: LHS
-		@usableFromInline let rhs: RHS
+		@usableFromInline typealias S = Outer<X.S, Y.S>
+		@usableFromInline typealias T = Outer<Y.T, X.T>
+		@usableFromInline typealias U = Arithmetic<Element>.Mul<X.U, Y.U>
+		@usableFromInline typealias V = Arithmetic<Element>.Mul<X.S, Y.S>
+		@usableFromInline let x: X
+		@usableFromInline let y: Y
 	}
 	@usableFromInline
-	struct MV<LHS: Matrix<Element>, RHS: Vector<Element>> {
+	struct MV<X: Matrix<Element>, Y: Vector<Element>> {
 		@usableFromInline typealias R = Array<Element>
-		@usableFromInline typealias S = MV<LHS.S, RHS>
-		@usableFromInline typealias U = Inner<LHS.V, RHS>
-		@usableFromInline let lhs: LHS
-		@usableFromInline let rhs: RHS
+		@usableFromInline typealias S = MV<X.S, Y>
+		@usableFromInline typealias U = Inner<X.V, Y>
+		@usableFromInline let x: X
+		@usableFromInline let y: Y
 	}
 	@usableFromInline
-	struct VM<LHS: Vector<Element>, RHS: Matrix<Element>> {
+	struct VM<X: Vector<Element>, Y: Matrix<Element>> {
 		@usableFromInline typealias R = Array<Element>
-		@usableFromInline typealias S = VM<LHS, RHS.S>
-		@usableFromInline typealias U = Inner<LHS, RHS.V>
-		@usableFromInline let lhs: LHS
-		@usableFromInline let rhs: RHS
+		@usableFromInline typealias S = VM<X, Y.S>
+		@usableFromInline typealias U = Inner<X, Y.V>
+		@usableFromInline let x: X
+		@usableFromInline let y: Y
+	}
+}
+extension DOT.Inner {
+	@inlinable@inline(__always)@_transparent
+	func callAsFunction(x: (Int, Int), y: (Int, Int)) -> @Sendable (X.R, Y.R) -> CollectionOfOne<Element> {
+		let count = broadcast(x: x.0, y: y.0)
+        let xs = x.1
+        let ys = y.1
+		return {
+			withUnsafePointer($0, $1) {
+                .init(Element.Inner(n: count, x: $0, ldx: xs, y: $1, ldy: ys))
+			}
+		}
 	}
 }
 extension DOT.Inner: Scalar {
-	@inlinable
-	func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> CollectionOfOne<Element>) {
-		let (xi, xk) = try lhs(for: strategy)
-		let (yi, yk) = try rhs(for: strategy)
-		let count = broadcast(x: lhs.count, y: rhs.count)
-		let xs = xi.reduce(1, *)
-		let ys = yi.reduce(1, *)
-		return ([1], {
-			await withUnsafePointer(xk(), yk()) {
-				.init(Element.Inner(n: count, x: $0, ldx: xs, y: $1, ldy: ys))
-			}
-		})
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> CollectionOfOne<Element>) {
+		switch try (x(as: strategy), y(as: strategy)) {
+        case ((let xs, let xm), (let ys, let ym)) where (xs.count, ys.count) == (1, 1):
+            let zm = callAsFunction(x: (x.count, xs.last ?? 0), y: (y.count, ys.first ?? 0))
+            return ([], {await zm(xm(), ym())})
+        default:
+            throw Error.unmatchShape(operation: #function, lhs: x.shape, rhs: y.shape)
+		}
+	}
+}
+extension DOT.Inner: InstantTensor & InstantMatrix & InstantVector & InstantScalar where X: InstantVector, Y: InstantVector {
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Element>) {
+		switch try (x(by: strategy), y(by: strategy)) {
+        case ((let xs, let xm), (let ys, let ym)) where (xs.count, ys.count) == (1, 1):
+            let zm = callAsFunction(x: (x.count, xs.last ?? 0), y: (y.count, ys.first ?? 0))
+			return ([], {zm(xm(), ym())})
+        default:
+            throw Error.unmatchShape(operation: #function, lhs: x.shape, rhs: y.shape)
+		}
 	}
 }
 extension DOT.Outer: Matrix {
-	@inlinable
+	@inlinable@inline(__always)@_transparent
 	var rows: Int {
-		lhs.count
+		x.count
 	}
-	@inlinable
+	@inlinable@inline(__always)@_transparent
 	var cols: Int {
-		rhs.count
+		y.count
 	}
 	@usableFromInline
 	var transpose: T {
-		.init(lhs: rhs.transpose, rhs: lhs.transpose)
+		.init(x: y.transpose, y: x.transpose)
 	}
 	@usableFromInline
 	var diagonal: V {
-		.init(core: lhs[..<min(rows, cols)] * rhs[..<min(rows, cols)])
+        .init(x: x[0..<min(rows, cols)], y: y[0..<min(rows, cols)])
 	}
 	@usableFromInline
 	subscript(row: Int, col: Int) -> U {
-		.init(lhs: lhs[row], rhs: rhs[col])
+		.init(x: x[row], y: y[col])
 	}
 	@usableFromInline
 	subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		.init(core: lhs[row] * rhs[col])
+        .init(x: x[row...row], y: y[col])
 	}
 	@usableFromInline
 	subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		.init(core: rhs[col] * lhs[row])
+        .init(x: x[row], y: y[col...col])
 	}
 	@usableFromInline
 	subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
-		.init(lhs: lhs[row], rhs: rhs[col])
+		.init(x: x[row], y: y[col])
 	}
-	@inlinable
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xi, xk) = try lhs(for: strategy)
-		let (yi, yk) = try rhs(for: strategy)
+}
+extension DOT.Outer {
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+		let (xi, xk) = try x(as: strategy)
+		let (yi, yk) = try y(as: strategy)
 		let xs = xi.reduce(1, *)
 		let ys = yi.reduce(1, *)
 		switch strategy {
@@ -131,27 +155,72 @@ extension DOT.Outer: Matrix {
 		}
 	}
 }
+extension DOT.Outer: InstantTensor & InstantMatrix where X: InstantVector, Y: InstantVector {
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+		let (xi, xk) = try x(by: strategy)
+		let (yi, yk) = try y(by: strategy)
+		let xs = xi.reduce(1, *)
+		let ys = yi.reduce(1, *)
+		switch strategy {
+		case.rowMajor:
+			let zs = [cols, 1]
+			let capacity = capacity(alloc: [rows, cols], stride: zs)
+			return (zs, { [rows, cols] in
+				withUnsafePointer(xk(), yk()) { x, y in
+					.init(unsafeUninitializedCapacity: capacity) {
+						Element.Outer(m: rows, n: cols,
+									  α: 1,
+									  x: y, ldx: ys,
+									  y: x, ldy: xs,
+									  β: 0,
+									  a: $0.baseAddress.unsafelyUnwrapped,
+									  lda: cols)
+						$1 = $0.count
+					}
+				}
+			})
+		case.columnMajor:
+			let zs = [1, rows]
+			let capacity = capacity(alloc: [rows, cols], stride: zs)
+			return (zs, { [rows, cols] in
+				withUnsafePointer(xk(), yk()) { x, y in
+					.init(unsafeUninitializedCapacity: capacity) {
+						Element.Outer(m: rows, n: cols,
+									  α: 1,
+									  x: x, ldx: xs,
+									  y: y, ldy: ys,
+									  β: 0,
+									  a: $0.baseAddress.unsafelyUnwrapped,
+									  lda: rows)
+						$1 = $0.count
+					}
+				}
+			})
+		}
+	}
+}
 extension DOT.MV: Vector {
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	var count: Int {
-		lhs.rows
+		x.rows
 	}
 	@usableFromInline
 	subscript(position: Int) -> U {
-		.init(lhs: lhs[position, 0...], rhs: rhs)
+		.init(x: x[position, 0...], y: y)
 	}
 	@usableFromInline
 	subscript(bounds: some RangeExpression<Int>) -> S {
-		.init(lhs: lhs[bounds, 0...], rhs: rhs)
+		.init(x: x[bounds, 0...], y: y)
 	}
-	@inlinable
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xs, xk) = try lhs(for: strategy)
-		let (ys, yk) = try rhs(for: strategy)
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        let (xs, xk) = try x(as: strategy)
+		let (ys, yk) = try y(as: strategy)
 		precondition((xs.count, ys.count) == (2, 1))
 		let inc = ys.reduce(1, *)
-		let m = lhs.rows
-		let n = lhs.cols
+		let m = x.rows
+		let n = x.cols
 		switch (xs.first, xs.last) {
 		case ((.some(1), .some(let lda))):
 			return ([1], {
@@ -205,27 +274,89 @@ extension DOT.MV: Vector {
 		}
 	}
 }
+extension DOT.MV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantVector {
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+		let (xs, xk) = try x(by: strategy)
+		let (ys, yk) = try y(by: strategy)
+		precondition((xs.count, ys.count) == (2, 1))
+		let inc = ys.reduce(1, *)
+		let m = x.rows
+		let n = x.cols
+		switch (xs.first, xs.last) {
+		case ((.some(1), .some(let lda))):
+			return ([1], {
+				withUnsafePointer(xk(), yk()) { x, y in
+					.init(unsafeUninitializedCapacity: m) {
+						let z = $0.baseAddress.unsafelyUnwrapped
+						Element.GEMV(m: m, n: n,
+									 α: 1,
+									 a: x, lda: lda, opa: "N",
+									 x: y, ldx: inc,
+									 β: 0,
+									 y: z, ldy: 1)
+						$1 = $0.count
+					}
+				}
+			})
+		case ((.some(let lda), .some(1))):
+			return ([1], {
+				withUnsafePointer(xk(), yk()) { x, y in
+					.init(unsafeUninitializedCapacity: m) {
+						let z = $0.baseAddress.unsafelyUnwrapped
+						Element.GEMV(m: n, n: m,
+									 α: 1,
+									 a: x, lda: lda, opa: "T",
+									 x: y, ldx: inc,
+									 β: 0,
+									 y: z, ldy: 1)
+						$1 = $0.count
+					}
+				}
+			})
+		case (.some(let ldr), .some(let ldc)):
+			return ([1], {
+				withUnsafePointer(xk(), yk()) { x, y in
+					Element.withUnsafeTemporary(gather: [m, n], source: [ldr, ldc], target: [1, m], memory: x) { x in
+						.init(unsafeUninitializedCapacity: m) {
+							let z = $0.baseAddress.unsafelyUnwrapped
+							Element.GEMV(m: m, n: n,
+										 α: 1,
+										 a: x, lda: m, opa: "N",
+										 x: y, ldx: inc,
+										 β: 0,
+										 y: z, ldy: 1)
+							$1 = $0.count
+						}
+					}
+				}
+			})
+		default:
+			throw Error.invalidShape(self)
+		}
+	}
+}
 extension DOT.VM: Vector {
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	var count: Int {
-		rhs.cols
+		y.cols
 	}
 	@usableFromInline
 	subscript(position: Int) -> U {
-		.init(lhs: lhs, rhs: rhs[0..., position])
+		.init(x: x, y: y[0..., position])
 	}
 	@usableFromInline
 	subscript(bounds: some RangeExpression<Int>) -> S {
-		.init(lhs: lhs, rhs: rhs[0..., bounds])
+		.init(x: x, y: y[0..., bounds])
 	}
-	@inlinable
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xs, xk) = try lhs(for: strategy)
-		let (ys, yk) = try rhs(for: strategy)
+    @inlinable@inline(__always)@_transparent
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+		let (xs, xk) = try x(as: strategy)
+		let (ys, yk) = try y(as: strategy)
 		precondition((xs.count, ys.count) == (1, 2))
 		let inc = xs.reduce(1, *)
-		let k = rhs.rows
-		let n = rhs.cols
+		let k = y.rows
+		let n = y.cols
 		switch (ys.first, ys.last) {
 		case ((.some(1), .some(let lda))):
 			return ([1], {
@@ -279,19 +410,97 @@ extension DOT.VM: Vector {
 		}
 	}
 }
+extension DOT.VM: InstantTensor & InstantVector where X: InstantVector, Y: InstantMatrix {
+    @inlinable@inline(__always)@_transparent
+    func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        let (xs, xk) = try x(by: strategy)
+        let (ys, yk) = try y(by: strategy)
+        precondition((xs.count, ys.count) == (1, 2))
+        let inc = xs.reduce(1, *)
+        let k = y.rows
+        let n = y.cols
+        switch (ys.first, ys.last) {
+        case ((.some(1), .some(let lda))):
+            return ([1], {
+                withUnsafePointer(xk(), yk()) { x, y in
+                    .init(unsafeUninitializedCapacity: n) {
+                        let z = $0.baseAddress.unsafelyUnwrapped
+                        Element.GEMV(m: k, n: n,
+                                     α: 1,
+                                     a: y, lda: lda, opa: "T",
+                                     x: x, ldx: inc,
+                                     β: 0,
+                                     y: z, ldy: 1)
+                        $1 = $0.count
+                    }
+                }
+            })
+        case ((.some(let lda), .some(1))):
+            return ([1], {
+                withUnsafePointer(xk(), yk()) { x, y in
+                    .init(unsafeUninitializedCapacity: n) {
+                        let z = $0.baseAddress.unsafelyUnwrapped
+                        Element.GEMV(m: n, n: k,
+                                     α: 1,
+                                     a: y, lda: lda, opa: "N",
+                                     x: x, ldx: inc,
+                                     β: 0,
+                                     y: z, ldy: 1)
+                        $1 = $0.count
+                    }
+                }
+            })
+        case (.some(let ldr), .some(let ldc)):
+            return ([1], {
+                withUnsafePointer(xk(), yk()) { x, y in
+                    Element.withUnsafeTemporary(gather: [k, n], source: [ldr, ldc], target: [n, 1], memory: x) { x in
+                        .init(unsafeUninitializedCapacity: n) {
+                            let z = $0.baseAddress.unsafelyUnwrapped
+                            Element.GEMV(m: k, n: n,
+                                         α: 1,
+                                         a: y, lda: n, opa: "T",
+                                         x: x, ldx: inc,
+                                         β: 0,
+                                         y: z, ldy: 1)
+                            $1 = $0.count
+                        }
+                    }
+                }
+            })
+        default:
+            throw Error.invalidShape(self)
+        }
+    }
+}
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some Vector<Element>, _ rhs: some Vector<Element>) -> some Scalar<Element> {
-	DOT.Inner(lhs: lhs, rhs: rhs)
+	DOT.Inner(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some Matrix<Element>, _ rhs: some Vector<Element>) -> some Vector<Element> {
-	DOT.MV(lhs: lhs, rhs: rhs)
+	DOT.MV(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some Vector<Element>, _ rhs: some Matrix<Element>) -> some Vector<Element> {
-	DOT.VM(lhs: lhs, rhs: rhs)
+	DOT.VM(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func outer<Element: ArithmeticElement & BLASElement>(_ lhs: some Vector<Element>, _ rhs: some Vector<Element>) -> some Matrix<Element> {
-	DOT.Outer(lhs: lhs, rhs: rhs)
+	DOT.Outer(x: lhs, y: rhs)
+}
+@_disfavoredOverload
+public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantVector<Element>) -> some InstantScalar<Element> {
+    DOT.Inner(x: lhs, y: rhs)
+}
+@_disfavoredOverload
+public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantMatrix<Element>, _ rhs: some InstantVector<Element>) -> some InstantVector<Element> {
+    DOT.MV(x: lhs, y: rhs)
+}
+@_disfavoredOverload
+public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantMatrix<Element>) -> some InstantVector<Element> {
+    DOT.VM(x: lhs, y: rhs)
+}
+@_disfavoredOverload
+public func outer<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantVector<Element>) -> some InstantMatrix<Element> {
+    DOT.Outer(x: lhs, y: rhs)
 }
