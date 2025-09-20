@@ -8,6 +8,7 @@ import protocol Dense.Vector
 import typealias Layout.MemoryStrategy
 @dynamicMemberLookup
 @frozen public struct SPV<Element: SparseScalar<Element> & Numeric> {
+    public typealias R = Array<Element>
 	public typealias U = Element
 	public let count: Int
 	@usableFromInline
@@ -61,7 +62,7 @@ extension SPV {
 		}
 	}
 }
-extension SPV: MutSparseVector {
+extension SPV: MutableSparseVector {
 	@inlinable
 	public var coo: some Sequence<(Int, Element)> {
 		store.lazy.map(\.self)
@@ -94,4 +95,6 @@ extension SPV: ExpressibleByArrayLiteral {
 		self.init(elements)
 	}
 }
-extension SPV: CustomStringConvertible {}
+extension SPV: CustomStringConvertible {
+    
+}

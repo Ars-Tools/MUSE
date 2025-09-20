@@ -59,7 +59,7 @@ extension VSK {
 		}
 	}
 }
-extension VSK: MutSparseVector {
+extension VSK: MutableSparseVector {
 	public init(shape: (Int)) {
 		count = shape
 		state = .init()
