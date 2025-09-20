@@ -190,7 +190,7 @@ extension Matrix {
 	@_disfavoredOverload
 	public subscript(_ masker: some SparseMatrix<Bool>, layout: MemoryStrategy = .rowMajor) -> DOK<Element> {
 		get async throws {
-			let (layout, maskee) = try callAsFunction(for: layout)
+			let (layout, maskee) = try callAsFunction(as: layout)
 			precondition(layout.count == 2)
 			async let result = maskee()
 			let masker = masker.state
