@@ -11,6 +11,7 @@ public typealias Quaternion64 = simd_quath
 public typealias Quaternion128 = simd_quatf
 public typealias Quaternion256 = simd_quatd
 import protocol Synchronization.AtomicRepresentable
+extension simd_quath: @retroactive Equatable & Hashable {}
 extension Quaternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, QuaternionNumber {
 	public typealias FloatLiteralType = Float16
 	@inlinable @inline(__always)
