@@ -4,16 +4,12 @@
 //
 //  Created by Kota on 9/9/R7.
 //
-import typealias Layout.MemoryStrategy
-import func Layout.capacity
-import protocol Dense.Tensor
-import protocol Dense.MutTensor
-import protocol Dense.MutScalar
-public typealias SparseScalar<Element> = MutScalar<Element>
-public typealias MutSparseScalar<Element> = SparseScalar<Element>
-public protocol SparseTensor<Element>: Tensor where S: SparseTensor<Element>, T: SparseTensor<Element>, U: SparseScalar<Element>, V: SparseVector<Element>, R == Array<Element> {
-}
-public protocol MutSparseTensor<Element>: MutTensor & SparseTensor where S: MutSparseTensor<Element>, T: MutSparseTensor<Element>, U: MutSparseScalar<Element>, V: MutSparseVector<Element> {}
+import protocol Dense.MutableScalar
+public typealias SparseScalar<Element> = MutableScalar<Element>
+public typealias MutableSparseScalar<Element> = SparseScalar<Element>
+//public protocol SparseTensor<Element>: Tensor where S: SparseTensor<Element>, T: SparseTensor<Element>, U: SparseScalar<Element>, V: SparseVector<Element>, R == Array<Element> {
+//}
+//public protocol MutSparseTensor<Element>: MutTensor & SparseTensor where S: MutSparseTensor<Element>, T: MutSparseTensor<Element>, U: MutSparseScalar<Element>, V: MutSparseVector<Element> {}
 //public protocol SparseTensor<Element>: Tensor where R == Array<Element>, S: SparseTensor<Element>, T: SparseTensor<Element>, U: SparseScalar<Element>, V: SparseVector<Element> {
 //	associatedtype Nonzero: Sequence where Nonzero.Element == (Array<Int>, Element)
 //	@inlinable var nonzero: Nonzero { get }

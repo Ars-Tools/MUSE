@@ -5,15 +5,14 @@
 //  Created by Kota on 9/9/R7.
 //
 import typealias Layout.MemoryStrategy
-import protocol Dense.Vector
-import protocol Dense.MutVector
-import protocol Dense.Immediate
-public protocol SparseVector<Element>: Vector & Immediate where S: SparseVector<Element>, T: SparseVector<Element>, U: SparseScalar<Element>, V: SparseVector<Element> {
+import protocol Dense.InstantVector
+import protocol Dense.MutableVector
+public protocol SparseVector<Element>: InstantVector where S: SparseVector<Element>, T: SparseVector<Element>, U: SparseScalar<Element>, V: SparseVector<Element>, R == Array<Element> {
 	associatedtype COO: Sequence where COO.Element == (Int, Element)
 	@inlinable var coo: COO { get }
 	@inlinable var state: Set<Int> { get }
 }
-public protocol MutSparseVector<Element>: MutVector & SparseVector where S: MutSparseVector<Element>, T: MutSparseVector<Element>, U: MutSparseScalar<Element>, V: MutSparseVector<Element> {
+public protocol MutableSparseVector<Element>: MutableVector & SparseVector where S: MutableSparseVector<Element>, T: MutableSparseVector<Element>, U: MutableSparseScalar<Element>, V: MutableSparseVector<Element> {
 	@inlinable init(shape: (Int), _ nonzero: some Sequence<(Int, Element)>)
 }
 extension SparseVector where Element: Numeric {
@@ -24,7 +23,7 @@ extension SparseVector where Element: Numeric {
 		})
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let result = Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: .zero)
 			for (key, val) in coo {
@@ -51,7 +50,7 @@ extension SparseVector where Element == Bool {
 		state.lazy.map { ($0, true) }
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let result = Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: false)
 			for index in state {
@@ -72,7 +71,7 @@ extension SparseVector where Element == Bool {
 		}.description
 	}
 }
-extension MutSparseVector {
+extension MutableSparseVector {
 	@inlinable
 	public init(_ source: some SparseVector<Element>) {
 		self.init(shape: source.count, source.coo)

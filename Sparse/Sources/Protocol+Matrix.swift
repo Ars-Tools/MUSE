@@ -5,15 +5,14 @@
 //  Created by Kota on 9/9/R7.
 //
 import typealias Layout.MemoryStrategy
-import protocol Dense.Matrix
-import protocol Dense.MutMatrix
-import protocol Dense.Immediate
-public protocol SparseMatrix<Element>: Matrix & Immediate where S: SparseMatrix<Element>, T: SparseMatrix<Element>, U: SparseScalar<Element>, V: SparseVector<Element> {
+import protocol Dense.InstantMatrix
+import protocol Dense.MutableMatrix
+public protocol SparseMatrix<Element>: InstantMatrix where S: SparseMatrix<Element>, T: SparseMatrix<Element>, U: SparseScalar<Element>, V: SparseVector<Element>, R == Array<Element> {
 	associatedtype LIL: RandomAccessCollection where LIL.Index == Int, LIL.Element: Sequence, LIL.Element.Element == (Int, Element)
 	@inlinable func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL)
 	@inlinable var state: Set<SIMD2<Int>> { get }
 }
-public protocol MutSparseMatrix<Element>: MutMatrix & SparseMatrix where S: MutSparseMatrix<Element>, T: MutSparseMatrix<Element>, U: MutSparseScalar<Element>, V: MutSparseVector<Element> {
+public protocol MutableSparseMatrix<Element>: MutableMatrix & SparseMatrix where S: MutableSparseMatrix<Element>, T: MutableSparseMatrix<Element>, U: MutableSparseScalar<Element>, V: MutableSparseVector<Element> {
 	@inlinable init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>)
 }
 extension SparseMatrix where Element: Numeric {
@@ -35,7 +34,7 @@ extension SparseMatrix where Element: Numeric {
 		}
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let (layout, memory) = switch lil(for: strategy) {
 		case(.rowMajor, let lil):
 			([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
@@ -101,7 +100,7 @@ extension SparseMatrix where Element == Bool {
 		}
 	}
 	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let (layout, result) = switch strategy {
 		case.rowMajor:
 			([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) { [state] in
@@ -137,7 +136,7 @@ extension SparseMatrix where Element == Bool {
 		}.joined(separator: ",\r\n ") + "]"
 	}
 }
-extension MutSparseMatrix {
+extension MutableSparseMatrix {
 	@inlinable
 	public init(diagonal vector: some Collection<Element>) {
 		self.init(shape: (vector.count, vector.count), vector.enumerated().lazy.map { (SIMD2(repeating: $0), $1) })
@@ -161,13 +160,13 @@ extension MutSparseMatrix {
 		}
 	}
 }
-extension MutSparseMatrix where Element: Numeric {
+extension MutableSparseMatrix where Element: Numeric {
 	@inlinable
 	public init(identity count: Int) {
 		self.init(diagonal: repeatElement(1 as Element, count: count))
 	}
 }
-extension MutSparseMatrix where Element == Bool {
+extension MutableSparseMatrix where Element == Bool {
 	@inlinable
 	public init(identity count: Int) {
 		self.init(diagonal: repeatElement(true, count: count))
