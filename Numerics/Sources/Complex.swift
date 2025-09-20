@@ -4,7 +4,7 @@
 //
 //  Created by Kota on 5/15/R7.
 //
-public protocol ComplexNumber<FloatLiteralType>: Numeric & Comparable & Hashable & CustomStringConvertible & Sendable & Copyable & ExpressibleByIntegerLiteral & ExpressibleByFloatLiteral where IntegerLiteralType == FloatLiteralType.IntegerLiteralType, Magnitude == FloatLiteralType, FloatLiteralType: SignedNumeric & Comparable & Hashable & Copyable {
+public protocol ComplexNumber<FloatLiteralType>: Numeric & Comparable & Hashable & CustomStringConvertible & Sendable & BitwiseCopyable & ExpressibleByIntegerLiteral & ExpressibleByFloatLiteral where IntegerLiteralType == FloatLiteralType.IntegerLiteralType, Magnitude == FloatLiteralType, FloatLiteralType: SignedNumeric & Comparable & Hashable & BitwiseCopyable {
 	var real: FloatLiteralType { get }
 	var imag: FloatLiteralType { get }
 	var magnitude: FloatLiteralType.Magnitude { get }
