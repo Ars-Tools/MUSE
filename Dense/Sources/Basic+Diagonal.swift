@@ -29,17 +29,17 @@ extension Basic.Diagonal: Vector {
 		.init(source: source[repeatElement(bounds, count: source.shape.count)])
 	}
 	@inlinable
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		switch try source(for: strategy) {
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+		switch try source(as: strategy) {
 		case (let stride, let kernel):
 			([stride.reduce(0, +)], kernel)
 		}
 	}
 }
-extension Basic.Diagonal: Immediate where Source: Immediate {
+extension Basic.Diagonal: InstantVector & InstantTensor where Source: InstantTensor {
 	@inlinable
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		switch try source(for: strategy) {
+	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+		switch try source(by: strategy) {
 		case (let stride, let kernel):
 			([stride.reduce(0, +)], kernel)
 		}
