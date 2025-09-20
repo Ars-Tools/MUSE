@@ -10,7 +10,7 @@ import protocol Dense.Vector
 import typealias Layout.MemoryStrategy
 import Auxiliary
 @usableFromInline
-@frozen enum Arithmetic<Element: Numeric & MutSparseScalar<Element>> {}
+@frozen enum Arithmetic<Element: Numeric & MutableSparseScalar<Element>> {}
 extension Arithmetic {
 	@usableFromInline
 	@frozen struct ANY {
