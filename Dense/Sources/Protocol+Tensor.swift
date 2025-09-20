@@ -9,6 +9,22 @@ import protocol Accelerate.AccelerateMutableBuffer
 import typealias Layout.MemoryStrategy
 public typealias Storage = Sendable & RandomAccessCollection & AccelerateBuffer
 public typealias MutableStorage = Storage & MutableCollection & AccelerateMutableBuffer
+public protocol Scalar<Element>: Tensor & Vector & Matrix where S == Self, T == Self, U == Self, V == Self {
+//    @inlinable subscript(_: ()) -> Element { get async throws }
+}
+public protocol Vector<Element>: Tensor where S: Vector<Element>, T: Vector<Element>, U: Scalar<Element>, V: Vector<Element> {
+	@inlinable var count: Int { get }
+	@inlinable subscript(position: Int) -> U { get }
+	@inlinable subscript(bounds: some RangeExpression<Int>) -> S { get }
+}
+public protocol Matrix<Element>: Tensor where S: Matrix<Element>, T: Matrix<Element>, U: Scalar<Element>, V: Vector<Element> {
+	@inlinable var rows: Int { get }
+	@inlinable var cols: Int { get }
+	@inlinable subscript(row: Int, col: Int) -> U { get }
+	@inlinable subscript(row: Int, col: some RangeExpression<Int>) -> V { get }
+	@inlinable subscript(row: some RangeExpression<Int>, col: Int) -> V { get }
+	@inlinable subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S { get }
+}
 public protocol Tensor<Element>: Sendable {
 	associatedtype Element: BitwiseCopyable & Sendable
 	associatedtype S: Tensor<Element>
@@ -21,22 +37,44 @@ public protocol Tensor<Element>: Sendable {
 	@inlinable var diagonal: V { get }
 	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get }
 	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get }
-	@inlinable func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
+	@inlinable func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
 }
-public protocol MutTensor<Element>: Tensor where S: MutTensor<Element>, T: MutTensor<Element>, U: MutScalar<Element>, V: MutVector<Element>, R: MutableStorage, R.SubSequence: MutableStorage {
+public protocol InstantScalar<Element>: Scalar & InstantTensor & InstantMatrix & InstantVector {
+//    @inlinable subscript(_: ()) -> Element { get throws }
+}
+public protocol InstantVector<Element>: Vector & InstantTensor where S: InstantVector<Element>, T: InstantVector<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
+}
+public protocol InstantMatrix<Element>: Matrix & InstantTensor where S: InstantMatrix<Element>, T: InstantMatrix<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
+}
+public protocol InstantTensor<Element>: Tensor where S: InstantTensor<Element>, T: InstantTensor<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
+	@inlinable func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R)
+}
+public protocol MutableScalar<Element>: InstantScalar & MutableTensor & MutableMatrix & MutableVector & BitwiseCopyable & Sendable where Element == Self {
+//    @inlinable subscript(_: ()) -> Element { get set }
+}
+public protocol MutableVector<Element>: InstantVector & MutableTensor where S: MutableVector<Element>, T: MutableVector<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
+	@inlinable subscript(position: Int) -> U { get set }
+	@inlinable subscript(bounds: some RangeExpression<Int>) -> S { get set }
+}
+public protocol MutableMatrix<Element>: InstantMatrix & MutableTensor where S: MutableMatrix<Element>, T: MutableMatrix<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
+	@inlinable subscript(row: Int, col: Int) -> U { get set }
+	@inlinable subscript(row: Int, col: some RangeExpression<Int>) -> V { get set }
+	@inlinable subscript(row: some RangeExpression<Int>, col: Int) -> V { get set }
+	@inlinable subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S { get set }
+}
+public protocol MutableTensor<Element>: InstantTensor {
 	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get set }
 	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get set }
 }
-public protocol Immediate<Element>: Tensor {
-	@inlinable func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R)
-}
-extension Immediate {
-	@inlinable
-	public func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		switch try callAsFunction(for: strategy) as (Array<Int>, @Sendable () -> R) {
+// MARK: Default
+extension InstantTensor {
+	@inlinable@inline(__always)
+	public func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+		switch try callAsFunction(by: strategy) as (Array<Int>, @Sendable () -> R) {
 		case (let stride, let kernel):
-			(stride, kernel)
+			(stride, {kernel()})
 		}
 	}
 }
 infix operator •: MultiplicationPrecedence
+// MARK: Default
