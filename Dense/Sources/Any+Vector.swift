@@ -21,7 +21,7 @@ extension ANY {
 			@inlinable
 			subscript(bounds: some RangeExpression<Int>) -> S { fatalError() }
 			@usableFromInline
-			func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) { fatalError() }
+			func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) { fatalError() }
 		}
 		@usableFromInline
 		final class Vec<Body: Dense.Vector<Element>>: Core, @unchecked Sendable {
@@ -31,8 +31,8 @@ extension ANY {
 				body = core
 			}
 			@usableFromInline
-			override func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-				switch try body(for: strategy) {
+			override func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+				switch try body(as: strategy) {
 				case (let s, let k) where s.count == 1:
 					([s.reduce(0, +)], {
 						await k().withUnsafeBufferPointer(Array.init)
@@ -80,8 +80,8 @@ extension ANY {
 				}], axis: axis))
 			}
 			@usableFromInline
-			override func callAsFunction(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-				switch try body(for: strategy) {
+			override func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+				switch try body(as: strategy) {
 				case (let layout, let kernel):
 					let stride = layout.enumerated().compactMap {
 						$0 == axis ? .some($1) : .none
@@ -116,8 +116,8 @@ extension ANY.Vector: Vector {
 		body[bounds]
 	}
 	@inlinable
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		try body(for: strategy)
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+		try body(as: strategy)
 	}
 }
 public func vector<Element>(_ source: some Tensor<Element>) -> some Vector<Element> {

@@ -34,7 +34,7 @@ extension ANY {
 			@usableFromInline
 			subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S { fatalError() }
 			@usableFromInline
-			func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) { fatalError() }
+			func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) { fatalError() }
 		}
 		@usableFromInline
 		final class Mat<Body: Dense.Matrix<Element>>: Core, @unchecked Sendable {
@@ -76,8 +76,8 @@ extension ANY {
 				.init(core: body[row, col])
 			}
 			@usableFromInline
-			override func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-				switch try body(for: strategy) {
+			override func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+				switch try body(as: strategy) {
 				case (let stride, let kernel):
 					(stride, {
 						await kernel().withUnsafeBufferPointer(Array.init)
@@ -163,8 +163,8 @@ extension ANY {
 				}])
 			}
 			@usableFromInline
-			override func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-				switch try body(for: strategy) {
+			override func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+				switch try body(as: strategy) {
 				case (let layout, let kernel):
 					let stride = layout.enumerated().compactMap {
 						switch $0 {
@@ -260,8 +260,8 @@ extension ANY {
 				}])
 			}
 			@usableFromInline
-			override func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-				switch try body(for: strategy) {
+			override func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+				switch try body(as: strategy) {
 				case (let layout, let kernel):
 					let stride = layout.enumerated().compactMap {
 						switch $0 {
@@ -337,8 +337,8 @@ extension ANY.Matrix: Matrix {
 		body[row, col]
 	}
 	@usableFromInline
-	func callAsFunction(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		try body(for: strategy)
+	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+		try body(as: strategy)
 	}
 }
 public func matrix<Element>(rows source: some Tensor<Element>) -> some Matrix<Element> {
