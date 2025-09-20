@@ -37,5 +37,6 @@ func withUnsafePointer<X: Storage, Y: Storage, Z: Storage, E, R>(_ x: X, _ y: Y,
 @usableFromInline
 enum Error: Swift.Error {
 	case invalidShape(_ tensor: any Dense.Tensor)
+    case unmatchShape(operation: String, lhs: Array<Int>, rhs: Array<Int>)
 	case numericalError(tensor: any Dense.Tensor, status: Any & Sendable, operation: String)
 }
