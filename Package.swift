@@ -1,13 +1,13 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 import PackageDescription
 let package = Package(
     name: "MUSE",
 	platforms: [
-		.iOS(.v18),
-		.tvOS(.v18),
-		.macCatalyst(.v18),
-		.macOS(.v15),
+		.iOS(.v26),
+		.tvOS(.v26),
+		.macCatalyst(.v26),
+        .macOS(.v26),
 	],
     products: [
 		.library(
