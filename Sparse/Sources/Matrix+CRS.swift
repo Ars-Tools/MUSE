@@ -34,7 +34,8 @@ extension CRS {
 		}
 	}
 }
-extension CRS: MutSparseMatrix {
+extension CRS: MutableSparseMatrix {
+    public typealias R = Array<Element>
 	public typealias S = CRS<Element>
 	public typealias T = CCS<Element>
 	public typealias U = Element
@@ -221,7 +222,7 @@ extension CRS {
 	public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
 		rows = source.rows
 		cols = source.cols
-		let (layout, source) = try source(for: .columnMajor)
+		let (layout, source) = try source(as: .columnMajor)
 		async let result = source()
 		precondition(layout.count == 2)
 		let ldr = layout[0]

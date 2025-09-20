@@ -31,7 +31,7 @@ extension LIL {
 		}
 	}
 }
-extension LIL: MutSparseMatrix {
+extension LIL: MutableSparseMatrix {
 	@usableFromInline typealias R = Array<Element>
 	@usableFromInline typealias S = LIL<Element>
 	@usableFromInline typealias T = LIL<Element>

@@ -124,7 +124,7 @@ extension MSK {
 		}
 	}
 }
-extension MSK: MutSparseMatrix {
+extension MSK: MutableSparseMatrix {
 	public init(shape: (Int, Int)) {
 		(rows, cols) = shape
 		state = .init()

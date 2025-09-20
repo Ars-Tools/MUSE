@@ -48,7 +48,8 @@ extension DOK {
 		.init(store.keys)
 	}
 }
-extension DOK: MutSparseMatrix {
+extension DOK: MutableSparseMatrix {
+    public typealias R = Array<Element>
 	public typealias S = Self
 	public typealias T = Self
 	public typealias U = Element
