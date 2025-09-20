@@ -6,7 +6,6 @@
 //
 import protocol Accelerate.AccelerateBuffer
 import typealias Foundation.KeyPathComparator
-import protocol Dense.MutMatrix
 import typealias Dense.MatBuf
 extension Graph {
 	public static func SuccessiveShortestPath<K: Hashable, F: Numeric & Comparable, C: Numeric & Comparable>(source: K,
