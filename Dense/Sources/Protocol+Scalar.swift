@@ -66,7 +66,7 @@ extension Scalar {
     @inlinable@inline(__always)
     public subscript() -> Element {
 		get async throws {
-			switch try callAsFunction(as: .rowMajor) {
+			switch try evaluation(for: .rowMajor) {
 			case (let stride, let kernel) where 1 == capacity(alloc: shape, stride: stride):
 				await kernel().withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped.pointee)
 			default:
@@ -79,7 +79,7 @@ extension InstantScalar {
     @inlinable@inline(__always)
     public subscript() -> Element {
         get throws {
-            switch try callAsFunction(by: .rowMajor) {
+            switch try evaluation(for: .rowMajor) {
             case (let stride, let kernel) where 1 == capacity(alloc: shape, stride: stride):
                 kernel().withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped.pointee)
             default:
