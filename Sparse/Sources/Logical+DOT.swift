@@ -23,10 +23,10 @@ extension Logical {
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct Diagonal<LHS: SparseMatrix<Bool>, RHS: SparseMatrix<Bool>> {
+		@frozen struct DD<LHS: SparseMatrix<Bool>, RHS: SparseMatrix<Bool>> {
 			@usableFromInline typealias Element = Bool
 			@usableFromInline typealias R = Array<Element>
-			@usableFromInline typealias S = Diagonal<LHS.S, RHS.S>
+			@usableFromInline typealias S = DD<LHS.S, RHS.S>
 			@usableFromInline typealias U = Element
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
@@ -49,6 +49,12 @@ extension Logical {
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
+        @usableFromInline
+        @frozen enum VV<X: SparseMatrix<Bool>, Y: SparseMatrix<Bool>> {
+            case DD(X, Y)
+            case MV(X, Y)
+            case VM(X, Y)
+        }
 		@usableFromInline
 		@frozen struct MM<LHS: SparseMatrix<Bool>, RHS: SparseMatrix<Bool>> {
 			@usableFromInline typealias Element = Bool
@@ -56,7 +62,7 @@ extension Logical {
 			@usableFromInline typealias S = MM<LHS.S, RHS.S>
 			@usableFromInline typealias T = MM<RHS.T, LHS.T>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias V = ANY
+            @usableFromInline typealias V = VV<LHS.S, RHS.S>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
@@ -96,7 +102,7 @@ extension Logical.DOT.Outer: SparseMatrix {
 		.init(product(lhs.state, rhs.state))
 	}
 }
-extension Logical.DOT.Diagonal: SparseVector {
+extension Logical.DOT.DD: SparseVector {
 	@inlinable
 	var count: Int {
 		min(lhs.rows, rhs.cols)
@@ -164,6 +170,55 @@ extension Logical.DOT.VM: SparseVector {
 		})
 	}
 }
+extension Logical.DOT.VV: SparseVector {
+    @usableFromInline typealias R = Array<Bool>
+    @usableFromInline typealias S = Logical.DOT.VV<X.S, Y.S>
+    @usableFromInline typealias U = Bool
+    @inlinable
+    var count: Int {
+        switch self {
+        case.DD(let x, let y):
+            min(x.rows, y.cols)
+        case.MV(let x, _):
+            x.rows
+        case.VM(_, let y):
+            y.cols
+        }
+    }
+    @usableFromInline
+    subscript(position: Int) -> U {
+        switch self {
+        case.DD(let x, let y):
+            x[position, 0...] • y[0..., position]
+        case.MV(let x, let y):
+            x[position, 0...] • y[0..., 0]
+        case.VM(let x, let y):
+            x[0, 0...] • y[0..., position]
+        }
+    }
+    @usableFromInline
+    subscript(bounds: some RangeExpression<Int>) -> S {
+        switch self {
+        case.DD(let x, let y):
+            .DD(x[bounds, 0...], y[0..., bounds])
+        case.MV(let x, let y):
+            .MV(x[bounds, 0...], y[0..., 0...])
+        case.VM(let x, let y):
+            .VM(x[0..., 0...], y[0..., bounds])
+        }
+    }
+    @usableFromInline
+    var state: Set<Int> {
+        switch self {
+        case.DD(let x, let y):
+            Logical.DOT.DD(lhs: x, rhs: y).state
+        case.MV(let x, let y):
+            Logical.DOT.MV(lhs: x, rhs: y[0..., 0]).state
+        case.VM(let x, let y):
+            Logical.DOT.VM(lhs: x[0, 0...], rhs: y).state
+        }
+    }
+}
 extension Logical.DOT.MM: SparseMatrix {
 	@usableFromInline
 	var rows: Int { lhs.rows }
@@ -175,7 +230,7 @@ extension Logical.DOT.MM: SparseMatrix {
 	}
 	@usableFromInline
 	var diagonal: V {
-		.init(core: Logical.DOT.Diagonal(lhs: lhs, rhs: rhs))
+        .DD(lhs[0..., 0...], rhs[0..., 0...])
 	}
 	@usableFromInline
 	subscript(row: Int, col: Int) -> Element {
@@ -183,11 +238,11 @@ extension Logical.DOT.MM: SparseMatrix {
 	}
 	@usableFromInline
 	subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		.init(core: Logical.DOT.MV(lhs: lhs[row, 0...], rhs: rhs[0..., col]))
+        .MV(lhs[row, 0...], rhs[0..., col...col])
 	}
 	@usableFromInline
 	subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		.init(core: Logical.DOT.VM(lhs: lhs[row, 0...], rhs: rhs[0..., col]))
+        .VM(lhs[row...row, 0...], rhs[0..., col])
 	}
 	@usableFromInline
 	subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
