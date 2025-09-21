@@ -34,13 +34,13 @@ extension SparseMatrix where Element: Numeric {
 		}
 	}
 	@inlinable
-	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let (layout, memory) = switch lil(for: strategy) {
 		case(.rowMajor, let lil):
 			([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
 				for (row, col) in lil.enumerated() {
 					$0[row*cols..<row*cols+cols].initialize(repeating: .zero)
-					for (col, val) in col {
+					for (col, val) in col where val != .zero {
 						$0[row*cols+col] = val
 					}
 				}
@@ -50,7 +50,7 @@ extension SparseMatrix where Element: Numeric {
 			([1, rows], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
 				for (col, row) in lil.enumerated() {
 					$0[col*rows..<col*rows+rows].initialize(repeating: .zero)
-					for (row, val) in row {
+					for (row, val) in row where val != .zero {
 						$0[row+rows*col] = val
 					}
 				}
@@ -66,7 +66,7 @@ extension SparseMatrix where Element: Numeric {
 			"[" + lil.lazy.map { row in
 				Array<Element>(unsafeUninitializedCapacity: cols) {
 					$0.initialize(repeating: .zero)
-					for (c, v) in row {
+                    for (c, v) in row where v != .zero {
 						$0[c] = v
 					}
 					$1 = $0.count
@@ -76,7 +76,7 @@ extension SparseMatrix where Element: Numeric {
 			"[" + Sparse.transpose(lil: lil, for: rows).lazy.map { row in
 				Array<Element>(unsafeUninitializedCapacity: cols) {
 					$0.initialize(repeating: .zero)
-					for (c, v) in row {
+                    for (c, v) in row where v != .zero {
 						$0[c] = v
 					}
 					$1 = $0.count
@@ -100,7 +100,7 @@ extension SparseMatrix where Element == Bool {
 		}
 	}
 	@inlinable
-	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let (layout, result) = switch strategy {
 		case.rowMajor:
 			([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) { [state] in
@@ -128,7 +128,7 @@ extension SparseMatrix where Element == Bool {
 		}.lazy.map { $0.lazy.map { ($0, true) } }.lazy.map { row in
 			Array<Element>(unsafeUninitializedCapacity: cols) {
 				$0.initialize(repeating: false)
-				for (c, v) in row {
+				for (c, v) in row where v {
 					$0[c] = v
 				}
 				$1 = $0.count

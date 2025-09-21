@@ -23,10 +23,10 @@ extension SparseVector where Element: Numeric {
 		})
 	}
 	@inlinable
-	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let result = Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: .zero)
-			for (key, val) in coo {
+            for (key, val) in coo where val != .zero {
 				$0[key] = val
 			}
 			$1 = $0.count
@@ -37,7 +37,7 @@ extension SparseVector where Element: Numeric {
 	public var description: String {
 		Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: .zero)
-			for (key, val) in coo {
+            for (key, val) in coo where val != .zero {
 				$0[key] = val
 			}
 			$1 = $0.count
@@ -50,7 +50,7 @@ extension SparseVector where Element == Bool {
 		state.lazy.map { ($0, true) }
 	}
 	@inlinable
-	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
 		let result = Array<Element>(unsafeUninitializedCapacity: count) {
 			$0.initialize(repeating: false)
 			for index in state {

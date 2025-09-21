@@ -4,6 +4,7 @@
 //
 //  Created by Kota on 9/9/R7.
 //
+import protocol Dense.InstantScalar
 import protocol Dense.MutableScalar
 public typealias SparseScalar<Element> = MutableScalar<Element>
 public typealias MutableSparseScalar<Element> = SparseScalar<Element>
