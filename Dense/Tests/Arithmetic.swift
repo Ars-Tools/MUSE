@@ -12,22 +12,22 @@ import Layout
 struct ArithmeticTestCases {
 	@Test
 	func scaleMat() throws {
-		let x = MatBuf(rows: [
+		let x = MatrixBuffer<Array<Float64>>(rows: [
 			[1.0, 2.0, 3.0],
 		])
-		let y = 3.0
+        let y = 3.0
 		let z = y * x
-		#expect(z.rows == x.rows)
+        #expect(z.rows == x.rows)
 		#expect(z.cols == x.cols)
-		let w = try MatBuf(z)
+        let w = try MatrixBuffer(z)
 		for col in 0..<3 {
-//			let v = z[0, col][]
+			let v = try z[0, col][]
 			#expect(y * x[0, col] == w[0, col])
-//			#expect(y * x[0, col] == v)
+			#expect(y * x[0, col] == v)
 		}
 	}
 	@Test
-	func mulMat() async throws {
+	func mulMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		])
@@ -37,16 +37,16 @@ struct ArithmeticTestCases {
 			[3.0]
 		])
 		let z = x * y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] * y[row, 0])
 			#expect(w[row, col] == x[0, col] * y[row, 0])
 		}
 	}
 	@Test
-	func addMat() async throws {
+	func addMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		])
@@ -56,16 +56,16 @@ struct ArithmeticTestCases {
 			[3.0]
 		])
 		let z = x + y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] + y[row, 0])
 			#expect(w[row, col] == x[0, col] + y[row, 0])
 		}
 	}
 	@Test
-	func divMat() async throws {
+	func divMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		])
@@ -75,16 +75,16 @@ struct ArithmeticTestCases {
 			[4.0]
 		])
 		let z = x / y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] / y[row, 0])
 			#expect(w[row, col] == x[0, col] / y[row, 0])
 		}
 	}
 	@Test
-	func subMat() async throws {
+	func subMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		])
@@ -94,16 +94,16 @@ struct ArithmeticTestCases {
 			[3.0]
 		])
 		let z = x - y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] - y[row, 0])
 			#expect(w[row, col] == x[0, col] - y[row, 0])
 		}
 	}
 	@Test
-	func zmulMat() async throws {
+	func zmulMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		] as [[Complex128]])
@@ -113,16 +113,16 @@ struct ArithmeticTestCases {
 			[3.0]
 		] as [[Complex128]])
 		let z = x * y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] * y[row, 0])
 			#expect(w[row, col] == x[0, col] * y[row, 0])
 		}
 	}
 	@Test
-	func zaddMat() async throws {
+	func zaddMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		] as [[Complex128]])
@@ -132,16 +132,16 @@ struct ArithmeticTestCases {
 			[3.0]
 		] as [[Complex128]])
 		let z = x + y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] + y[row, 0])
 			#expect(w[row, col] == x[0, col] + y[row, 0])
 		}
 	}
 	@Test
-	func zdivMat() async throws {
+	func zdivMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		] as [[Complex128]])
@@ -151,16 +151,16 @@ struct ArithmeticTestCases {
 			[4.0]
 		] as [[Complex128]])
 		let z = x / y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] / y[row, 0])
 			#expect(w[row, col] == x[0, col] / y[row, 0])
 		}
 	}
 	@Test
-	func zsubMat() async throws {
+	func zsubMat() throws {
 		let x = MatBuf(rows: [
 			[1.0, 2.0, 3.0],
 		] as [[Complex128]])
@@ -170,16 +170,16 @@ struct ArithmeticTestCases {
 			[3.0]
 		] as [[Complex128]])
 		let z = x - y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] - y[row, 0])
 			#expect(w[row, col] == x[0, col] - y[row, 0])
 		}
 	}
 	@Test
-	func diviMat() async throws {
+	func diviMat() throws {
 		let x = MatBuf(rows: [
 			[10, 20, 30],
 		] as Array<Array<Int32>>)
@@ -189,10 +189,10 @@ struct ArithmeticTestCases {
 			[5]
 		] as Array<Array<Int32>>)
 		let z = x / y
-		let w = try await MatBuf(z)
+		let w = try MatrixBuffer(z)
 		for (row, col) in product(0..<3, 0..<3) {
 			let u = z[row, col]
-			let v = try await u[]
+			let v = try u[]
 			#expect(v == x[0, col] / y[row, 0])
 			#expect(w[row, col] == x[0, col] / y[row, 0])
 		}

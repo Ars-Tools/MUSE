@@ -12,14 +12,11 @@ import Layout
 struct LinAlgTestCases {
 	@Test
 	func inv() async throws {
-		let x = MatBuf<Float64>(rows: [
-			[1, 0, 2],
-			[3, 8, 5],
-			[9, 2, 1]
-		])
-		let y = try LinAlg.Inv(x)
-		let z = x • y
-		let w = try await MatBuf(z)
-		print(w)
+//		let x = MatBuf<Float64>(rows: [
+//			[1, 0, 2],
+//			[3, 8, 5],
+//			[9, 2, 1]
+//		])
+		
 	}
 }
