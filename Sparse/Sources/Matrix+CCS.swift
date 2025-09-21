@@ -5,6 +5,7 @@
 //  Created by Kota on 9/9/R7.
 //
 import protocol Dense.Matrix
+import protocol Dense.InstantMatrix
 import typealias Layout.MemoryStrategy
 @frozen public struct CCS<Element: SparseScalar<Element> & Numeric> {
 	public let rows: Int
@@ -217,12 +218,31 @@ extension CCS: ExpressibleByArrayLiteral {
 	}
 }
 extension CCS {
+    @inlinable
+    public init(_ source: some InstantMatrix<Element>, ε: Element.Magnitude) async throws {
+        rows = source.rows
+        cols = source.cols
+        let (layout, source) = try source.evaluation(for: .columnMajor)
+        let result = source()
+        precondition(layout.count == 2)
+        let ldr = layout[0]
+        let ldc = layout[1]
+        (colStart, rowIndex, valArray) = result.withUnsafeBufferPointer { [rows, cols] buffer in
+            (0..<cols).reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
+                for si in 0..<rows where ε < buffer[si * ldr + $1 * ldc].magnitude {
+                    $0.2.append(buffer[si * ldr + $1 * ldc])
+                    $0.1.append(.init(si))
+                }
+                $0.0.append($0.1.count)
+            }
+        }
+    }
 	@_disfavoredOverload
 	@inlinable
 	public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
 		rows = source.rows
 		cols = source.cols
-		let (layout, source) = try source(as: .columnMajor)
+        let (layout, source) = try source.evaluation(for: .columnMajor)
 		async let result = source()
 		precondition(layout.count == 2)
 		let ldr = layout[0]

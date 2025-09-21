@@ -5,6 +5,7 @@
 //  Created by Kota on 9/9/R7.
 //
 import protocol Dense.Matrix
+import protocol Dense.InstantMatrix
 import typealias Layout.MemoryStrategy
 @frozen public struct CRS<Element: SparseScalar<Element> & Numeric> {
 	public let rows: Int
@@ -217,17 +218,16 @@ extension CRS: ExpressibleByArrayLiteral {
 	}
 }
 extension CRS {
-	@_disfavoredOverload
 	@inlinable
-	public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
+	public init(_ source: some InstantMatrix<Element>, ε: Element.Magnitude) throws {
 		rows = source.rows
 		cols = source.cols
-		let (layout, source) = try source(as: .columnMajor)
-		async let result = source()
+        let (layout, source) = try source.evaluation(for: .columnMajor)
+		let result = source()
 		precondition(layout.count == 2)
 		let ldr = layout[0]
 		let ldc = layout[1]
-		(rowStart, colIndex, valArray) = await result.withUnsafeBufferPointer { [rows, cols] buffer in
+		(rowStart, colIndex, valArray) = result.withUnsafeBufferPointer { [rows, cols] buffer in
 			(0..<rows).reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
 				for si in 0..<cols where ε < buffer[$1 * ldr + si * ldc].magnitude {
 					$0.2.append(buffer[$1 * ldr + si * ldc])
@@ -237,5 +237,25 @@ extension CRS {
 			}
 		}
 	}
+    @_disfavoredOverload
+    @inlinable
+    public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
+        rows = source.rows
+        cols = source.cols
+        let (layout, source) = try source.evaluation(for: .columnMajor)
+        async let result = source()
+        precondition(layout.count == 2)
+        let ldr = layout[0]
+        let ldc = layout[1]
+        (rowStart, colIndex, valArray) = await result.withUnsafeBufferPointer { [rows, cols] buffer in
+            (0..<rows).reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
+                for si in 0..<cols where ε < buffer[$1 * ldr + si * ldc].magnitude {
+                    $0.2.append(buffer[$1 * ldr + si * ldc])
+                    $0.1.append(.init(si))
+                }
+                $0.0.append($0.1.count)
+            }
+        }
+    }
 }
 extension CRS: CustomStringConvertible {}
