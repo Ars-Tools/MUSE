@@ -7,7 +7,7 @@
 import Layout
 extension DOT {
 	@usableFromInline
-	struct DD<X: Matrix<Element>, Y: Matrix<Element>> {
+    @frozen struct DD<X: Matrix<Element>, Y: Matrix<Element>> {
 		@usableFromInline typealias R = Array<Element>
 		@usableFromInline typealias S = DD<X.S, Y.S>
 		@usableFromInline typealias U = Inner<X.V, Y.V>
@@ -15,13 +15,13 @@ extension DOT {
 		@usableFromInline let y: Y
 	}
     @usableFromInline
-    enum VV<X: Matrix<Element>, Y: Matrix<Element>> {
+    @frozen enum VV<X: Matrix<Element>, Y: Matrix<Element>> {
         case DD(X, Y)
         case MV(X, Y)
         case VM(X, Y)
     }
 	@usableFromInline
-	struct MM<X: Matrix<Element>, Y: Matrix<Element>> {
+    @frozen struct MM<X: Matrix<Element>, Y: Matrix<Element>> {
 		@usableFromInline typealias R = Array<Element>
 		@usableFromInline typealias S = MM<X.S, Y.S>
 		@usableFromInline typealias T = MM<Y.T, X.T>
@@ -45,9 +45,9 @@ extension DOT.DD: Vector {
 		.init(x: x[bounds, 0...], y: y[0..., bounds])
 	}
 	@inlinable
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xi, xk) = try x(as: strategy)
-		let (yi, yk) = try y(as: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        let (xi, xk) = try x.evaluation(for: strategy)
+        let (yi, yk) = try y.evaluation(for: strategy)
 		precondition((xi.count, yi.count) == (2, 2))
 		let xs = (xi.first ?? 1, xi.last ?? 1)
 		let ys = (yi.first ?? 1, yi.last ?? 1)
@@ -67,9 +67,9 @@ extension DOT.DD: Vector {
 }
 extension DOT.DD: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantMatrix {
     @inlinable
-    func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-        let (xi, xk) = try x(by: strategy)
-        let (yi, yk) = try y(by: strategy)
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        let (xi, xk) = try x.evaluation(for: strategy)
+        let (yi, yk) = try y.evaluation(for: strategy)
         precondition((xi.count, yi.count) == (2, 2))
         let xs = (xi.first ?? 1, xi.last ?? 1)
         let ys = (yi.first ?? 1, yi.last ?? 1)
@@ -125,27 +125,27 @@ extension DOT.VV: Vector {
         }
     }
     @usableFromInline
-    func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch self {
         case.DD(let x, let y):
-            try DOT.DD(x: x, y: y)(as: strategy)
+            try DOT.DD(x: x, y: y).evaluation(for: strategy)
         case.MV(let x, let y):
-            try DOT.MV(x: x, y: y[0..., 0])(as: strategy)
+            try DOT.MV(x: x, y: y[0..., 0]).evaluation(for: strategy)
         case.VM(let x, let y):
-            try DOT.VM(x: x[0, 0...], y: y)(as: strategy)
+            try DOT.VM(x: x[0, 0...], y: y).evaluation(for: strategy)
         }
     }
 }
 extension DOT.VV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantMatrix {
     @usableFromInline
-    func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch self {
         case.DD(let x, let y):
-            try DOT.DD(x: x, y: y)(by: strategy)
+            try DOT.DD(x: x, y: y).evaluation(for: strategy)
         case.MV(let x, let y):
-            try DOT.MV(x: x, y: y[0..., 0])(by: strategy)
+            try DOT.MV(x: x, y: y[0..., 0]).evaluation(for: strategy)
         case.VM(let x, let y):
-            try DOT.VM(x: x[0, 0...], y: y)(by: strategy)
+            try DOT.VM(x: x[0, 0...], y: y).evaluation(for: strategy)
         }
     }
 }
@@ -183,9 +183,9 @@ extension DOT.MM: Matrix {
 		.init(x: x[row, 0...], y: y[0..., col])
 	}
 	@inlinable
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xs, xk) = try x(as: strategy)
-		let (ys, yk) = try y(as: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
 		let m = x.rows
 		let n = y.cols
 		let k = broadcast(x: x.cols, y: y.rows)
@@ -320,9 +320,9 @@ extension DOT.MM: Matrix {
 }
 extension DOT.MM: InstantTensor & InstantMatrix where X: InstantMatrix, Y: InstantMatrix {
     @inlinable
-    func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-        let (xs, xk) = try x(by: strategy)
-        let (ys, yk) = try y(by: strategy)
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
         let m = x.rows
         let n = y.cols
         let k = broadcast(x: x.cols, y: y.rows)
