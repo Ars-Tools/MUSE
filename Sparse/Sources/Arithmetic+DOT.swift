@@ -4,27 +4,34 @@
 //
 //  Created by Kota on 9/12/R7.
 //
+import protocol Dense.InstantScalar
 import protocol Dense.Matrix
 import enum Layout.MemoryStrategy
 import Auxiliary
 extension Arithmetic {
 	@usableFromInline
 	@frozen enum DOT {
+        @usableFromInline
+        @frozen struct Inner<X: SparseVector<Element>, Y: SparseVector<Element>> {
+            @usableFromInline typealias R = CollectionOfOne<Element>
+            @usableFromInline let x: X
+            @usableFromInline let y: Y
+        }
 		@usableFromInline
 		@frozen struct Outer<LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
 			@usableFromInline typealias R = Array<Element>
 			@usableFromInline typealias T = Outer<RHS.T, LHS.T>
-			@usableFromInline typealias V = ANY
+            @usableFromInline typealias V = Arithmetic.MUL.Vector<LHS.S, RHS.S>
 			@usableFromInline typealias S = Outer<LHS.S, RHS.S>
 			@usableFromInline typealias U = Element
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 		@usableFromInline
-		@frozen struct Diagonal<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
+		@frozen struct DD<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias S = Diagonal<LHS.S, RHS.S>
+			@usableFromInline typealias S = DD<LHS.S, RHS.S>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
@@ -44,17 +51,29 @@ extension Arithmetic {
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
+        @usableFromInline
+        @frozen enum VV<X: SparseMatrix<Element>, Y: SparseMatrix<Element>> {
+            case DD(X, Y)
+            case MV(X, Y)
+            case VM(X, Y)
+        }
 		@usableFromInline
 		@frozen struct MM<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
 			@usableFromInline typealias R = Array<Element>
 			@usableFromInline typealias S = MM<LHS.S, RHS.S>
 			@usableFromInline typealias T = MM<RHS.T, LHS.T>
 			@usableFromInline typealias U = Element
-			@usableFromInline typealias V = ANY
+            @usableFromInline typealias V = VV<LHS.S, RHS.S>
 			@usableFromInline let lhs: LHS
 			@usableFromInline let rhs: RHS
 		}
 	}
+}
+extension Arithmetic.DOT.Inner: InstantScalar {
+    @inlinable@inline(__always)
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Element>) {
+        ([], {.init(x.coo • y.coo)})
+    }
 }
 extension Arithmetic.DOT.Outer: SparseMatrix {
 	@inlinable@inline(__always)
@@ -67,7 +86,7 @@ extension Arithmetic.DOT.Outer: SparseMatrix {
 	}
 	@usableFromInline@inline(__always)
 	var diagonal: V {
-		.init(core: lhs * rhs)
+        .init(lhs: lhs[0...], rhs: rhs[0...])
 	}
 	@inlinable@inline(__always)
 	subscript(row: Int, col: Int) -> Element {
@@ -75,43 +94,33 @@ extension Arithmetic.DOT.Outer: SparseMatrix {
 	}
 	@usableFromInline@inline(__always)
 	subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		.init(core: lhs[row] * rhs[col])
+        .init(lhs: lhs[row...row], rhs: rhs[col])
 	}
 	@usableFromInline@inline(__always)
 	subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		.init(core: rhs[col] * lhs[row])
+        .init(lhs: lhs[row], rhs: rhs[col...col])
 	}
 	@usableFromInline@inline(__always)
 	subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
 		.init(lhs: lhs[row], rhs: rhs[col])
 	}
 	@inlinable@inline(__always)
-	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LazyMapSequence<Range<Int>, Optional<LazyMapSequence<Array<(Int, Element)>, (Int, Element)>>>) {
+	func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Optional<LazyMapSequence<Array<(Int, Element)>, (Int, Element)>>>) {
 		switch layout {
 		case.rowMajor:
-			let l = Dictionary(uniqueKeysWithValues: lhs.coo)
 			let r = Array(rhs.coo)
-			return (.rowMajor, (0..<lhs.count).lazy.map {
-				if let l = l[$0] {
-					.some(r.lazy.map { ($0, l * $1) })
-				} else {
-					.none
-				}
-			})
+			return (.rowMajor, lhs.coo.reduce(into: Array<Optional<LazyMapSequence<Array<(Int, Element)>, (Int, Element)>>>(repeating: .none, count: lhs.count)) { a, x in
+                a[x.0] = .some(r.lazy.map { ($0, $1 * x.1) })
+            })
 		case.columnMajor:
 			let l = Array(lhs.coo)
-			let r = Dictionary(uniqueKeysWithValues: rhs.coo)
-			return (.columnMajor, (0..<rhs.count).lazy.map {
-				if let r = r[$0] {
-					.some(l.lazy.map { ($0, $1 * r) })
-				} else {
-					.none
-				}
-			})
+            return (.columnMajor, rhs.coo.reduce(into: .init(repeating: .none, count: rhs.count)) { a, x in
+                a[x.0] = .some(l.lazy.map { ($0, $1 * x.1) })
+            })
 		}
 	}
 }
-extension Arithmetic.DOT.Diagonal: SparseVector {
+extension Arithmetic.DOT.DD: SparseVector {
 	@inlinable@inline(__always)
 	var count: Int { min(lhs.rows, rhs.cols) }
 	@inlinable@inline(__always)
@@ -239,6 +248,55 @@ extension Arithmetic.DOT.VM: SparseVector {
 		}
 	}
 }
+extension Arithmetic.DOT.VV: SparseVector {
+    @usableFromInline typealias R = Array<Element>
+    @usableFromInline typealias S = Arithmetic.DOT.VV<X.S, Y.S>
+    @usableFromInline typealias U = Element
+    @inlinable
+    var count: Int {
+        switch self {
+        case.DD(let x, let y):
+            min(x.rows, y.cols)
+        case.MV(let x, _):
+            x.rows
+        case.VM(_, let y):
+            y.cols
+        }
+    }
+    @usableFromInline
+    subscript(position: Int) -> U {
+        switch self {
+        case.DD(let x, let y):
+            x[position, 0...] • y[0..., position]
+        case.MV(let x, let y):
+            x[position, 0...] • y[0..., 0]
+        case.VM(let x, let y):
+            x[0, 0...] • y[0..., position]
+        }
+    }
+    @usableFromInline
+    subscript(bounds: some RangeExpression<Int>) -> S {
+        switch self {
+        case.DD(let x, let y):
+            .DD(x[bounds, 0...], y[0..., bounds])
+        case.MV(let x, let y):
+            .MV(x[bounds, 0...], y[0..., 0...])
+        case.VM(let x, let y):
+            .VM(x[0..., 0...], y[0..., bounds])
+        }
+    }
+    @usableFromInline
+    var coo: Array<(Int, Element)> {
+        switch self {
+        case.DD(let x, let y):
+            Arithmetic.DOT.DD(lhs: x, rhs: y).coo
+        case.MV(let x, let y):
+            Arithmetic.DOT.MV(lhs: x, rhs: y[0..., 0]).coo
+        case.VM(let x, let y):
+            Arithmetic.DOT.VM(lhs: x[0..., 0], rhs: y).coo
+        }
+    }
+}
 extension Arithmetic.DOT.MM: SparseMatrix {
 	@inlinable@inline(__always)
 	var rows: Int { lhs.rows }
@@ -246,7 +304,7 @@ extension Arithmetic.DOT.MM: SparseMatrix {
 	var cols: Int { rhs.cols }
 	@usableFromInline@inline(__always)
 	var diagonal: V {
-		.init(core: Arithmetic.DOT.Diagonal(lhs: lhs, rhs: rhs))
+        .DD(lhs[0..., 0...], rhs[0..., 0...])
 	}
 	@usableFromInline@inline(__always)
 	var transpose: T {
@@ -258,11 +316,11 @@ extension Arithmetic.DOT.MM: SparseMatrix {
 	}
 	@usableFromInline@inline(__always)
 	subscript(row: Int, col: some RangeExpression<Int>) -> V {
-		.init(core: Arithmetic.DOT.VM(lhs: lhs[row, 0...], rhs: rhs[0..., col]))
+        .MV(lhs[row...row, 0...], rhs[0..., col])
 	}
 	@usableFromInline@inline(__always)
 	subscript(row: some RangeExpression<Int>, col: Int) -> V {
-		.init(core: Arithmetic.DOT.MV(lhs: lhs[row, 0...], rhs: rhs[0..., col]))
+        .VM(lhs[row, 0...], rhs[0..., col...col])
 	}
 	@usableFromInline@inline(__always)
 	subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {

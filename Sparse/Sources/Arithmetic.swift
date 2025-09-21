@@ -10,34 +10,7 @@ import protocol Dense.Vector
 import typealias Layout.MemoryStrategy
 import Auxiliary
 @usableFromInline
-@frozen enum Arithmetic<Element: Numeric & MutableSparseScalar<Element>> {}
-extension Arithmetic {
-	@usableFromInline
-	@frozen struct ANY {
-		@usableFromInline let core: any SparseVector<Element>
-	}
-}
-extension Arithmetic.ANY: SparseVector {
-	@usableFromInline typealias R = Array<Element>
-	@usableFromInline typealias S = Self
-	@usableFromInline typealias U = Element
-	@usableFromInline
-	var count: Int {
-		core.count
-	}
-	@usableFromInline
-	subscript(position: Int) -> Element {
-		core[position]
-	}
-	@usableFromInline
-	subscript(bounds: some RangeExpression<Int>) -> S {
-		.init(core: core[bounds])
-	}
-	@usableFromInline
-	var coo: some Sequence<(Int, Element)> {
-		AnySequence<(Int, Element)>((core.coo as any Sequence<(Int, Element)>))
-	}
-}
+@frozen enum Arithmetic<Element: Numeric & SparseScalar<Element>> {}
 extension Arithmetic {
 	@usableFromInline
 	@frozen enum Scale {
