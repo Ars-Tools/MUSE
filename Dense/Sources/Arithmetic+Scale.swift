@@ -42,11 +42,11 @@ extension Arithmetic.Scale: Tensor {
 		.init(factor: factor, source: source[bounds])
 	}
     @usableFromInline
-    func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         print(#function)
         fatalError()
-        let (xs, xk) = try source(as: strategy)
-        let (ys, yk) = try factor(as: strategy)
+        let (xs, xk) = try source.evaluation(for: strategy)
+        let (ys, yk) = try factor.evaluation(for: strategy)
         precondition(ys.reduce(1, *) <= 1)
         let (length, stride, offset) = flatten(shape: source.shape, xs: xs)
         let capacity = capacity(alloc: source.shape, stride: xs)
@@ -72,11 +72,11 @@ extension Arithmetic.Scale: InstantVector where Source: InstantVector, Factor: I
 extension Arithmetic.Scale: InstantMatrix where Source: InstantMatrix, Factor: InstantMatrix {}
 extension Arithmetic.Scale: InstantTensor where Source: InstantTensor, Factor: InstantTensor {
 	@usableFromInline
-	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         print(#function)
         fatalError()
-		let (xs, xk) = try source(by: strategy)
-		let (ys, yk) = try factor(by: strategy)
+        let (xs, xk) = try source.evaluation(for: strategy)
+        let (ys, yk) = try factor.evaluation(for: strategy)
         precondition(ys.reduce(1, *) <= 1)
         let (length, stride, offset) = flatten(shape: source.shape, xs: xs)
         let capacity = capacity(alloc: source.shape, stride: xs)

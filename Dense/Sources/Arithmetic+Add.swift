@@ -52,8 +52,8 @@ extension Arithmetic.Add: Vector & Operators.BinaryVector where X: Vector, Y: Ve
 extension Arithmetic.Add: Matrix & Operators.BinaryMatrix where X: Matrix, Y: Matrix {}
 extension Arithmetic.Add: Tensor & Operators.BinaryTensor where X: Tensor, Y: Tensor {
 	@usableFromInline@inline(__always)
-	func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		switch try (x(as: strategy), y(as: strategy)) {
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
 		case ((let xs, let xm), (let ys, let ym)):
 			let zs = strategy.stride(for: shape)
             let zm = Self.operator(x: (x.shape, xs), y: (y.shape, ys), z: (shape, zs))
@@ -66,8 +66,8 @@ extension Arithmetic.Add: InstantVector where X: InstantVector, Y: InstantVector
 extension Arithmetic.Add: InstantMatrix where X: InstantMatrix, Y: InstantMatrix {}
 extension Arithmetic.Add: InstantTensor where X: InstantTensor, Y: InstantTensor {
 	@usableFromInline@inline(__always)
-	func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-		switch try (x(by: strategy), y(by: strategy)) {
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
 		case ((let xs, let xm), (let ys, let ym)):
 			let zs = strategy.stride(for: shape)
             let zm = Self.operator(x: (x.shape, xs), y: (y.shape, ys), z: (shape, zs))
