@@ -149,8 +149,8 @@ extension Operators.Unary: Tensor {
 			  ƒ: ƒ)
 	}
 	@inlinable@inline(__always)@_transparent
-	func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		let (xs, xk) = try x(as: strategy)
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+        let (xs, xk) = try x.evaluation(for: strategy)
 		let ys = strategy.stride(for: shape)
 		let yk = `operator`(x: (x.shape, xs), y: (shape, ys))
 		return (ys, {await yk(xk())})
@@ -161,8 +161,8 @@ extension Operators.Unary: InstantVector where X: InstantVector {}
 extension Operators.Unary: InstantMatrix where X: InstantMatrix {}
 extension Operators.Unary: InstantTensor where X: InstantTensor {
 	@inlinable@inline(__always)@_transparent
-	func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		let (xs, xk) = try x(by: strategy) as (Array<Int>, @Sendable () -> X.R)
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+        let (xs, xk) = try x.evaluation(for: strategy) as (Array<Int>, @Sendable () -> X.R)
 		let ys = strategy.stride(for: shape)
 		let yk = `operator`(x: (x.shape, xs), y: (shape, ys))
 		return (ys, {yk(xk())})

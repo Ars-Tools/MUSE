@@ -161,9 +161,9 @@ extension Operators.Binary: Tensor {
 			  y: y[narrowcast(ranges: bounds, target: shape, source: y.shape)])
 	}
 	@usableFromInline@inline(__always)
-	func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		let (xs, xk) = try x(as: strategy)
-		let (ys, yk) = try y(as: strategy)
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
 		let zs = strategy.stride(for: shape)
 		let zk = `operator`(x: (x.shape, xs), y: (y.shape, ys), z: (shape, zs))
 		return (zs, {await zk(xk(), yk())})
@@ -174,9 +174,9 @@ extension Operators.Binary: InstantVector where X: InstantVector, Y: InstantVect
 extension Operators.Binary: InstantMatrix where X: InstantMatrix, Y: InstantMatrix {}
 extension Operators.Binary: InstantTensor where X: InstantTensor, Y: InstantTensor {
 	@usableFromInline@inline(__always)
-	func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		let (xs, xk) = try x(by: strategy)// as (Array<Int>, @Sendable () -> X.R)
-		let (ys, yk) = try y(by: strategy)// as (Array<Int>, @Sendable () -> Y.R)
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
 		let zs = strategy.stride(for: shape)
 		let zk = `operator`(x: (x.shape, xs), y: (y.shape, ys), z: (shape, zs))
 		return (zs, {zk(xk(), yk())})

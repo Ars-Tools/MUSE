@@ -103,10 +103,10 @@ extension Operators.Ternary: Tensor {
 	}
 	@usableFromInline
 	@inline(__always)
-	func callAsFunction(as strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		let (xs, xk) = try x(as: strategy)
-		let (ys, yk) = try y(as: strategy)
-		let (zs, zk) = try z(as: strategy)
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
+        let (zs, zk) = try z.evaluation(for: strategy)
 		let ws = strategy.stride(for: shape)
 		let wk = `operator`(x: (x.shape, xs), y: (y.shape, ys), z: (z.shape, zs), w: (shape, ws))
 		return (ws, {await wk(xk(), yk(), zk())})
@@ -123,10 +123,10 @@ extension Operators.Ternary: InstantMatrix where X: InstantMatrix, Y: InstantMat
 extension Operators.Ternary: InstantTensor where X: InstantTensor, Y: InstantTensor, Z: InstantTensor {
 	@usableFromInline
 	@inline(__always)
-	func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		let (xs, xk) = try x(by: strategy) as (Array<Int>, @Sendable () -> X.R)
-		let (ys, yk) = try y(by: strategy) as (Array<Int>, @Sendable () -> Y.R)
-		let (zs, zk) = try z(by: strategy) as (Array<Int>, @Sendable () -> Z.R)
+	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+        let (xs, xk) = try x.evaluation(for: strategy) as (Array<Int>, @Sendable () -> X.R)
+        let (ys, yk) = try y.evaluation(for: strategy) as (Array<Int>, @Sendable () -> Y.R)
+        let (zs, zk) = try z.evaluation(for: strategy) as (Array<Int>, @Sendable () -> Z.R)
 		let ws = strategy.stride(for: shape)
 		let wk = `operator`(x: (x.shape, xs), y: (y.shape, ys), z: (z.shape, zs), w: (shape, ws))
 		return (ws, {wk(xk(), yk(), zk())})
