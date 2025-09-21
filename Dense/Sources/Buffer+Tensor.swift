@@ -60,7 +60,7 @@ extension TensorBuffer: InstantTensor {
 		let upper = lower.advanced(by: capacity(slice: shape, stride: pitch))
 		return.init(shape: shape, pitch: pitch, store: store[lower..<upper])
 	}
-	public func callAsFunction(by strategy: MemoryStrategy) -> (Array<Int>, @Sendable () -> R) {
+	public func evaluation(for strategy: MemoryStrategy) -> (Array<Int>, @Sendable () -> R) {
 		(zip(shape, pitch).compactMap { $0 == .zero ? .none : .some($1) }, {store})
 	}
 }
@@ -127,7 +127,7 @@ extension TensorBuffer {
 	@inlinable
 	public init<Source: InstantTensor>(_ source: Source, by strategy: MemoryStrategy) throws where Source.R == R {
 		shape = source.shape
-		(pitch, store) = switch try source(by: strategy) {
+        (pitch, store) = switch try source.evaluation(for: strategy) {
 		case (let stride, let kernel):
 			(stride, kernel())
 		}
@@ -135,7 +135,7 @@ extension TensorBuffer {
 	@inlinable
 	public init<Source: Tensor>(_ source: Source, as strategy: MemoryStrategy) async throws where Source.R == R {
 		shape = source.shape
-		(pitch, store) = switch try source(as: strategy) {
+		(pitch, store) = switch try source.evaluation(for: strategy) {
 		case (let stride, let kernel):
 			(stride, await kernel())
 		}
@@ -146,7 +146,7 @@ extension TensorBuffer where R: RangeReplaceableCollection {
     @inlinable
     public init<Source: InstantTensor>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source.R.Element == Element {
         shape = source.shape
-        (pitch, store) = switch try source(by: strategy) {
+        (pitch, store) = switch try source.evaluation(for: strategy) {
         case (let stride, let kernel):
             (stride, kernel().withUnsafeBufferPointer(R.init))
         }
@@ -155,7 +155,7 @@ extension TensorBuffer where R: RangeReplaceableCollection {
 	@inlinable
 	public init<Source: Tensor>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source.R.Element == Element {
 		shape = source.shape
-		(pitch, store) = switch try source(as: strategy) {
+		(pitch, store) = switch try source.evaluation(for: strategy) {
 		case (let stride, let kernel):
 			(stride, await kernel().withUnsafeBufferPointer(R.init))
 		}

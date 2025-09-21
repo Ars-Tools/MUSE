@@ -75,7 +75,7 @@ extension MatrixBuffer: InstantMatrix {
 		return.init(rows: row.count, cols: col.count, ldr: ldr, ldc: ldc, data: data[lower..<upper])
 	}
     @inline(__always)@_transparent
-	public func callAsFunction(by strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+	public func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
 		([ldr, ldc], {data})
 	}
 }
@@ -159,7 +159,7 @@ extension MatrixBuffer {
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R == R {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(as: .rowMajor)
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			async let result = kernel()
 			rows = source.shape.dropLast().last ?? 1
 			cols = source.shape.last ?? 1
@@ -167,7 +167,7 @@ extension MatrixBuffer {
 			ldc = stride.last ?? 0
 			data = await result
 		case.columnMajor:
-			let (stride, kernel) = try source(as: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			async let result = kernel()
 			rows = source.shape.first ?? 1
 			cols = source.shape.dropFirst().first ?? 1
@@ -180,14 +180,14 @@ extension MatrixBuffer {
 	public init<Source>(_ source: Source, by strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R == R {
 		switch strategy {
 		case.rowMajor:
-            let (stride, kernel) = try source(by: .rowMajor)
+            let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			rows = source.shape.dropLast().last ?? 1
 			cols = source.shape.last ?? 1
 			ldr = stride.dropLast().last ?? 0
 			ldc = stride.last ?? 0
 			data = kernel()
 		case.columnMajor:
-			let (stride, kernel) = try source(by: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			rows = source.shape.first ?? 1
 			cols = source.shape.dropFirst().first ?? 1
 			ldr = stride.first ?? 0
@@ -210,7 +210,7 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R.Element == Element {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(as: .rowMajor)
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			async let result = kernel()
 			rows = source.shape.dropLast().last ?? 1
 			cols = source.shape.last ?? 1
@@ -218,7 +218,7 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 			ldc = stride.last ?? 0
 			data = await result.withUnsafeBufferPointer(R.init)
 		case.columnMajor:
-			let (stride, kernel) = try source(as: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			async let result = kernel()
 			rows = source.shape.first ?? 1
 			cols = source.shape.dropFirst().first ?? 1
@@ -232,14 +232,14 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R.Element == Element {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(by: .rowMajor)
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			rows = source.shape.dropLast().last ?? 1
 			cols = source.shape.last ?? 1
 			ldr = stride.dropLast().last ?? 0
 			ldc = stride.last ?? 0
 			data = kernel().withUnsafeBufferPointer(R.init)
 		case.columnMajor:
-			let (stride, kernel) = try source(by: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			rows = source.shape.first ?? 1
 			cols = source.shape.dropFirst().first ?? 1
 			ldr = stride.first ?? 0

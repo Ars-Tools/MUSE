@@ -47,7 +47,7 @@ extension VectorBuffer: InstantVector {
 		return.init(count: range.count, inc: inc, data: data[lower..<upper])
 	}
 	@inlinable
-	public func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+	public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
 		([inc], {data})
 	}
 }
@@ -89,12 +89,12 @@ extension VectorBuffer {
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R == R {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(by: .rowMajor)
+            let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			count = source.shape.last ?? 1
 			inc = stride.last ?? 0
 			data = kernel()
 		case.columnMajor:
-			let (stride, kernel) = try source(by: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			count = source.shape.first ?? 1
 			inc = stride.first ?? 0
 			data = kernel()
@@ -104,13 +104,13 @@ extension VectorBuffer {
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R == R {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(as: .rowMajor)
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			async let result = kernel()
 			count = source.shape.last ?? 1
 			inc = stride.last ?? 0
 			data = await result
 		case.columnMajor:
-			let (stride, kernel) = try source(as: .columnMajor)
+            let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			async let result = kernel()
 			count = source.shape.first ?? 1
 			inc = stride.first ?? 0
@@ -125,12 +125,12 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R.Element == Element {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(by: .rowMajor)
+            let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			count = source.shape.last ?? 1
 			inc = stride.last ?? 0
 			data = kernel().withUnsafeBufferPointer(R.init)
 		case.columnMajor:
-			let (stride, kernel) = try source(by: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			count = source.shape.first ?? 1
 			inc = stride.first ?? 0
 			data = kernel().withUnsafeBufferPointer(R.init)
@@ -141,13 +141,13 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R.Element == Element {
 		switch strategy {
 		case.rowMajor:
-			let (stride, kernel) = try source(as: .rowMajor)
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			async let result = kernel()
 			count = source.shape.last ?? 1
 			inc = stride.last ?? 0
 			data = await result.withUnsafeBufferPointer(R.init)
 		case.columnMajor:
-			let (stride, kernel) = try source(as: .columnMajor)
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			async let result = kernel()
 			count = source.shape.first ?? 1
 			inc = stride.first ?? 0
