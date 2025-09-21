@@ -37,7 +37,7 @@ public protocol Tensor<Element>: Sendable {
 	@inlinable var diagonal: V { get }
 	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get }
 	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get }
-	@inlinable func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
+	@inlinable func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
 }
 public protocol InstantScalar<Element>: Scalar & InstantTensor & InstantMatrix & InstantVector {
 //    @inlinable subscript(_: ()) -> Element { get throws }
@@ -47,7 +47,7 @@ public protocol InstantVector<Element>: Vector & InstantTensor where S: InstantV
 public protocol InstantMatrix<Element>: Matrix & InstantTensor where S: InstantMatrix<Element>, T: InstantMatrix<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
 }
 public protocol InstantTensor<Element>: Tensor where S: InstantTensor<Element>, T: InstantTensor<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
-	@inlinable func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R)
+    @inlinable func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R)
 }
 public protocol MutableScalar<Element>: InstantScalar & MutableTensor & MutableMatrix & MutableVector & BitwiseCopyable & Sendable where Element == Self {
 //    @inlinable subscript(_: ()) -> Element { get set }
@@ -68,13 +68,13 @@ public protocol MutableTensor<Element>: InstantTensor {
 }
 // MARK: Default
 extension InstantTensor {
-	@inlinable@inline(__always)
-	public func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		switch try callAsFunction(by: strategy) as (Array<Int>, @Sendable () -> R) {
-		case (let stride, let kernel):
-			(stride, {kernel()})
-		}
-	}
+    @inlinable@inline(__always)
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+        switch try evaluation(for: strategy) as (Array<Int>, @Sendable () -> R) {
+        case (let stride, let kernel):
+            (stride, {kernel()})
+        }
+    }
 }
 infix operator •: MultiplicationPrecedence
 // MARK: Default
