@@ -39,8 +39,8 @@ extension Basic.Transpose: Tensor {
 		source[bounds.reversed()]
 	}
 	@inlinable
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-		switch try source(as: strategy) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+        switch try source.evaluation(for: strategy) {
 		case (let stride, let kernel):
 			(stride.reversed(), kernel)
 		}
@@ -75,8 +75,8 @@ extension Basic.Transpose: Matrix where Source: Matrix {
 extension Basic.Transpose: InstantMatrix where Source: InstantMatrix {}
 extension Basic.Transpose: InstantTensor where Source: InstantTensor {
 	@inlinable
-	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		switch try source(by: strategy) as (Array<Int>, @Sendable () -> R) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+        switch try source.evaluation(for: strategy) as (Array<Int>, @Sendable () -> R) {
 		case (let stride, let kernel):
 			(stride.reversed(), kernel)
 		}
