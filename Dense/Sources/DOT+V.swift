@@ -41,7 +41,7 @@ extension DOT {
 }
 extension DOT.Inner {
 	@inlinable@inline(__always)@_transparent
-	func callAsFunction(x: (Int, Int), y: (Int, Int)) -> @Sendable (X.R, Y.R) -> CollectionOfOne<Element> {
+	func evaluation(x: (Int, Int), y: (Int, Int)) -> @Sendable (X.R, Y.R) -> CollectionOfOne<Element> {
 		let count = broadcast(x: x.0, y: y.0)
         let xs = x.1
         let ys = y.1
@@ -54,10 +54,10 @@ extension DOT.Inner {
 }
 extension DOT.Inner: Scalar {
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> CollectionOfOne<Element>) {
-		switch try (x(as: strategy), y(as: strategy)) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> CollectionOfOne<Element>) {
+        switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)) where (xs.count, ys.count) == (1, 1):
-            let zm = callAsFunction(x: (x.count, xs.last ?? 0), y: (y.count, ys.first ?? 0))
+            let zm = evaluation(x: (x.count, xs.last ?? 0), y: (y.count, ys.first ?? 0))
             return ([], {await zm(xm(), ym())})
         default:
             throw Error.unmatchShape(operation: #function, lhs: x.shape, rhs: y.shape)
@@ -66,10 +66,10 @@ extension DOT.Inner: Scalar {
 }
 extension DOT.Inner: InstantTensor & InstantMatrix & InstantVector & InstantScalar where X: InstantVector, Y: InstantVector {
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Element>) {
-		switch try (x(by: strategy), y(by: strategy)) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Element>) {
+        switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)) where (xs.count, ys.count) == (1, 1):
-            let zm = callAsFunction(x: (x.count, xs.last ?? 0), y: (y.count, ys.first ?? 0))
+            let zm = evaluation(x: (x.count, xs.last ?? 0), y: (y.count, ys.first ?? 0))
 			return ([], {zm(xm(), ym())})
         default:
             throw Error.unmatchShape(operation: #function, lhs: x.shape, rhs: y.shape)
@@ -112,9 +112,9 @@ extension DOT.Outer: Matrix {
 }
 extension DOT.Outer {
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xi, xk) = try x(as: strategy)
-		let (yi, yk) = try y(as: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        let (xi, xk) = try x.evaluation(for: strategy)
+        let (yi, yk) = try y.evaluation(for: strategy)
 		let xs = xi.reduce(1, *)
 		let ys = yi.reduce(1, *)
 		switch strategy {
@@ -157,9 +157,9 @@ extension DOT.Outer {
 }
 extension DOT.Outer: InstantTensor & InstantMatrix where X: InstantVector, Y: InstantVector {
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-		let (xi, xk) = try x(by: strategy)
-		let (yi, yk) = try y(by: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        let (xi, xk) = try x.evaluation(for: strategy)
+        let (yi, yk) = try y.evaluation(for: strategy)
 		let xs = xi.reduce(1, *)
 		let ys = yi.reduce(1, *)
 		switch strategy {
@@ -214,9 +214,9 @@ extension DOT.MV: Vector {
 		.init(x: x[bounds, 0...], y: y)
 	}
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-        let (xs, xk) = try x(as: strategy)
-		let (ys, yk) = try y(as: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
 		precondition((xs.count, ys.count) == (2, 1))
 		let inc = ys.reduce(1, *)
 		let m = x.rows
@@ -276,9 +276,9 @@ extension DOT.MV: Vector {
 }
 extension DOT.MV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantVector {
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-		let (xs, xk) = try x(by: strategy)
-		let (ys, yk) = try y(by: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
 		precondition((xs.count, ys.count) == (2, 1))
 		let inc = ys.reduce(1, *)
 		let m = x.rows
@@ -350,9 +350,9 @@ extension DOT.VM: Vector {
 		.init(x: x, y: y[0..., bounds])
 	}
     @inlinable@inline(__always)@_transparent
-	func callAsFunction(as strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
-		let (xs, xk) = try x(as: strategy)
-		let (ys, yk) = try y(as: strategy)
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
 		precondition((xs.count, ys.count) == (1, 2))
 		let inc = xs.reduce(1, *)
 		let k = y.rows
@@ -412,9 +412,9 @@ extension DOT.VM: Vector {
 }
 extension DOT.VM: InstantTensor & InstantVector where X: InstantVector, Y: InstantMatrix {
     @inlinable@inline(__always)@_transparent
-    func callAsFunction(by strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-        let (xs, xk) = try x(by: strategy)
-        let (ys, yk) = try y(by: strategy)
+    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        let (xs, xk) = try x.evaluation(for: strategy)
+        let (ys, yk) = try y.evaluation(for: strategy)
         precondition((xs.count, ys.count) == (1, 2))
         let inc = xs.reduce(1, *)
         let k = y.rows
