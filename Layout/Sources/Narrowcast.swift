@@ -14,7 +14,7 @@ public func narrowcast(point: some BidirectionalCollection<Int>, shape: some Bid
 }
 @inlinable@inline(__always)@_transparent
 public func narrowcast(bounds: some RangeExpression<Int>, target: Int, source: Int) -> Range<Int> {
-	let r = (0..<target)[bounds]
+    let r = bounds.relative(to: 0..<target)
 	return max(0, 0 - min(0, 0 - r.lowerBound) % source)..<min(source, source - max(0, source - r.upperBound) % source)
 }
 @inlinable@inline(__always)@_transparent
@@ -27,4 +27,19 @@ public func narrowcast(ranges: some BidirectionalCollection<some RangeExpression
 		target.reversed(),
 		source.reversed()
 	).map(narrowcast).reversed()
+}
+extension MemoryStrategy {
+    @inlinable@inline(__always)@_transparent
+    public func narrowcast(bounds: some Collection<some RangeExpression<Int>>, target: some Collection<Int>, source: some Collection<Int>) -> Array<Range<Int>> {
+        switch self {
+        case.rowMajor:
+            zip(bounds.suffix(source.count), target.suffix(source.count), source).map {
+                Layout.narrowcast(bounds: $0.relative(to: 0..<$1), target: $1, source: $2)
+            }
+        case.columnMajor:
+            zip(bounds.prefix(source.count), target.prefix(source.count), source).map {
+                Layout.narrowcast(bounds: $0.relative(to: 0..<$1), target: $1, source: $2)
+            }
+        }
+    }
 }

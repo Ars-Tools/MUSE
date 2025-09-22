@@ -6,7 +6,9 @@
 //
 @_exported import enum Accelerate.AccelerateMatrixOrder
 public typealias MemoryStrategy = AccelerateMatrixOrder
-extension MemoryStrategy {
+import protocol Synchronization.AtomicRepresentable
+import typealias Synchronization.Atomic
+extension MemoryStrategy: @retroactive AtomicRepresentable {
 	@inlinable@inline(__always)@_transparent
 	public var transpose: Self {
 		switch self {
@@ -16,29 +18,30 @@ extension MemoryStrategy {
 			.rowMajor
 		}
 	}
+    @usableFromInline@inline(__always)
+    static let Default: Atomic<Self> = .init(.rowMajor)
+    @inlinable@inline(__always)@_transparent
+    public static var `default`: Self {
+        get {
+            Default.load(ordering: .acquiring)
+        }
+        set {
+            Default.store(newValue, ordering: .releasing)
+        }
+    }
 }
 extension MemoryStrategy {
 	@inlinable@inline(__always)@_transparent
 	public func stride(for shape: some BidirectionalCollection<Int>) -> Array<Int> {
-		switch self {
-		case.columnMajor:
-			.init(sequence(state: (1, shape.makeIterator())) { state in
-				state.1.next().map { value in
-					defer {
-						state.0 *= value
-					}
-					return state.0
-				}
-			})
-		case.rowMajor:
-			sequence(state: (1, shape.reversed().makeIterator())) { state in
-				state.1.next().map { value in
-					defer {
-						state.0 *= value
-					}
-					return state.0
-				}
-			}.reversed()
-		}
+        switch self {
+        case.rowMajor:
+            shape.reversed().dropLast().reduce(into: Array<Int>(arrayLiteral: 1)) {
+                $0.append($0.last.unsafelyUnwrapped * $1)
+            }.reversed()
+        case.columnMajor:
+            shape.dropLast().reduce(into: Array<Int>(arrayLiteral: 1)) {
+                $0.append($0.last.unsafelyUnwrapped * $1)
+            }
+        }
 	}
 }

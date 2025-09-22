@@ -181,3 +181,71 @@ public func flatten(shape: some BidirectionalCollection<Int>,
 	let (length, stride) = layout.first ?? (1, SIMD4<Int>())
 	return layout.dropFirst().reduce((length, stride, [SIMD4<Int>()]), flatten)
 }
+extension MemoryStrategy {
+    @inlinable@inline(__always)@_transparent
+    public func flatten(shape: some BidirectionalCollection<Int>,
+                        xs: some BidirectionalCollection<Int>) -> (Int, (Int), Array<(Int)>) {
+        let layout = switch self {
+        case.rowMajor:
+            zip(shape.reversed(), xs.reversed())
+                .lazy.filter { 0 < $1 }.sorted { $0.1 < $1.1 }
+        case.columnMajor:
+            zip(shape, xs)
+                .lazy.filter { 0 < $1 }.sorted { $0.1 < $1.1 }
+        }
+        let (length, stride) = layout.first ?? (1, (0))
+        return layout.dropFirst().reduce((length, stride, [(0)]), flatten(result:source:))
+    }
+    @inlinable@inline(__always)@_transparent
+    public func flatten(shape: some BidirectionalCollection<Int>,
+                        xs: some BidirectionalCollection<Int>,
+                        ys: some BidirectionalCollection<Int>) -> (Int, SIMD2<Int>, Array<SIMD2<Int>>) {
+        let layout = switch self {
+        case.rowMajor:
+            zip(shape.reversed(), zip(xs.reversed(), ys.reversed()))
+                .lazy.filter { 0 < $1.y }.sorted { $0.1.y < $1.1.y }
+        case.columnMajor:
+            zip(shape, zip(xs, ys))
+                .lazy.filter { 0 < $1.y }.sorted { $0.1.y < $1.1.y }
+        }
+        let (length, stride) = layout.first ?? (1, SIMD2<Int>())
+        return layout.dropFirst().reduce((length, stride, [SIMD2<Int>()]), flatten(result:source:))
+    }
+    @inlinable@inline(__always)@_transparent
+    public func flatten(shape: some BidirectionalCollection<Int>,
+                        xs: some BidirectionalCollection<Int>,
+                        ys: some BidirectionalCollection<Int>,
+                        zs: some BidirectionalCollection<Int>) -> (Int, SIMD3<Int>, Array<SIMD3<Int>>) {
+        let layout = switch self {
+        case.rowMajor:
+            zip(shape.reversed(), zip(xs.reversed(), ys.reversed(), zs.reversed()))
+                .filter { 0 < $1.z }
+                .sorted { $0.1.z < $1.1.z }
+        case.columnMajor:
+            zip(shape, zip(xs, ys, zs))
+                .filter { 0 < $1.z }
+                .sorted { $0.1.z < $1.1.z }
+        }
+        let (length, stride) = layout.first ?? (1, SIMD3<Int>())
+        return layout.dropFirst().reduce((length, stride, [SIMD3<Int>()]), flatten(result:source:))
+    }
+    @inlinable@inline(__always)@_transparent
+    public func flatten(shape: some BidirectionalCollection<Int>,
+                        xs: some BidirectionalCollection<Int>,
+                        ys: some BidirectionalCollection<Int>,
+                        zs: some BidirectionalCollection<Int>,
+                        ws: some BidirectionalCollection<Int>) -> (Int, SIMD4<Int>, Array<SIMD4<Int>>) {
+        let layout = switch self {
+        case.rowMajor:
+            zip(shape, zip(xs.reversed(), ys.reversed(), zs.reversed(), ws.reversed()))
+                .filter { 0 < $1.w }
+                .sorted { $0.1.w < $1.1.w }
+        case.columnMajor:
+            zip(shape, zip(xs, ys, zs, ws))
+                .filter { 0 < $1.w }
+                .sorted { $0.1.w < $1.1.w }
+        }
+        let (length, stride) = layout.first ?? (1, SIMD4<Int>())
+        return layout.dropFirst().reduce((length, stride, [SIMD4<Int>()]), flatten(result:source:))
+    }
+}
