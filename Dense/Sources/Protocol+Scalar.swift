@@ -165,13 +165,4 @@ extension MutableScalar {
 			yield &self
 		}
 	}
-    @inlinable@inline(__always)
-    public subscript() -> Element {
-		_read {
-			yield self
-		}
-		_modify {
-			yield &self
-		}
-	}
 }

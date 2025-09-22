@@ -9,8 +9,8 @@ import protocol Accelerate.AccelerateMutableBuffer
 import typealias Layout.MemoryStrategy
 public typealias Storage = Sendable & RandomAccessCollection & AccelerateBuffer
 public typealias MutableStorage = Storage & MutableCollection & AccelerateMutableBuffer
-public protocol Scalar<Element>: Tensor & Vector & Matrix where S == Self, T == Self, U == Self, V == Self {
-//    @inlinable subscript(_: ()) -> Element { get async throws }
+public protocol Scalar<Element>: Tensor & Vector & Matrix where S: Scalar<Element>, T: Scalar<Element>, U: Scalar<Element>, V: Scalar<Element> {
+//    @inlinable subscript() -> Element { get async throws }
 }
 public protocol Vector<Element>: Tensor where S: Vector<Element>, T: Vector<Element>, U: Scalar<Element>, V: Vector<Element> {
 	@inlinable var count: Int { get }
@@ -39,8 +39,8 @@ public protocol Tensor<Element>: Sendable {
 	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get }
 	@inlinable func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
 }
-public protocol InstantScalar<Element>: Scalar & InstantTensor & InstantMatrix & InstantVector {
-//    @inlinable subscript(_: ()) -> Element { get throws }
+public protocol InstantScalar<Element>: Scalar & InstantTensor & InstantMatrix & InstantVector where S: InstantScalar, T: InstantScalar, U: InstantScalar, V: InstantScalar {
+//    @inlinable subscript() -> Element { get throws }
 }
 public protocol InstantVector<Element>: Vector & InstantTensor where S: InstantVector<Element>, T: InstantVector<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
 }
@@ -49,8 +49,8 @@ public protocol InstantMatrix<Element>: Matrix & InstantTensor where S: InstantM
 public protocol InstantTensor<Element>: Tensor where S: InstantTensor<Element>, T: InstantTensor<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
     @inlinable func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R)
 }
-public protocol MutableScalar<Element>: InstantScalar & MutableTensor & MutableMatrix & MutableVector & BitwiseCopyable & Sendable where Element == Self {
-//    @inlinable subscript(_: ()) -> Element { get set }
+public protocol MutableScalar<Element>: InstantScalar & MutableTensor & MutableMatrix & MutableVector where S: MutableScalar, T: MutableScalar, U: MutableScalar, V: MutableScalar {
+//    @inlinable subscript() -> Element { get set }
 }
 public protocol MutableVector<Element>: InstantVector & MutableTensor where S: MutableVector<Element>, T: MutableVector<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
 	@inlinable subscript(position: Int) -> U { get set }
@@ -76,5 +76,4 @@ extension InstantTensor {
         }
     }
 }
-infix operator •: MultiplicationPrecedence
 // MARK: Default
