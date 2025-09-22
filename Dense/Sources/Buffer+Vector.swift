@@ -9,7 +9,7 @@ import protocol Accelerate.AccelerateMutableBuffer
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
 @dynamicMemberLookup
-@frozen public struct VectorBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: MutableScalar, R.SubSequence: Storage {
+@frozen public struct VectorBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: ScalarBuffer, R.SubSequence: Storage {
 	public typealias Element = R.Element
 	public typealias S = VectorBuffer<R.SubSequence>
 	public typealias T = Self
@@ -21,10 +21,12 @@ import func Layout.capacity
 	private(set) var data: R
 }
 extension VectorBuffer {
+    @_disfavoredOverload
     @inlinable@inline(__always)
     public subscript<T>(dynamicMember lookup: KeyPath<R, T>) -> T {
 		data[keyPath: lookup]
 	}
+    @_disfavoredOverload
     @inlinable@inline(__always)
 	public subscript<T>(dynamicMember lookup: ReferenceWritableKeyPath<R, T>) -> T {
 		_read {
@@ -122,36 +124,36 @@ extension VectorBuffer {
 extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
     @_disfavoredOverload
     @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R.Element == Element {
+    public init(_ source: some Tensor<Element>, for strategy: MemoryStrategy = .rowMajor) async throws {
+        switch strategy {
+        case.rowMajor:
+            let (stride, kernel) = try source.evaluation(for: .rowMajor)
+            async let result = kernel()
+            count = source.shape.last ?? 1
+            inc = stride.last ?? 0
+            data = await R(result)
+        case.columnMajor:
+            let (stride, kernel) = try source.evaluation(for: .columnMajor)
+            async let result = kernel()
+            count = source.shape.first ?? 1
+            inc = stride.first ?? 0
+            data = await.init(result)
+        }
+    }
+    @_disfavoredOverload
+    @inlinable@inline(__always)@_transparent
+    public init(_ source: some InstantTensor<Element>, for strategy: MemoryStrategy = .rowMajor) throws {
 		switch strategy {
 		case.rowMajor:
             let (stride, kernel) = try source.evaluation(for: .rowMajor)
 			count = source.shape.last ?? 1
 			inc = stride.last ?? 0
-			data = kernel().withUnsafeBufferPointer(R.init)
+			data = .init(kernel())
 		case.columnMajor:
 			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			count = source.shape.first ?? 1
 			inc = stride.first ?? 0
-			data = kernel().withUnsafeBufferPointer(R.init)
-		}
-	}
-    @_disfavoredOverload
-    @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R.Element == Element {
-		switch strategy {
-		case.rowMajor:
-			let (stride, kernel) = try source.evaluation(for: .rowMajor)
-			async let result = kernel()
-			count = source.shape.last ?? 1
-			inc = stride.last ?? 0
-			data = await result.withUnsafeBufferPointer(R.init)
-		case.columnMajor:
-			let (stride, kernel) = try source.evaluation(for: .columnMajor)
-			async let result = kernel()
-			count = source.shape.first ?? 1
-			inc = stride.first ?? 0
-			data = await result.withUnsafeBufferPointer(R.init)
+            data = .init(kernel())
 		}
 	}
     @inlinable@inline(__always)@_transparent
@@ -163,6 +165,7 @@ extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
     @inlinable@inline(__always)@_transparent
 	public init(_ elements: some Collection<Element>) {
 		count = elements.count
+        precondition(0 < count, "empty vector is not allowed")
 		inc = 1
 		data = .init(elements)
 	}
@@ -190,4 +193,4 @@ extension VectorBuffer: RandomAccessCollection {
 	}
 }
 // MARK: typealias
-public typealias VecBuf<T: MutableScalar> = VectorBuffer<Array<T>>
+public typealias VecBuf<T: ScalarBuffer> = VectorBuffer<Array<T>>
