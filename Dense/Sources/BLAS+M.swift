@@ -1,11 +1,11 @@
 //
-//  DOT+M.swift
+//  BLAS+M.swift
 //  MUSE
 //
 //  Created by Kota on 9/18/R7.
 //
 import Layout
-extension DOT {
+extension BLAS {
 	@usableFromInline
     @frozen struct DD<X: Matrix<Element>, Y: Matrix<Element>> {
 		@usableFromInline typealias R = Array<Element>
@@ -31,7 +31,7 @@ extension DOT {
 		@usableFromInline let y: Y
 	}
 }
-extension DOT.DD: Vector {
+extension BLAS.DD: Vector {
 	@inlinable
 	var count: Int {
 		min(x.rows, y.cols)
@@ -65,7 +65,7 @@ extension DOT.DD: Vector {
 		})
 	}
 }
-extension DOT.DD: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantMatrix {
+extension BLAS.DD: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantMatrix {
     @inlinable
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let (xi, xk) = try x.evaluation(for: strategy)
@@ -87,10 +87,10 @@ extension DOT.DD: InstantTensor & InstantVector where X: InstantMatrix, Y: Insta
         })
     }
 }
-extension DOT.VV: Vector {
+extension BLAS.VV: Vector {
     @usableFromInline typealias R = Array<Element>
-    @usableFromInline typealias S = DOT.VV<X.S, Y.S>
-    @usableFromInline typealias U = DOT.Inner<X.V, Y.V>
+    @usableFromInline typealias S = BLAS.VV<X.S, Y.S>
+    @usableFromInline typealias U = BLAS.Inner<X.V, Y.V>
     @inlinable
     var count: Int {
         switch self {
@@ -128,28 +128,28 @@ extension DOT.VV: Vector {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch self {
         case.DD(let x, let y):
-            try DOT.DD(x: x, y: y).evaluation(for: strategy)
+            try BLAS.DD(x: x, y: y).evaluation(for: strategy)
         case.MV(let x, let y):
-            try DOT.MV(x: x, y: y[0..., 0]).evaluation(for: strategy)
+            try BLAS.MV(x: x, y: y[0..., 0]).evaluation(for: strategy)
         case.VM(let x, let y):
-            try DOT.VM(x: x[0, 0...], y: y).evaluation(for: strategy)
+            try BLAS.VM(x: x[0, 0...], y: y).evaluation(for: strategy)
         }
     }
 }
-extension DOT.VV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantMatrix {
+extension BLAS.VV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantMatrix {
     @usableFromInline
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch self {
         case.DD(let x, let y):
-            try DOT.DD(x: x, y: y).evaluation(for: strategy)
+            try BLAS.DD(x: x, y: y).evaluation(for: strategy)
         case.MV(let x, let y):
-            try DOT.MV(x: x, y: y[0..., 0]).evaluation(for: strategy)
+            try BLAS.MV(x: x, y: y[0..., 0]).evaluation(for: strategy)
         case.VM(let x, let y):
-            try DOT.VM(x: x[0, 0...], y: y).evaluation(for: strategy)
+            try BLAS.VM(x: x[0, 0...], y: y).evaluation(for: strategy)
         }
     }
 }
-extension DOT.MM: Matrix {
+extension BLAS.MM: Matrix {
 	@inlinable
 	var rows: Int {
 		x.rows
@@ -318,7 +318,7 @@ extension DOT.MM: Matrix {
 		}
 	}
 }
-extension DOT.MM: InstantTensor & InstantMatrix where X: InstantMatrix, Y: InstantMatrix {
+extension BLAS.MM: InstantTensor & InstantMatrix where X: InstantMatrix, Y: InstantMatrix {
     @inlinable
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let (xs, xk) = try x.evaluation(for: strategy)
@@ -456,8 +456,8 @@ extension DOT.MM: InstantTensor & InstantMatrix where X: InstantMatrix, Y: Insta
     }
 }
 public func •<Element: BLASElement & ArithmeticElement>(_ lhs: some Matrix<Element>, _ rhs: some Matrix<Element>) -> some Matrix<Element> {
-    DOT.MM(x: lhs, y: rhs)
+    BLAS.MM(x: lhs, y: rhs)
 }
 public func •<Element: BLASElement & ArithmeticElement>(_ lhs: some InstantMatrix<Element>, _ rhs: some InstantMatrix<Element>) -> some InstantMatrix<Element> {
-    DOT.MM(x: lhs, y: rhs)
+    BLAS.MM(x: lhs, y: rhs)
 }

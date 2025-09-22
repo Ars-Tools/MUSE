@@ -1,5 +1,5 @@
 //
-//  DOT.swift
+//  BLAS.swift
 //  MUSE
 //
 //  Created by Kota on 9/18/R7.
@@ -9,13 +9,13 @@ import typealias Numerics.Complex64
 import typealias Numerics.Complex128
 import typealias Layout.MemoryStrategy
 @usableFromInline
-enum DOT<Element: BLASElement & ArithmeticElement> {}
+enum BLAS<Element: BLASElement & ArithmeticElement> {}
+infix operator •: MultiplicationPrecedence
 public protocol BLASElement {
 	@inlinable@inline(__always)
 	static func Inner(n: Int,
 					  x: UnsafePointer<Self>, ldx: Int,
 					  y: UnsafePointer<Self>, ldy: Int) -> Self
-	
 	@inlinable@inline(__always)
 	static func Outer(m: Int, n: Int,
 					  α: Self,

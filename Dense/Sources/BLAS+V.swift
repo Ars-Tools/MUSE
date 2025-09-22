@@ -1,19 +1,19 @@
 //
-//  DOT+V.swift
+//  BLAS+V.swift
 //  MUSE
 //
 //  Created by Kota on 9/18/R7.
 //
 import protocol Accelerate.AccelerateBuffer
 import Layout
-extension DOT {
+extension BLAS {
 	@usableFromInline
-	struct Inner<X: Vector<Element>, Y: Vector<Element>> {
+    @frozen struct Inner<X: Vector<Element>, Y: Vector<Element>> {
 		@usableFromInline let x: X
 		@usableFromInline let y: Y
 	}
 	@usableFromInline
-	struct Outer<X: Vector<Element>, Y: Vector<Element>> {
+    @frozen struct Outer<X: Vector<Element>, Y: Vector<Element>> {
 		@usableFromInline typealias R = Array<Element>
 		@usableFromInline typealias S = Outer<X.S, Y.S>
 		@usableFromInline typealias T = Outer<Y.T, X.T>
@@ -23,7 +23,7 @@ extension DOT {
 		@usableFromInline let y: Y
 	}
 	@usableFromInline
-	struct MV<X: Matrix<Element>, Y: Vector<Element>> {
+    @frozen struct MV<X: Matrix<Element>, Y: Vector<Element>> {
 		@usableFromInline typealias R = Array<Element>
 		@usableFromInline typealias S = MV<X.S, Y>
 		@usableFromInline typealias U = Inner<X.V, Y>
@@ -31,7 +31,7 @@ extension DOT {
 		@usableFromInline let y: Y
 	}
 	@usableFromInline
-	struct VM<X: Vector<Element>, Y: Matrix<Element>> {
+    @frozen struct VM<X: Vector<Element>, Y: Matrix<Element>> {
 		@usableFromInline typealias R = Array<Element>
 		@usableFromInline typealias S = VM<X, Y.S>
 		@usableFromInline typealias U = Inner<X, Y.V>
@@ -39,7 +39,7 @@ extension DOT {
 		@usableFromInline let y: Y
 	}
 }
-extension DOT.Inner {
+extension BLAS.Inner {
 	@inlinable@inline(__always)@_transparent
 	func evaluation(x: (Int, Int), y: (Int, Int)) -> @Sendable (X.R, Y.R) -> CollectionOfOne<Element> {
 		let count = broadcast(x: x.0, y: y.0)
@@ -52,7 +52,7 @@ extension DOT.Inner {
 		}
 	}
 }
-extension DOT.Inner: Scalar {
+extension BLAS.Inner: Scalar {
     @inlinable@inline(__always)@_transparent
 	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> CollectionOfOne<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
@@ -64,7 +64,7 @@ extension DOT.Inner: Scalar {
 		}
 	}
 }
-extension DOT.Inner: InstantTensor & InstantMatrix & InstantVector & InstantScalar where X: InstantVector, Y: InstantVector {
+extension BLAS.Inner: InstantTensor & InstantMatrix & InstantVector & InstantScalar where X: InstantVector, Y: InstantVector {
     @inlinable@inline(__always)@_transparent
 	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
@@ -76,7 +76,7 @@ extension DOT.Inner: InstantTensor & InstantMatrix & InstantVector & InstantScal
 		}
 	}
 }
-extension DOT.Outer: Matrix {
+extension BLAS.Outer: Matrix {
 	@inlinable@inline(__always)@_transparent
 	var rows: Int {
 		x.count
@@ -110,7 +110,7 @@ extension DOT.Outer: Matrix {
 		.init(x: x[row], y: y[col])
 	}
 }
-extension DOT.Outer {
+extension BLAS.Outer {
     @inlinable@inline(__always)@_transparent
 	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         let (xi, xk) = try x.evaluation(for: strategy)
@@ -155,7 +155,7 @@ extension DOT.Outer {
 		}
 	}
 }
-extension DOT.Outer: InstantTensor & InstantMatrix where X: InstantVector, Y: InstantVector {
+extension BLAS.Outer: InstantTensor & InstantMatrix where X: InstantVector, Y: InstantVector {
     @inlinable@inline(__always)@_transparent
 	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let (xi, xk) = try x.evaluation(for: strategy)
@@ -200,7 +200,7 @@ extension DOT.Outer: InstantTensor & InstantMatrix where X: InstantVector, Y: In
 		}
 	}
 }
-extension DOT.MV: Vector {
+extension BLAS.MV: Vector {
     @inlinable@inline(__always)@_transparent
 	var count: Int {
 		x.rows
@@ -274,7 +274,7 @@ extension DOT.MV: Vector {
 		}
 	}
 }
-extension DOT.MV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantVector {
+extension BLAS.MV: InstantTensor & InstantVector where X: InstantMatrix, Y: InstantVector {
     @inlinable@inline(__always)@_transparent
 	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let (xs, xk) = try x.evaluation(for: strategy)
@@ -336,7 +336,7 @@ extension DOT.MV: InstantTensor & InstantVector where X: InstantMatrix, Y: Insta
 		}
 	}
 }
-extension DOT.VM: Vector {
+extension BLAS.VM: Vector {
     @inlinable@inline(__always)@_transparent
 	var count: Int {
 		y.cols
@@ -410,7 +410,7 @@ extension DOT.VM: Vector {
 		}
 	}
 }
-extension DOT.VM: InstantTensor & InstantVector where X: InstantVector, Y: InstantMatrix {
+extension BLAS.VM: InstantTensor & InstantVector where X: InstantVector, Y: InstantMatrix {
     @inlinable@inline(__always)@_transparent
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let (xs, xk) = try x.evaluation(for: strategy)
@@ -474,33 +474,33 @@ extension DOT.VM: InstantTensor & InstantVector where X: InstantVector, Y: Insta
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some Vector<Element>, _ rhs: some Vector<Element>) -> some Scalar<Element> {
-	DOT.Inner(x: lhs, y: rhs)
+    BLAS.Inner(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some Matrix<Element>, _ rhs: some Vector<Element>) -> some Vector<Element> {
-	DOT.MV(x: lhs, y: rhs)
+    BLAS.MV(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some Vector<Element>, _ rhs: some Matrix<Element>) -> some Vector<Element> {
-	DOT.VM(x: lhs, y: rhs)
+    BLAS.VM(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func outer<Element: ArithmeticElement & BLASElement>(_ lhs: some Vector<Element>, _ rhs: some Vector<Element>) -> some Matrix<Element> {
-	DOT.Outer(x: lhs, y: rhs)
+    BLAS.Outer(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantVector<Element>) -> some InstantScalar<Element> {
-    DOT.Inner(x: lhs, y: rhs)
+    BLAS.Inner(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantMatrix<Element>, _ rhs: some InstantVector<Element>) -> some InstantVector<Element> {
-    DOT.MV(x: lhs, y: rhs)
+    BLAS.MV(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func •<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantMatrix<Element>) -> some InstantVector<Element> {
-    DOT.VM(x: lhs, y: rhs)
+    BLAS.VM(x: lhs, y: rhs)
 }
 @_disfavoredOverload
 public func outer<Element: ArithmeticElement & BLASElement>(_ lhs: some InstantVector<Element>, _ rhs: some InstantVector<Element>) -> some InstantMatrix<Element> {
-    DOT.Outer(x: lhs, y: rhs)
+    BLAS.Outer(x: lhs, y: rhs)
 }
