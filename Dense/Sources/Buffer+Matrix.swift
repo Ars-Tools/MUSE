@@ -11,7 +11,7 @@ import func Layout.offset
 import func Layout.capacity
 import func Layout.product
 @dynamicMemberLookup
-@frozen public struct MatrixBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: MutableScalar, R.SubSequence: Storage {
+@frozen public struct MatrixBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: ScalarBuffer, R.SubSequence: Storage {
 	public typealias Element = R.Element
 	public typealias S = MatrixBuffer<R.SubSequence>
 	public typealias T = Self
@@ -25,10 +25,12 @@ import func Layout.product
 	private(set) var data: R
 }
 extension MatrixBuffer {
+    @_disfavoredOverload
     @inlinable@inline(__always)
 	public subscript<Λ>(dynamicMember lookup: KeyPath<R, Λ>) -> Λ {
 		data[keyPath: lookup]
 	}
+    @_disfavoredOverload
     @inlinable@inline(__always)
 	public subscript<Λ>(dynamicMember lookup: ReferenceWritableKeyPath<R, Λ>) -> Λ {
 		_read {
@@ -156,7 +158,7 @@ extension MatrixBuffer: MutableTensor & MutableMatrix where R: MutableStorage, R
 }
 extension MatrixBuffer {
     @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R == R {
+	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .default) async throws where Source: Tensor, Source.R == R {
 		switch strategy {
 		case.rowMajor:
 			let (stride, kernel) = try source.evaluation(for: .rowMajor)
@@ -177,7 +179,7 @@ extension MatrixBuffer {
 		}
 	}
     @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, by strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R == R {
+	public init<Source>(_ source: Source, by strategy: MemoryStrategy = .default) throws where Source: InstantTensor, Source.R == R {
 		switch strategy {
 		case.rowMajor:
             let (stride, kernel) = try source.evaluation(for: .rowMajor)
@@ -207,7 +209,7 @@ extension MatrixBuffer {
 extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
     @_disfavoredOverload
     @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R.Element == Element {
+	public init(_ source: some Tensor<Element>, for strategy: MemoryStrategy = .default) async throws {
 		switch strategy {
 		case.rowMajor:
 			let (stride, kernel) = try source.evaluation(for: .rowMajor)
@@ -216,7 +218,7 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 			cols = source.shape.last ?? 1
 			ldr = stride.dropLast().last ?? 0
 			ldc = stride.last ?? 0
-			data = await result.withUnsafeBufferPointer(R.init)
+            data = await.init(result)
 		case.columnMajor:
 			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			async let result = kernel()
@@ -224,12 +226,12 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 			cols = source.shape.dropFirst().first ?? 1
 			ldr = stride.first ?? 0
 			ldc = stride.dropFirst().first ?? 0
-			data = await result.withUnsafeBufferPointer(R.init)
+			data = await.init(result)
 		}
 	}
     @_disfavoredOverload
     @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R.Element == Element {
+	public init(_ source: some InstantTensor<Element>, for strategy: MemoryStrategy = .default) throws {
 		switch strategy {
 		case.rowMajor:
 			let (stride, kernel) = try source.evaluation(for: .rowMajor)
@@ -237,14 +239,14 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 			cols = source.shape.last ?? 1
 			ldr = stride.dropLast().last ?? 0
 			ldc = stride.last ?? 0
-			data = kernel().withUnsafeBufferPointer(R.init)
+            data = .init(kernel())
 		case.columnMajor:
 			let (stride, kernel) = try source.evaluation(for: .columnMajor)
 			rows = source.shape.first ?? 1
 			cols = source.shape.dropFirst().first ?? 1
 			ldr = stride.first ?? 0
 			ldc = stride.dropFirst().first ?? 0
-			data = kernel().withUnsafeBufferPointer(R.init)
+			data = .init(kernel())
 		}
 	}
     @inlinable@inline(__always)@_transparent
@@ -262,7 +264,8 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init(rows vec: some Collection<some Collection<Element>>) {
 		let counts = vec.map(\.count)
 		rows = vec.count
-		cols = counts.min() ?? 0
+        precondition(0 < rows, "empty matrix is not allowed")
+		cols = counts.min() ?? 1
 		ldr = cols
 		ldc = 1
 		data = .init(vec.lazy.flatMap { [ldr] in $0.prefix(ldr) })
@@ -271,7 +274,8 @@ extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableColle
 	public init(cols vec: some Collection<some Collection<Element>>) {
 		let counts = vec.map(\.count)
 		cols = vec.count
-		rows = counts.min() ?? 0
+        precondition(0 < cols, "empty matrix is not allowed")
+		rows = counts.min() ?? 1
 		ldc = rows
 		ldr = 1
 		data = .init(vec.lazy.flatMap { [ldc] in $0.prefix(ldc) })
@@ -295,4 +299,4 @@ extension MatrixBuffer: CustomStringConvertible {
 }
 // MARK: Misc Protocols
 // MARK: typealias
-public typealias MatBuf<T: MutableScalar> = MatrixBuffer<Array<T>>
+public typealias MatBuf<T: ScalarBuffer> = MatrixBuffer<Array<T>>
