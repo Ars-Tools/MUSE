@@ -9,21 +9,28 @@ import Testing
 @Suite
 struct BroadcastTests {
 	@Test func shape() {
-		let x = [1,2,1]
-		let y = [1,4]
-		let z = broadcast(lhs: x, rhs: y)
-		#expect(z == [1, 2, 4])
+		let x = [1,4,1]
+		let y = [4,1]
+        let z = Layout.broadcast(lhs: x, rhs: y)
+		#expect(z == [1, 4, 1])
+        #expect(MemoryStrategy.rowMajor.broadcast(x: x, y: y) == [1, 4, 1])
+        #expect(MemoryStrategy.columnMajor.broadcast(x: x, y: y) == [4, 4, 1])
 	}
-	@Test func stride() {
-		let target = [5, 4, 3]
-		let source = [4, 1]
-		let stride = [2, 4]
-		let result = broadcast(target: target, source: source, stride: stride)
-		print(result)
+	@Test func broadcast() {
+		let target = [5, 5, 3]
+		let source = [5, 1]
+		let stride = [1, 1]
+//        let result = Layout.broadcast(target: target, source: source, stride: stride)
+        #expect(MemoryStrategy.rowMajor.broadcast(target: target, source: source, stride: stride) == [0, 1, 0])
+        #expect(MemoryStrategy.columnMajor.broadcast(target: target, source: source, stride: stride) == [1, 0, 0])
 	}
+    @Test func stride() {
+        #expect(MemoryStrategy.rowMajor.stride(for: [3, 5, 2]) == [10, 2, 1])
+        #expect(MemoryStrategy.columnMajor.stride(for: [3, 5, 2]) == [1, 3, 15])
+    }
 	@Test func capacity() {
-		let shape = [1,3,5,2]
-		let stride = [1,4,32]
+		let shape = [1, 3, 5]
+		let stride = [60, 4, 12]
 		print(Layout.capacity(alloc: shape, stride: stride))
 		print(Layout.capacity(slice: shape, stride: stride))
 	}
