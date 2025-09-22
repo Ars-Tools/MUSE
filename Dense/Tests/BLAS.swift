@@ -1,5 +1,5 @@
 //
-//  DOT.swift
+//  BLAS.swift
 //  MUSE
 //
 //  Created by Kota on 9/18/R7.
@@ -9,7 +9,7 @@ import Testing
 import Layout
 @testable import Dense
 @Suite
-struct DOTTestCases {
+struct BLASTestCases {
 	@Test
 	func inner() throws {
 		let X = [0.0, 1.0, 2.0, 3.0]
@@ -262,4 +262,21 @@ struct DOTTestCases {
             #expect(w[idx, idx] == u)
         }
 	}
+    @Test
+    func tt() throws {
+        let x = [
+            [1.0, 1.0, 1.0],
+            [4.0, 5.0, 6.0],
+        ] as TensorBuffer<Array<Float64>>
+        let y = [
+            [2.0, 9.0, 9.0],
+            [5.0, 9.0, 7.0],
+        ] as TensorBuffer<Array<Float64>>
+        
+        let z = BLAS.TT(x: x, y: y, w: 1)
+        let w = try TensorBuffer(z, for: .rowMajor)
+        print(w)
+        try print(TensorBuffer<Array<Float64>>(z[[0, 2]], for: .rowMajor))
+        
+    }
 }
