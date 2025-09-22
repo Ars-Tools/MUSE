@@ -16,111 +16,37 @@ extension CollectionOfOne: @retroactive AccelerateBuffer & AccelerateMutableBuff
         try span.withUnsafeBufferPointer(body)
     }
 }
-extension Bool: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
+public protocol ScalarBuffer<Element>: MutableScalar<Self> & BitwiseCopyable & Sendable where R == CollectionOfOne<Self>, Element == Self {}
+extension ScalarBuffer {
+    @inlinable@inline(__always)
+    public subscript() -> Element {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+    @inlinable
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Self>) {
+        ([], {CollectionOfOne(self)})
     }
 }
-extension Int: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Int8: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Int16: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Int32: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Int64: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Int128: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension UInt8: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension UInt16: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension UInt32: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension UInt64: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension UInt128: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Float16: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Float32: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Float64: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Complex32: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Complex64: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
-extension Complex128: MutableScalar {
-    public typealias R = CollectionOfOne<Self>
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-        ([], {R(self)})
-    }
-}
+extension Bool: ScalarBuffer {}
+extension Int: ScalarBuffer {}
+extension Int8: ScalarBuffer {}
+extension Int16: ScalarBuffer {}
+extension Int32: ScalarBuffer {}
+extension Int64: ScalarBuffer {}
+extension Int128: ScalarBuffer {}
+extension UInt8: ScalarBuffer {}
+extension UInt16: ScalarBuffer {}
+extension UInt32: ScalarBuffer {}
+extension UInt64: ScalarBuffer {}
+extension UInt128: ScalarBuffer {}
+extension Float16: ScalarBuffer {}
+extension Float32: ScalarBuffer {}
+extension Float64: ScalarBuffer {}
+extension Complex32: ScalarBuffer {}
+extension Complex64: ScalarBuffer {}
+extension Complex128: ScalarBuffer {}
