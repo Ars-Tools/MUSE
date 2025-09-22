@@ -4,7 +4,7 @@
 //
 //  Created by Kota on 5/15/R7.
 //
-public protocol RationalNumber<IntegerLiteralType>: Numeric & Comparable & CustomStringConvertible & Hashable & Sendable & Copyable where IntegerLiteralType: BinaryInteger {
+public protocol RationalNumber<IntegerLiteralType>: SignedNumeric & Comparable & CustomStringConvertible & Hashable & Sendable & Copyable where IntegerLiteralType: BinaryInteger {
 	var numerator: IntegerLiteralType { get }
 	var denominator: IntegerLiteralType { get }
 	init(numerator: IntegerLiteralType, denominator: IntegerLiteralType)
