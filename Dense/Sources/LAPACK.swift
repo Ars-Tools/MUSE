@@ -7,8 +7,7 @@
 import Accelerate.vecLib
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
-@usableFromInline
-enum LAPACK<Element: LAPACKElement & ArithmeticElement & ScalarBuffer & SignedNumeric> {}
+public enum LAPACK<Element: LAPACKElement & ArithmeticElement & ScalarBuffer & SignedNumeric> {}
 public protocol LAPACKElement: BLASElement {
 	@inlinable@inline(__always)
 	@discardableResult
