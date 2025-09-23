@@ -10,7 +10,7 @@ import Testing
 struct ContractionTests {
     @Test
     func vecLHS() {
-        let ((n, k), ldb, ldc, layout, offset) = MemoryStrategy.rowMajor.contraction(x: 4, y: ([4,5], [1,4]))
+        let ((n, k), ldb, ldc, layout, offset) = MemoryStrategy.rowMajor.contraction(m: 4, y: ([4,5], [1,4]))
         #expect(n == 5)
         #expect(k == 4)
         #expect(ldb == (1, 4))
@@ -20,7 +20,7 @@ struct ContractionTests {
     }
     @Test
     func vecRHS() {
-        let ((m, k), ldb, ldc, layout, offset) = MemoryStrategy.rowMajor.contraction(x: ([4,5], [1,4]), y: 5)
+        let ((m, k), ldb, ldc, layout, offset) = MemoryStrategy.rowMajor.contraction(x: ([4,5], [1,4]), n: 5)
         #expect(m == 4)
         #expect(k == 5)
         #expect(ldb == (1, 4))

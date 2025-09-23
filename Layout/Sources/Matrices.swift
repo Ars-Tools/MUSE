@@ -126,7 +126,7 @@ where
 extension MemoryStrategy {
     // ((n, k), ldb, ldc, ks, MemoryOffset)
     @inlinable@inline(__always)@_transparent
-    public func contraction<RK: RandomAccessCollection<Int>, RS: RandomAccessCollection<Int>>(x m: Int, y: (RK, RS)) -> ((Int, Int), (Int, Int), (Int, Int), Array<Int>, Array<SIMD2<Int>>) where RK.Index == Int, RS.Index == Int {
+    public func contraction<RK: RandomAccessCollection<Int>, RS: RandomAccessCollection<Int>>(m: Int, y: (RK, RS)) -> ((Int, Int), (Int, Int), (Int, Int), Array<Int>, Array<SIMD2<Int>>) where RK.Index == Int, RS.Index == Int {
         let r = shuffle(shape: y.0.dropFirst(), stride: y.1.dropFirst())
         let n = matricise(source: r.0)
         let k = y.0.first ?? 1
@@ -144,7 +144,7 @@ extension MemoryStrategy {
     }
     // ((m, k), ldb, ldc, ks, MemoryOffset)
     @inlinable@inline(__always)@_transparent
-    public func contraction<LK: RandomAccessCollection<Int>, LS: RandomAccessCollection<Int>>(x: (LK, LS), y n: Int) -> ((Int, Int), (Int, Int), (Int, Int), Array<Int>, Array<SIMD2<Int>>) where LK.Index == Int, LS.Index == Int {
+    public func contraction<LK: RandomAccessCollection<Int>, LS: RandomAccessCollection<Int>>(x: (LK, LS), n: Int) -> ((Int, Int), (Int, Int), (Int, Int), Array<Int>, Array<SIMD2<Int>>) where LK.Index == Int, LS.Index == Int {
         let l = shuffle(shape: x.0.dropLast(), stride: x.1.dropLast())
         let m = matricise(source: l.0)
         let k = x.0.last ?? 1
