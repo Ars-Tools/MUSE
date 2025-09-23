@@ -150,13 +150,25 @@ extension CCS {
 	public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL) {
 		(.columnMajor, (0..<cols).lazy.map(coo(at:)))
 	}
+    @inlinable
+    init(lil: some Collection<some Sequence<(Int, Element)>>, count: Int) {
+        rows = count
+        cols = lil.count
+        (colStart, rowIndex, valArray) = lil.reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
+            for (idx, val) in $1 where val != .zero {
+                $0.2.append(val)
+                $0.1.append(.init(idx))
+            }
+            $0.0.append(max($0.1.count, $0.2.count))
+        }
+    }
 }
 extension CCS {
 	@inlinable
 	public init(shape: (Int, Int)) {
 		(rows, cols) = shape
 		precondition([rows, cols].allSatisfy { .zero < $0 }, "size should be greater than 0")
-		colStart = .init(arrayLiteral: 0)
+        colStart = .init(repeating: .zero, count: cols + 1)
 		rowIndex = .init()
 		valArray = .init()
 	}
