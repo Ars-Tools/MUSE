@@ -5,6 +5,7 @@
 //  Created by Kota on 9/9/R7.
 //
 import Testing
+import Dense
 @testable import Sparse
 @Suite
 struct CCSTestCases {
