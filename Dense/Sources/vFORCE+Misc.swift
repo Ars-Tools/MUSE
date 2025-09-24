@@ -112,8 +112,12 @@ extension vFORCE.Pow: Tensor & Operators.BinaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
-            let zs = strategy.stride(for: shape)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys, zs: zs)
+            let zk = shape
+            let zs = strategy.stride(for: zk)
+            let (length, stride, offset) = strategy.flatten(shape: shape,
+                                                            xs: strategy.broadcast(target: zk, source: x.shape, stride: xs),
+                                                            ys: strategy.broadcast(target: zk, source: y.shape, stride: ys),
+                                                            zs: zs)
             let capacity = capacity(alloc: shape, stride: zs)
             return (zs, {
                 await withUnsafePointer(xm(), ym()) { x, y in
@@ -140,9 +144,15 @@ extension vFORCE.Pow: InstantTensor where X: InstantTensor, Y: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
-            let zs = strategy.stride(for: shape)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys, zs: zs)
-            let capacity = capacity(alloc: shape, stride: zs)
+            let xk = x.shape
+            let yk = y.shape
+            let zk = MemoryStrategy.default.broadcast(x: xk, y: yk)
+            let zs = strategy.stride(for: zk)
+            let capacity = capacity(alloc: zk, stride: zs)
+            let (length, stride, offset) = strategy.flatten(shape: zk,
+                                                            xs: MemoryStrategy.default.broadcast(target: zk, source: xk, stride: xs),
+                                                            ys: MemoryStrategy.default.broadcast(target: zk, source: yk, stride: ys),
+                                                            zs: zs)
             return (zs, {
                 withUnsafePointer(xm(), ym()) { x, y in
                         .init(unsafeUninitializedCapacity: capacity) {
@@ -201,8 +211,12 @@ extension vFORCE.Mod: Tensor & Operators.BinaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
-            let zs = strategy.stride(for: shape)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys, zs: zs)
+            let zk = shape
+            let zs = strategy.stride(for: zk)
+            let (length, stride, offset) = strategy.flatten(shape: shape,
+                                                            xs: strategy.broadcast(target: zk, source: x.shape, stride: xs),
+                                                            ys: strategy.broadcast(target: zk, source: y.shape, stride: ys),
+                                                            zs: zs)
             let capacity = capacity(alloc: shape, stride: zs)
             return (zs, {
                 await withUnsafePointer(xm(), ym()) { x, y in
@@ -229,8 +243,12 @@ extension vFORCE.Mod: InstantTensor where X: InstantTensor, Y: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
+            let zk = shape
             let zs = strategy.stride(for: shape)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys, zs: zs)
+            let (length, stride, offset) = strategy.flatten(shape: shape,
+                                                            xs: strategy.broadcast(target: zk, source: x.shape, stride: xs),
+                                                            ys: strategy.broadcast(target: zk, source: y.shape, stride: ys),
+                                                            zs: zs)
             let capacity = capacity(alloc: shape, stride: zs)
             return (zs, {
                 withUnsafePointer(xm(), ym()) { x, y in

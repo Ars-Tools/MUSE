@@ -15,6 +15,8 @@ enum vFORCE<Element: vFORCESuiteElement & ArithmeticElement & BitwiseCopyable & 
 }
 public protocol vFORCESuiteElement: Numeric {
     static func fabs(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int)
+    static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int)
+    static func phas(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int)
     static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int)
     static func round(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int)
     static func ceil(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int)
@@ -241,6 +243,14 @@ extension Float32: vFORCESuiteElement {
         `do`(A, IA, B, IB, N, vvfabsf)
     }
     @inlinable@inline(__always)@_transparent
+    public static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        vDSP_vsq(A, IA, B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func phas(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        vDSP_vclr(B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
     public static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvfloorf)
     }
@@ -450,6 +460,14 @@ extension Float64: vFORCESuiteElement {
         `do`(A, IA, B, IB, N, vvfabs)
     }
     @inlinable@inline(__always)@_transparent
+    public static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        vDSP_vsqD(A, IA, B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func phas(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        vDSP_vclrD(B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
     public static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvfloor)
     }
@@ -575,12 +593,23 @@ extension Float64: vFORCESuiteElement {
     }
 }
 extension Complex64: vFORCESuiteElement {
-    @usableFromInline typealias SplitComplex = DSPSplitComplex
     @inlinable@inline(__always)@_transparent
     public static func fabs(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
         var z = SplitComplex(realp: .init(.init(A)).advanced(by: 0),
                              imagp: .init(.init(B)).advanced(by: 1))
         vDSP_zvabs(&z, 2 * IA, B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        var z = SplitComplex(realp: .init(.init(A)).advanced(by: 0),
+                             imagp: .init(.init(B)).advanced(by: 1))
+        vDSP_zvmags(&z, 2 * IA, B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func phas(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        var z = SplitComplex(realp: .init(.init(A)).advanced(by: 0),
+                             imagp: .init(.init(B)).advanced(by: 1))
+        vDSP_zvphas(&z, 2 * IA, B, IB, .init(N))
     }
     @inlinable@inline(__always)@_transparent
     public static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
@@ -794,12 +823,23 @@ extension Complex64: vFORCESuiteElement {
     }
 }
 extension Complex128: vFORCESuiteElement {
-    @usableFromInline typealias SplitComplex = DSPDoubleSplitComplex
     @inlinable@inline(__always)@_transparent
     public static func fabs(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
         var z = SplitComplex(realp: .init(.init(A)).advanced(by: 0),
                              imagp: .init(.init(B)).advanced(by: 1))
         vDSP_zvabsD(&z, 2 * IA, B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        var z = SplitComplex(realp: .init(.init(A)).advanced(by: 0),
+                             imagp: .init(.init(B)).advanced(by: 1))
+        vDSP_zvmagsD(&z, 2 * IA, B, IB, .init(N))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func phas(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
+        var z = SplitComplex(realp: .init(.init(A)).advanced(by: 0),
+                             imagp: .init(.init(B)).advanced(by: 1))
+        vDSP_zvphasD(&z, 2 * IA, B, IB, .init(N))
     }
     @inlinable@inline(__always)@_transparent
     public static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {

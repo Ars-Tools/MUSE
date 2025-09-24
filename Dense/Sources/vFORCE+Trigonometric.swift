@@ -134,10 +134,10 @@ extension vFORCE.Sin: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -162,10 +162,10 @@ extension vFORCE.Sin: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -231,10 +231,10 @@ extension vFORCE.Cos: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -259,10 +259,10 @@ extension vFORCE.Cos: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -328,10 +328,10 @@ extension vFORCE.Tan: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -356,10 +356,10 @@ extension vFORCE.Tan: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -426,10 +426,10 @@ extension vFORCE.Sinπ: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -454,10 +454,10 @@ extension vFORCE.Sinπ: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -523,10 +523,10 @@ extension vFORCE.Cosπ: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -551,10 +551,10 @@ extension vFORCE.Cosπ: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -620,10 +620,10 @@ extension vFORCE.Tanπ: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -648,10 +648,10 @@ extension vFORCE.Tanπ: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -718,10 +718,10 @@ extension vFORCE.Sinh: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -746,10 +746,10 @@ extension vFORCE.Sinh: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -815,10 +815,10 @@ extension vFORCE.Cosh: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -843,10 +843,10 @@ extension vFORCE.Cosh: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -912,10 +912,10 @@ extension vFORCE.Tanh: Tensor & Operators.UnaryTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
@@ -940,10 +940,10 @@ extension vFORCE.Tanh: InstantTensor where X: InstantTensor {
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
-            let shape = x.shape
-            let ys = strategy.stride(for: shape)
-            let capacity = capacity(alloc: shape, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
                     R(unsafeUninitializedCapacity: capacity) {
