@@ -9,6 +9,6 @@ import func Darwin.fmod
 import simd
 @testable import Numerics
 @Suite
-struct QuoternionTests {
+struct QuaternionTestCases {
 	
 }
