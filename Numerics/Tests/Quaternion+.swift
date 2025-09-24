@@ -1,5 +1,5 @@
 //
-//  Quoternion+.swift
+//  Quaternion+.swift
 //  MUSE
 //
 //  Created by Kota on 5/16/R7.
