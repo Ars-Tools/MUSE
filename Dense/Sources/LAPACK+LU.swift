@@ -5,6 +5,8 @@
 //  Created by Kota on 9/22/25.
 //
 import protocol Accelerate.AccelerateBuffer
+import typealias Layout.MemoryStrategy
+import func Layout.capacity
 import func Layout.flatten
 extension LAPACK {
     public struct LU {
@@ -15,10 +17,10 @@ extension LAPACK {
     }
 }
 extension LAPACK.LU {
-    public init<R>(decompose x: MatrixBuffer<R>) throws where R.Element == Element {
+    public init<R>(factorize x: MatrixBuffer<R>) throws where R.Element == Element {
         m = x.rows
         n = x.cols
-        let (length, stride, offset) = flatten(shape: [m, n], xs: [x.ldr, x.ldc], ys: [1, m])
+        let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [m, n], xs: [x.ldr, x.ldc], ys: [1, m])
         var a = Array<Element>(unsafeUninitializedCapacity: m * n) {
             let y = $0.baseAddress.unsafelyUnwrapped
             withUnsafePointer(x.data) { x in
@@ -42,11 +44,11 @@ extension LAPACK.LU {
         system = a
         ipivot = p
     }
-    public init<R, X>(decompose x: X) throws where X: InstantMatrix, X.R == R, X.Element == Element {
-        try self.init(decompose: MatrixBuffer<R>(x))
+    public init<R, X>(factorize x: X) throws where X: InstantMatrix, X.R == R, X.Element == Element {
+        try self.init(factorize: MatrixBuffer<R>(x))
     }
-    public init<R, X>(decompose x: X) async throws where X: Matrix, X.R == R, X.Element == Element {
-        try await self.init(decompose: MatrixBuffer<R>(x))
+    public init<R, X>(factorize x: X) async throws where X: Matrix, X.R == R, X.Element == Element {
+        try await self.init(factorize: MatrixBuffer<R>(x))
     }
 }
 extension LAPACK.LU {
@@ -90,87 +92,48 @@ extension LAPACK.LU  {
     }
 }
 extension LAPACK.LU {
-    public func solve<R>(rhs: VectorBuffer<R>) where R.Element == Element {
-        precondition(rhs.count == m)
+    public func solve<R>(y: VectorBuffer<R>) -> VectorBuffer<Array<Element>> where R.Element == Element {
+        precondition(y.count == m)
+        return.init(count: n, inc: 1, data: .init(unsafeUninitializedCapacity: max(m, n)) {
+            Element.Copy(x: y.data.withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped), ldx: y.inc,
+                         y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, length: y.count)
+            let status = Element.GETRS(n: n, nrhs: 1,
+                                       a: system, lda: m, opa: "N",
+                                       b: $0.baseAddress.unsafelyUnwrapped, ldb: n,
+                                       p: ipivot)
+            assert(status == 0)
+            $1 = $0.count
+        })
+    }
+    public func solve<R>(y: MatrixBuffer<R>) -> MatrixBuffer<Array<Element>> where R.Element == Element {
+        precondition(y.rows == m)
+        let rows = max(m, n)
+        let nrhs = y.cols
+        return.init(rows: m, cols: nrhs, ldr: 1, ldc: m, data: .init(unsafeUninitializedCapacity: capacity(alloc: [rows, nrhs], stride: [1, rows])) {
+            let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [y.rows, y.cols], xs: [y.ldr, y.ldc], ys: [1, rows])
+            for offset in offset {
+                Element.Copy(x: y.data.withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped).advanced(by: offset.x), ldx: stride.x,
+                             y: $0.baseAddress.unsafelyUnwrapped.advanced(by: offset.y), ldy: stride.y, length: length)
+            }
+            Element.GETRS(n: n, nrhs: nrhs,
+                          a: system, lda: m, opa: "N",
+                          b: $0.baseAddress.unsafelyUnwrapped, ldb: rows,
+                          p: ipivot)
+            $1 = $0.count
+        })
     }
 }
-
-//extension LinAlg.LU {
-//    public func solve<R>(rhs: VectorBuffer<R>) where R.Element == Element {
-//
-//    }
-//    public func solve<R>(rhs: MatrixBuffer<R>) where R.Element == Element {
-//
-//    }
-//}
-//
-//extension LinAlg {
-//    public static func Det<R>(_ x: MatrixBuffer<R>) throws -> Element where R.Element == Element {
-//        precondition(x.rows == x.cols)
-//        let n = min(x.rows, x.cols)
-//        let (length, stride, offset) = flatten(shape: [n, n], xs: [x.ldc, x.ldc], ys: [1, n])
-//        var system = withUnsafePointer(x.data) { x in
-//            Array<Element>(unsafeUninitializedCapacity: n * n) {
-//                let y = $0.baseAddress.unsafelyUnwrapped
-//                for offset in offset {
-//                    Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
-//                                 y: y.advanced(by: offset.y), ldy: stride.y,
-//                                 length: length)
-//                }
-//                $1 = $0.count
-//            }
-//        }
-//        var ipivot = Array<Int>(repeating: .zero, count: n)
-//        switch Element.GETRF(m: n, n: n,
-//                             a: &system, lda: n,
-//                             p: &ipivot) {
-//        case.zero:
-//            break
-//        case let status:
-//            throw Error.numericalError(tensor: x, status: status, operation: "getrf@\(#function)")
-//        }
-//        return ipivot.enumerated().reduce(1 as Element) {
-//            ($1.0 == $1.1 ? $0 : 0 - $0) * system[$1.1 * n + $1.1]
-//        }
-//    }
-//    public static func Det(_ x: some Matrix<Element>) async throws -> Element where Element: MutScalar {
-//        try Det(await MatrixBuffer(x, for: .columnMajor))
-//    }
-//    public static func Inv<R>(_ x: MatrixBuffer<R>) throws -> MatrixBuffer<Array<Element>> where R.Element == Element {
-//        precondition(x.rows == x.cols)
-//        let n = min(x.rows, x.cols)
-//        let (length, stride, offset) = flatten(shape: [n, n], xs: [x.ldr, x.ldc], ys: [1, n])
-//        var system = withUnsafePointer(x.data) { x in
-//            Array<Element>(unsafeUninitializedCapacity: n * n) {
-//                let y = $0.baseAddress.unsafelyUnwrapped
-//                for offset in offset {
-//                    Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
-//                                 y: y.advanced(by: offset.y), ldy: stride.y,
-//                                 length: length)
-//                }
-//                $1 = $0.count
-//            }
-//        }
-//        var ipivot = Array<Int>(repeating: .zero, count: n)
-//        switch Element.GETRF(m: n, n: n,
-//                             a: &system, lda: n,
-//                             p: &ipivot) {
-//        case.zero:
-//            break
-//        case let status:
-//            throw Error.numericalError(tensor: x, status: status, operation: "getrf@\(#function)")
-//        }
-//        switch Element.GETRI(n: n,
-//                             a: &system, lda: n,
-//                             p: &ipivot) {
-//        case.zero:
-//            break
-//        case let status:
-//            throw Error.numericalError(tensor: x, status: status, operation: "getri@\(#function)")
-//        }
-//        return.init(shape: (n, n), stride: (1, n), data: system)
-//    }
-//    public static func Inv(_ x: some Matrix<Element>) async throws -> MatrixBuffer<Array<Element>> {
-//        try Inv(await MatrixBuffer(x, for: .columnMajor))
-//    }
-//}
+extension LAPACK.LU {
+    public func solve(y: some Matrix<Element>) async throws -> MatrixBuffer<Array<Element>> {
+        try await solve(y: MatrixBuffer<Array<Element>>(y, for: .columnMajor))
+    }
+    public func solve(y: some InstantMatrix<Element>) throws -> MatrixBuffer<Array<Element>> {
+        try solve(y: MatrixBuffer<Array<Element>>(y, for: .columnMajor))
+    }
+    public func solve(y: some Vector<Element>) async throws -> VectorBuffer<Array<Element>> {
+        try await solve(y: VectorBuffer<Array<Element>>(y, for: .columnMajor))
+    }
+    public func solve(y: some InstantVector<Element>) throws -> VectorBuffer<Array<Element>> {
+        try solve(y: VectorBuffer<Array<Element>>(y, for: .columnMajor))
+    }
+}
