@@ -7,6 +7,7 @@
 import Accelerate.vecLib
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
+import typealias Layout.MemoryStrategy
 import func Layout.flatten
 import func Layout.capacity
 @usableFromInline
@@ -95,7 +96,7 @@ extension ArithmeticElement {
 												 memory x: UnsafePointer<Self>,
 												 _ body: (UnsafePointer<Self>) throws (E) -> R) rethrows -> R {
 		try withUnsafeTemporaryAllocation(of: Self.self, capacity: capacity(alloc: shape, stride: ys)) {
-			let (length, stride, offset) = flatten(shape: shape, xs: xs, ys: ys)
+            let (length, stride, offset) = MemoryStrategy.default.flatten(shape: shape, xs: xs, ys: ys)
 			let y = $0.baseAddress.unsafelyUnwrapped
 			for offset in offset {
 				Copy(x: x.advanced(by: offset.x), ldx: stride.x,

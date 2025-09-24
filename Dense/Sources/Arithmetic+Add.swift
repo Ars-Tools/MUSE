@@ -27,10 +27,11 @@ extension Arithmetic {
 extension Arithmetic.Add {
 	@inlinable@inline(__always)@_transparent
 	static func`operator`(x: (Array<Int>, Array<Int>), y: (Array<Int>, Array<Int>), z: (Array<Int>, Array<Int>)) -> @Sendable (X.R, Y.R) -> R {
-		let xs = broadcast(target: z.0, source: x.0, stride: x.1)
-		let ys = broadcast(target: z.0, source: y.0, stride: y.1)
-		let capacity = capacity(alloc: z.0, stride: z.1)
-		let (length, stride, offset) = flatten(shape: z.0, xs: xs, ys: ys, zs: z.1)
+        let strategy = MemoryStrategy.default
+        let xs = strategy.broadcast(target: z.0, source: x.0, stride: x.1)
+        let ys = strategy.broadcast(target: z.0, source: y.0, stride: y.1)
+        let capacity = capacity(alloc: z.0, stride: z.1)
+        let (length, stride, offset) = strategy.flatten(shape: z.0, xs: xs, ys: ys, zs: z.1)
 		return {
 			withUnsafePointer($0, $1) { x, y in
 					.init(unsafeUninitializedCapacity: capacity) {
@@ -52,7 +53,7 @@ extension Arithmetic.Add: Vector & Operators.BinaryVector where X: Vector, Y: Ve
 extension Arithmetic.Add: Matrix & Operators.BinaryMatrix where X: Matrix, Y: Matrix {}
 extension Arithmetic.Add: Tensor & Operators.BinaryTensor where X: Tensor, Y: Tensor {
 	@usableFromInline@inline(__always)
-	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
 		case ((let xs, let xm), (let ys, let ym)):
 			let zs = strategy.stride(for: shape)
@@ -66,7 +67,7 @@ extension Arithmetic.Add: InstantVector where X: InstantVector, Y: InstantVector
 extension Arithmetic.Add: InstantMatrix where X: InstantMatrix, Y: InstantMatrix {}
 extension Arithmetic.Add: InstantTensor where X: InstantTensor, Y: InstantTensor {
 	@usableFromInline@inline(__always)
-	func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+	func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
 		case ((let xs, let xm), (let ys, let ym)):
 			let zs = strategy.stride(for: shape)
