@@ -178,26 +178,26 @@ extension Complex64: ArithmeticElement {
 			   .init(y), withUnsafePointer(to: ldy, \.self))
 	}
 	@inlinable@inline(__always)@_transparent
-	public static func Scale(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPSplitComplex(realp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0),
-								imagp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1))
-		vDSP_zvzsml(&x, .init(ldx),
-					&y,
-					&z, .init(ldz),
-					.init(length))
-	}
+    public static func Scale(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
+        var x = DSPSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                imagp: .init(.init(z)).advanced(by: 1))
+        vDSP_zvzsml(&x, .init(2 * ldx),
+                    &y,
+                    &z, .init(2 * ldz),
+                    .init(length))
+    }
 	@inlinable@inline(__always)@_transparent
 	public static func Mul(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPSplitComplex(realp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0),
-								imagp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvmul(&x, .init(2 * ldx),
 				   &y, .init(2 * ldy),
 				   &z, .init(2 * ldz),
@@ -205,12 +205,12 @@ extension Complex64: ArithmeticElement {
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func Add(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPSplitComplex(realp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0),
-								imagp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvadd(&x, .init(2 * ldx),
 				   &y, .init(2 * ldy),
 				   &z, .init(2 * ldz),
@@ -218,12 +218,12 @@ extension Complex64: ArithmeticElement {
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func Div(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPSplitComplex(realp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0),
-								imagp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvdiv(&y, .init(2 * ldy),
 				   &x, .init(2 * ldx),
 				   &z, .init(2 * ldz),
@@ -231,33 +231,33 @@ extension Complex64: ArithmeticElement {
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func Sub(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPSplitComplex(realp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0),
-								imagp: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvsub(&x, .init(2 * ldx),
 				   &y, .init(2 * ldy),
 				   &z, .init(2 * ldz),
 				   .init(length))
 	}
 	@inlinable@inline(__always)@_transparent
-	public static func FMA(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafePointer<Self>, ldz: Int, w: UnsafeMutablePointer<Self>, ldw: Int, length: Int) {
-		var x = DSPSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: x.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: y.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPSplitComplex(realp: .init(mutating: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0)),
-								imagp: .init(mutating: z.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1)))
-		var w = DSPSplitComplex(realp: w.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 0),
-								imagp: w.withMemoryRebound(to: Magnitude.self, capacity: 1, \.self).advanced(by: 1))
-		vDSP_zvma(&x, .init(2 * ldx),
-				  &y, .init(2 * ldy),
-				  &z, .init(2 * ldz),
-				  &w, .init(2 * ldw),
-				  .init(length))
-	}
+    public static func FMA(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafePointer<Self>, ldz: Int, w: UnsafeMutablePointer<Self>, ldw: Int, length: Int) {
+        var x = DSPSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                imagp: .init(.init(z)).advanced(by: 1))
+        var w = DSPSplitComplex(realp: .init(.init(w)).advanced(by: 0),
+                                imagp: .init(.init(w)).advanced(by: 1))
+        vDSP_zvma(&x, .init(2 * ldx),
+                  &y, .init(2 * ldy),
+                  &z, .init(2 * ldz),
+                  &w, .init(2 * ldw),
+                  .init(length))
+    }
 }
 extension Complex128: ArithmeticElement {@inlinable@inline(__always)@_transparent
 	public static func Copy(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int) {
@@ -266,26 +266,26 @@ extension Complex128: ArithmeticElement {@inlinable@inline(__always)@_transparen
 			   .init(y), withUnsafePointer(to: ldy, \.self))
 	}
 	@inlinable@inline(__always)@_transparent
-	public static func Scale(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPDoubleSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPDoubleSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPDoubleSplitComplex(realp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0),
-									  imagp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1))
-		vDSP_zvzsmlD(&x, .init(ldx),
-					 &y,
-					 &z, .init(ldz),
-					 .init(length))
-	}
+    public static func Scale(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
+        var x = DSPDoubleSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                      imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPDoubleSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                      imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPDoubleSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                      imagp: .init(.init(z)).advanced(by: 1))
+        vDSP_zvzsmlD(&x, .init(2 * ldx),
+                     &y,
+                     &z, .init(2 * ldz),
+                     .init(length))
+    }
 	@inlinable@inline(__always)@_transparent
 	public static func Mul(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPDoubleSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPDoubleSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPDoubleSplitComplex(realp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0),
-									  imagp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPDoubleSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                      imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPDoubleSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                      imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPDoubleSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                      imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvmulD(&x, .init(2 * ldx),
 					&y, .init(2 * ldy),
 					&z, .init(2 * ldz),
@@ -293,12 +293,12 @@ extension Complex128: ArithmeticElement {@inlinable@inline(__always)@_transparen
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func Add(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPDoubleSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPDoubleSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPDoubleSplitComplex(realp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0),
-									  imagp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPDoubleSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                      imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPDoubleSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                      imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPDoubleSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                      imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvaddD(&x, .init(2 * ldx),
 					&y, .init(2 * ldy),
 					&z, .init(2 * ldz),
@@ -306,12 +306,12 @@ extension Complex128: ArithmeticElement {@inlinable@inline(__always)@_transparen
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func Div(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPDoubleSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPDoubleSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPDoubleSplitComplex(realp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0),
-									  imagp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPDoubleSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                      imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPDoubleSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                      imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPDoubleSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                      imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvdivD(&y, .init(2 * ldy),
 					&x, .init(2 * ldx),
 					&z, .init(2 * ldz),
@@ -319,12 +319,12 @@ extension Complex128: ArithmeticElement {@inlinable@inline(__always)@_transparen
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func Sub(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-		var x = DSPDoubleSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPDoubleSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPDoubleSplitComplex(realp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0),
-									  imagp: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPDoubleSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+                                      imagp: .init(.init(x)).advanced(by: 1))
+        var y = DSPDoubleSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+                                      imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPDoubleSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                      imagp: .init(.init(z)).advanced(by: 1))
 		vDSP_zvsubD(&x, .init(2 * ldx),
 					&y, .init(2 * ldy),
 					&z, .init(2 * ldz),
@@ -332,14 +332,14 @@ extension Complex128: ArithmeticElement {@inlinable@inline(__always)@_transparen
 	}
 	@inlinable@inline(__always)@_transparent
 	public static func FMA(x: UnsafePointer<Self>, ldx: Int, y: UnsafePointer<Self>, ldy: Int, z: UnsafePointer<Self>, ldz: Int, w: UnsafeMutablePointer<Self>, ldw: Int, length: Int) {
-		var x = DSPDoubleSplitComplex(realp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: x.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var y = DSPDoubleSplitComplex(realp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: y.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var z = DSPDoubleSplitComplex(realp: .init(mutating: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0)),
-									  imagp: .init(mutating: z.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1)))
-		var w = DSPDoubleSplitComplex(realp: w.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 0),
-									  imagp: w.withMemoryRebound(to: Float64.self, capacity: 1, \.self).advanced(by: 1))
+        var x = DSPDoubleSplitComplex(realp: .init(.init(x)).advanced(by: 0),
+									  imagp: .init(.init(x)).advanced(by: 1))
+		var y = DSPDoubleSplitComplex(realp: .init(.init(y)).advanced(by: 0),
+									  imagp: .init(.init(y)).advanced(by: 1))
+        var z = DSPDoubleSplitComplex(realp: .init(.init(z)).advanced(by: 0),
+                                      imagp: .init(.init(z)).advanced(by: 1))
+        var w = DSPDoubleSplitComplex(realp: .init(.init(w)).advanced(by: 0),
+                                      imagp: .init(.init(w)).advanced(by: 1))
 		vDSP_zvmaD(&x, .init(2 * ldx),
 				   &y, .init(2 * ldy),
 				   &z, .init(2 * ldz),
