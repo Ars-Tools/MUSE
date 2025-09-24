@@ -342,9 +342,9 @@ extension TensorBuffer: MutableTensor where R: MutableStorage, R.SubSequence: Mu
                         $0.1.append($1.1)
                     }
                 let upper = newValue.store.startIndex
-                let (length, stride, offset) = flatten(shape: shape,
-                                                       xs: order.broadcast(target: shape, source: newValue.shape, stride: newValue.pitch),
-                                                       ys: pitch)
+                let (length, stride, offset) = order.flatten(shape: shape,
+                                                             xs: order.broadcast(target: shape, source: newValue.shape, stride: newValue.pitch),
+                                                             ys: pitch)
                 for (offset, cursor) in product(offset, 0..<length) {
                     store[lower.advanced(by: offset.y + stride.y * cursor)] = newValue.store[upper.advanced(by: offset.x + stride.x * cursor)]
                 }
@@ -358,9 +358,9 @@ extension TensorBuffer: MutableTensor where R: MutableStorage, R.SubSequence: Mu
                         $0.1.append($1.1)
                     }
                 let upper = newValue.store.startIndex
-                let (length, stride, offset) = flatten(shape: shape,
-                                                       xs: order.broadcast(target: shape, source: newValue.shape, stride: newValue.pitch),
-                                                       ys: pitch)
+                let (length, stride, offset) = order.flatten(shape: shape,
+                                                             xs: order.broadcast(target: shape, source: newValue.shape, stride: newValue.pitch),
+                                                             ys: pitch)
                 for (offset, cursor) in product(offset, 0..<length) {
                     store[lower.advanced(by: offset.y + stride.y * cursor)] = newValue.store[upper.advanced(by: offset.x + stride.x * cursor)]
                 }
