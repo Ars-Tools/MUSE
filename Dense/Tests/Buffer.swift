@@ -33,4 +33,10 @@ struct BuuferTestCases {
         #expect(z[0] == x[1, 0])
         #expect(z[1] == x[1, 1])
     }
+    @Test
+    func cplx() throws {
+        let z: some InstantVector<Complex128> = complex(r: 1, i: [.pi / 4, .pi / 2, .pi / 2] as VecBuf<Float64>)
+        let w = try VecBuf(z)
+        print(z, w)
+    }
 }
