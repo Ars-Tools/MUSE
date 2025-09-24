@@ -29,63 +29,63 @@ extension Operators {
 extension Operators.UnaryScalar {}
 extension Operators.UnaryVector {
     @inlinable
-    var count: Int {
+    public var count: Int {
         x.count
     }
-    @usableFromInline
-    subscript(position: Int) -> U {
+    @inlinable
+    public subscript(position: Int) -> U {
         .init(x: x[position])
     }
-    @usableFromInline
-    subscript(bounds: some RangeExpression<Int>) -> S {
+    @inlinable
+    public subscript(bounds: some RangeExpression<Int>) -> S {
         .init(x: x[bounds])
     }
 }
 extension Operators.UnaryMatrix {
     @inlinable
-    var rows: Int {
+    public var rows: Int {
         x.rows
     }
     @inlinable
-    var cols: Int {
+    public var cols: Int {
         x.cols
     }
-    @usableFromInline
-    subscript(row: Int, col: Int) -> U {
+    @inlinable
+    public subscript(row: Int, col: Int) -> U {
         .init(x: x[row, col])
     }
-    @usableFromInline
-    subscript(row: Int, col: some RangeExpression<Int>) -> V {
+    @inlinable
+    public subscript(row: Int, col: some RangeExpression<Int>) -> V {
         .init(x: x[row, col])
     }
-    @usableFromInline
-    subscript(row: some RangeExpression<Int>, col: Int) -> V {
+    @inlinable
+    public subscript(row: some RangeExpression<Int>, col: Int) -> V {
         .init(x: x[row, col])
     }
-    @usableFromInline
-    subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
+    @inlinable
+    public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
         .init(x: x[row, col])
     }
 }
 extension Operators.UnaryTensor {
-	@inlinable
-	var shape: Array<Int> {
+    @inlinable
+    public var shape: Array<Int> {
 		x.shape
 	}
-	@usableFromInline
-	var transpose: T {
+    @inlinable
+    public var transpose: T {
 		.init(x: x.transpose)
 	}
-	@usableFromInline
-	var diagonal: V {
+    @inlinable
+    public var diagonal: V {
 		.init(x: x.diagonal)
 	}
-	@usableFromInline
-	subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
+    @inlinable
+    public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
 		.init(x: x[position])
 	}
-	@usableFromInline
-	subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
+    @inlinable
+    public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
 		.init(x: x[bounds])
 	}
 }

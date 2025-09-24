@@ -4,6 +4,7 @@
 //
 //  Created by Kota on 9/19/R7.
 //
+import typealias Layout.MemoryStrategy
 import func Layout.broadcast
 import func Layout.narrowcast
 extension Operators {
@@ -80,7 +81,7 @@ extension Operators.BinaryMatrix {
 extension Operators.BinaryTensor {
 	@usableFromInline@inline(__always)@_transparent
 	var shape: Array<Int> {
-		broadcast(lhs: x.shape, rhs: y.shape)
+        MemoryStrategy.default.broadcast(x: x.shape, y: y.shape)
 	}
 	@usableFromInline@inline(__always)
 	var transpose: T {
@@ -94,12 +95,12 @@ extension Operators.BinaryTensor {
 	}
 	@usableFromInline@inline(__always)
 	subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
-		.init(x: x[narrowcast(point: position, shape: x.shape)],
-			  y: y[narrowcast(point: position, shape: y.shape)])
+        .init(x: x[MemoryStrategy.default.narrowcast(point: position, shape: x.shape)],
+              y: y[MemoryStrategy.default.narrowcast(point: position, shape: y.shape)])
 	}
 	@usableFromInline@inline(__always)
 	subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
-		.init(x: x[narrowcast(ranges: bounds, target: shape, source: x.shape)],
-			  y: y[narrowcast(ranges: bounds, target: shape, source: y.shape)])
+        .init(x: x[MemoryStrategy.default.narrowcast(bounds: bounds, target: shape, source: x.shape)],
+              y: y[MemoryStrategy.default.narrowcast(bounds: bounds, target: shape, source: y.shape)])
 	}
 }
