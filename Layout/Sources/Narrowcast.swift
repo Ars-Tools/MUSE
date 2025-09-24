@@ -30,6 +30,15 @@ public func narrowcast(ranges: some BidirectionalCollection<some RangeExpression
 }
 extension MemoryStrategy {
     @inlinable@inline(__always)@_transparent
+    public func narrowcast(point: some BidirectionalCollection<Int>, shape: some BidirectionalCollection<Int>) -> Array<Int> {
+        switch self {
+        case.rowMajor:
+            zip(point, shape.prefix(point.count)).map(%)
+        case.columnMajor:
+            zip(point, shape.suffix(point.count)).map(%)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
     public func narrowcast(bounds: some Collection<some RangeExpression<Int>>, target: some Collection<Int>, source: some Collection<Int>) -> Array<Range<Int>> {
         switch self {
         case.rowMajor:
