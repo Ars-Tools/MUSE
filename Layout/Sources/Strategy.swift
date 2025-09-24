@@ -8,6 +8,7 @@
 public typealias MemoryStrategy = AccelerateMatrixOrder
 import protocol Synchronization.AtomicRepresentable
 import typealias Synchronization.Atomic
+import os.log
 extension MemoryStrategy: @retroactive AtomicRepresentable {
 	@inlinable@inline(__always)@_transparent
 	public var transpose: Self {
@@ -26,7 +27,12 @@ extension MemoryStrategy: @retroactive AtomicRepresentable {
             Default.load(ordering: .acquiring)
         }
         set {
-            Default.store(newValue, ordering: .releasing)
+            switch Default.exchange(newValue, ordering: .releasing) {
+            case newValue:
+                break
+            case let oldValue:
+                os_log(.info, "MemoryLayout.default has been changed from %{public}@ to %{public}@", String(describing: oldValue), String(describing: newValue))
+            }
         }
     }
 }
