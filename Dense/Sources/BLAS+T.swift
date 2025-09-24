@@ -571,8 +571,8 @@ extension BLAS.TT: Tensor {
             let zk = xr + yc
             let xt = MemoryStrategy.rowMajor.stride(for: xk)
             let yt = MemoryStrategy.columnMajor.stride(for: yk)
-            let xo = flatten(shape: xk, xs: xs, ys: xt)
-            let yo = flatten(shape: yk, xs: ys, ys: yt)
+            let xo = MemoryStrategy.rowMajor.flatten(shape: xk, xs: xs, ys: xt)
+            let yo = MemoryStrategy.columnMajor.flatten(shape: yk, xs: ys, ys: yt)
             let xb = capacity(alloc: xk, stride: xt)
             let yb = capacity(alloc: yk, stride: yt)
             let zr = MemoryStrategy.rowMajor.stride(for: xr)
@@ -1086,8 +1086,8 @@ extension BLAS.TT: InstantTensor & InstantMatrix & InstantVector & InstantScalar
             let zk = xr + yc
             let xt = MemoryStrategy.rowMajor.stride(for: xk)
             let yt = MemoryStrategy.columnMajor.stride(for: yk)
-            let xo = flatten(shape: xk, xs: xs, ys: xt)
-            let yo = flatten(shape: yk, xs: ys, ys: yt)
+            let xo = MemoryStrategy.rowMajor.flatten(shape: xk, xs: xs, ys: xt)
+            let yo = MemoryStrategy.columnMajor.flatten(shape: yk, xs: ys, ys: yt)
             let xb = capacity(alloc: xk, stride: xt)
             let yb = capacity(alloc: yk, stride: yt)
             let zr = MemoryStrategy.rowMajor.stride(for: xr)
