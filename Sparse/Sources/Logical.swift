@@ -2,9 +2,9 @@
 //  Logical.swift
 //  MUSE
 //
-//  Created by Kota on 9/12/R7.
+//  Created by Kota on 9/26/25.
 //
 @usableFromInline
 @frozen enum Logical {
-	@usableFromInline typealias Element = Bool
+    @usableFromInline typealias Element = Bool
 }

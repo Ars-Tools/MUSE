@@ -1,35 +1,34 @@
 //
-//  Storage+COV.swift
+//  Vector+COV.swift
 //  MUSE
 //
-//  Created by Kota on 9/9/R7.
+//  Created by Kota on 9/26/25.
 //
-import protocol Accelerate.AccelerateBuffer
-extension LazyMapSequence: @retroactive @unchecked Sendable {}
 @usableFromInline
 @frozen struct COV<Element: SparseScalar<Element> & Numeric, COO: Sequence<(Int, Element)> & Sendable> {
-	@usableFromInline let count: Int
-	@usableFromInline let coo: COO
+    @usableFromInline let count: Int
+    @usableFromInline let coo: COO
 }
 extension COV: SparseVector {
-	@usableFromInline typealias U = Element
-	@usableFromInline typealias R = Array<Element>
-	@inlinable
-	subscript(position: Int) -> Element {
-		coo.first {
-			$0 == position && $1 != .zero
-		}.map(\.1) ?? .zero
-	}
-	@usableFromInline
-	subscript(bounds: some RangeExpression<Int>) -> COV<Element, LazyMapSequence<LazyFilterSequence<LazyMapSequence<COO, Optional<(Int, Element)>>>, (Int, Element)>> {
-		let bounds = bounds.relative(to: 0..<count)
-		return.init(count: bounds.count, coo: coo.lazy.compactMap {
-			switch ($0, $1) {
-			case (bounds, let v) where v != .zero:
-				.some(($0 - bounds.lowerBound, $1))
-			default:
-				.none
-			}
-		})
-	}
+    @usableFromInline typealias U = Element
+    @inlinable
+    subscript(position: Int) -> Element {
+        coo.first {
+            $0 == position && $1 != .zero
+        }.map(\.1) ?? .zero
+    }
+    @usableFromInline
+    subscript(bounds: some RangeExpression<Int>) -> COV<Element, LazyMapSequence<LazyFilterSequence<LazyMapSequence<COO, Optional<(Int, Element)>>>, (Int, Element)>> {
+        let bounds = bounds.relative(to: 0..<count)
+        return.init(count: bounds.count, coo: coo.lazy.compactMap {
+            switch ($0, $1) {
+            case (bounds, .zero):
+                .none
+            case (bounds, let v):
+                .some(($0 - bounds.lowerBound, $1))
+            default:
+                .none
+            }
+        })
+    }
 }

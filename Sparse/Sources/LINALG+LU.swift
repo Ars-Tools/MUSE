@@ -1,11 +1,11 @@
 //
-//  Dense+.swift
+//  LINALG+LU.swift
 //  MUSE
 //
-//  Created by Kota on 9/22/25.
+//  Created by Kota on 9/26/25.
 //
 import typealias Dense.LAPACK
-extension LAPACK.LU {
+extension LAPACK.LU where Element: SparseScalar<Element> {
     public typealias P = CCS<Element>
     public var p: P {
         .init(rows: ipivot.count,
