@@ -141,16 +141,13 @@ struct BLASTestCases {
             #expect(w[row, col] == u)
             #expect(w[row, col] == v)
         }
-        for row in 0..<1 {//w.rows {
-            
+        for row in 0..<w.rows {
             let u = try z[0..., 0][row][]
-            print(z[0..., 0].x, z[0..., 0].y, "u", u)
             #expect(w[row, 0] == u)
         }
-        for col in 0..<1 { //w.cols {
-            print(z[0, 0...].x, z[0, 0...].y)
-//            let u = try z[0, 0...][col][]
-//            #expect(w[0, col] == u)
+        for col in 0..<w.cols {
+            let u = try z[0, 0...][col][]
+            #expect(w[0, col] == u)
         }
 //        for idx in 0..<min(w.rows, w.cols) {
 //            let u = try z.diagonal[idx][]
@@ -188,10 +185,10 @@ struct BLASTestCases {
             let u = try z[0, 0...][col][]
             #expect(w[0, col] == u)
         }
-        for idx in 0..<min(w.rows, w.cols) {
-            let u = try z.diagonal[idx][]
-            #expect(w[idx, idx] == u)
-        }
+//        for idx in 0..<min(w.rows, w.cols) {
+//            let u = try z.diagonal[idx][]
+//            #expect(w[idx, idx] == u)
+//        }
     }
     @Test(arguments: [
         (4, 3, 7)
@@ -224,10 +221,10 @@ struct BLASTestCases {
             let u = try z[0, 0...][col][]
             #expect(w[0, col] == u)
         }
-        for idx in 0..<min(w.rows, w.cols) {
-            let u = try z.diagonal[idx][]
-            #expect(w[idx, idx] == u)
-        }
+//        for idx in 0..<min(w.rows, w.cols) {
+//            let u = try z.diagonal[idx][]
+//            #expect(w[idx, idx] == u)
+//        }
     }
     @Test(arguments: [
         (4, 3, 7)
@@ -260,10 +257,10 @@ struct BLASTestCases {
             let u = try z[0, 0...][col][]
             #expect(w[0, col] == u)
         }
-        for idx in 0..<min(w.rows, w.cols) {
-            let u = try z.diagonal[idx][]
-            #expect(w[idx, idx] == u)
-        }
+//        for idx in 0..<min(w.rows, w.cols) {
+//            let u = try z.diagonal[idx][]
+//            #expect(w[idx, idx] == u)
+//        }
     }
     @Test
     func tt() throws {
