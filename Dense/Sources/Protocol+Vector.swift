@@ -40,9 +40,9 @@ extension Vector {
     public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
         switch MemoryStrategy.default {
         case.rowMajor:
-            self[bounds.last.map { $0.relative(to: 0..<count) } ?? 0..<count]
+            self[bounds.last.map { $0.relative(to: 0..<count) } ?? 0..<0]
         case.columnMajor:
-            self[bounds.first.map { $0.relative(to: 0..<count) } ?? 0..<count]
+            self[bounds.first.map { $0.relative(to: 0..<count) } ?? 0..<0]
         }
     }
 }

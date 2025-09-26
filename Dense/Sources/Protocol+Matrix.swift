@@ -29,22 +29,22 @@ extension Matrix {
     public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
         switch MemoryStrategy.default {
         case.rowMajor:
-            self[position.first ?? .zero,
-                 position.dropFirst().first ?? .zero]
+            self[position.prefix(rows == 0 ? 0 : 1).first ?? .zero,
+                 position.dropFirst(rows == 0 ? 0 : 1).first ?? .zero]
         case.columnMajor:
-            self[position.dropLast().last ?? .zero,
-                 position.last ?? .zero]
+            self[position.dropLast(cols == 0 ? 0 : 1).last ?? .zero,
+                 position.suffix(cols == 0 ? 0 : 1).last ?? .zero]
         }
     }
     @inlinable
     public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
         switch MemoryStrategy.default {
         case.rowMajor:
-            self[bounds.first.map { $0.relative(to: 0..<rows) } ?? 0..<rows,
-                 bounds.dropFirst().first.map { $0.relative(to: 0..<cols) } ?? 0..<cols]
+            self[bounds.prefix(rows == 0 ? 0 : 1).first.map { $0.relative(to: 0..<rows) } ?? 0..<0,
+                 bounds.dropFirst(rows == 0 ? 0 : 1).first.map { $0.relative(to: 0..<cols) } ?? 0..<0]
         case.columnMajor:
-            self[bounds.dropLast().last.map { $0.relative(to: 0..<rows) } ?? 0..<rows,
-                 bounds.last.map { $0.relative(to: 0..<cols) } ?? 0..<cols]
+            self[bounds.dropLast(cols == 0 ? 0 : 1).last.map { $0.relative(to: 0..<rows) } ?? 0..<0,
+                 bounds.suffix(cols == 0 ? 0 : 1).last.map { $0.relative(to: 0..<cols) } ?? 0..<0]
         }
     }
 }
@@ -54,21 +54,21 @@ extension MutableMatrix {
         _read {
             switch MemoryStrategy.default {
             case.rowMajor:
-                yield self[position.first ?? .zero,
-                           position.dropFirst().first ?? .zero]
+                yield self[position.prefix(rows == 0 ? 0 : 1).first ?? .zero,
+                           position.dropFirst(rows == 0 ? 0 : 1).first ?? .zero]
             case.columnMajor:
-                yield self[position.dropLast().last ?? .zero,
-                           position.last ?? .zero]
+                yield self[position.dropLast(cols == 0 ? 0 : 1).last ?? .zero,
+                           position.suffix(cols == 0 ? 0 : 1).last ?? .zero]
             }
         }
         _modify {
             switch MemoryStrategy.default {
             case.rowMajor:
-                yield &self[position.first ?? .zero,
-                            position.dropFirst().first ?? .zero]
+                yield &self[position.prefix(rows == 0 ? 0 : 1).first ?? .zero,
+                            position.dropFirst(rows == 0 ? 0 : 1).first ?? .zero]
             case.columnMajor:
-                yield &self[position.dropLast().last ?? .zero,
-                            position.last ?? .zero]
+                yield &self[position.dropLast(cols == 0 ? 0 : 1).last ?? .zero,
+                            position.suffix(cols == 0 ? 0 : 1).last ?? .zero]
             }
         }
     }
@@ -77,21 +77,21 @@ extension MutableMatrix {
         _read {
             switch MemoryStrategy.default {
             case.rowMajor:
-                yield self[bounds.first.map { $0.relative(to: 0..<rows) } ?? 0..<rows,
-                           bounds.dropFirst().first.map { $0.relative(to: 0..<cols) } ?? 0..<cols]
+                yield self[bounds.prefix(rows == 0 ? 0 : 1).first.map { $0.relative(to: 0..<rows) } ?? 0..<0,
+                           bounds.dropFirst(rows == 0 ? 0 : 1).first.map { $0.relative(to: 0..<cols) } ?? 0..<0]
             case.columnMajor:
-                yield self[bounds.dropLast().last.map { $0.relative(to: 0..<rows) } ?? 0..<rows,
-                           bounds.last.map { $0.relative(to: 0..<cols) } ?? 0..<cols]
+                yield self[bounds.dropLast(cols == 0 ? 0 : 1).last.map { $0.relative(to: 0..<rows) } ?? 0..<0,
+                           bounds.suffix(cols == 0 ? 0 : 1).last.map { $0.relative(to: 0..<cols) } ?? 0..<0]
             }
         }
         _modify {
             switch MemoryStrategy.default {
             case.rowMajor:
-                yield &self[bounds.first.map { $0.relative(to: 0..<rows) } ?? 0..<rows,
-                            bounds.dropFirst().first.map { $0.relative(to: 0..<cols) } ?? 0..<cols]
+                yield &self[bounds.prefix(rows == 0 ? 0 : 1).first.map { $0.relative(to: 0..<rows) } ?? 0..<0,
+                            bounds.dropFirst(rows == 0 ? 0 : 1).first.map { $0.relative(to: 0..<cols) } ?? 0..<0]
             case.columnMajor:
-                yield &self[bounds.dropLast().last.map { $0.relative(to: 0..<rows) } ?? 0..<rows,
-                            bounds.last.map { $0.relative(to: 0..<cols) } ?? 0..<cols]
+                yield &self[bounds.dropLast(cols == 0 ? 0 : 1).last.map { $0.relative(to: 0..<rows) } ?? 0..<0,
+                            bounds.suffix(cols == 0 ? 0 : 1).last.map { $0.relative(to: 0..<cols) } ?? 0..<0]
             }
         }
     }
