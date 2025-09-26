@@ -1139,7 +1139,6 @@ extension BLAS.DOT: ElasticTensor where X: ElasticTensor, Y: ElasticTensor {
             let yb = bounds.dropFirst(xb.count)
             let xs = xb + concat(xh.dropFirst(xb.count), xt).map { 0..<$0 }
             let ys = yh.map { 0..<$0 } + yb + (yt.dropFirst(yb.count).map { 0..<$0 } as Array<Range<Int>>)
-            
             return.init(order: order, width: width, x: x[xs], y: y[ys])
         case.columnMajor:
             let bounds = zk.dropLast(bounds.count).map { 0..<$0 } + zip(bounds, zk.suffix(bounds.count)).map { $0.relative(to: 0..<$1) }
