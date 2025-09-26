@@ -55,12 +55,17 @@ extension BLAS.DOT: Tensor {
                 await withUnsafePointer(xm(), ym()) { x, y in
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
-                            $0.initialize(repeating: .zero)
                             for offset in offset {
                                 let x = x.advanced(by: offset.x)
                                 let y = y.advanced(by: offset.y)
                                 let z = z.advanced(by: offset.z)
-                                for offset in length {
+                                Element.Outer(m: m, n: n,
+                                              α: 1,
+                                              x: x.advanced(by: offset.x), ldx: max(1, incx),
+                                              y: y.advanced(by: offset.y), ldy: max(1, incy),
+                                              β: 0,
+                                              a: z, lda: ldc)
+                                for offset in length.dropFirst() {
                                     Element.Outer(m: m, n: n,
                                                   α: 1,
                                                   x: x.advanced(by: offset.x), ldx: max(1, incx),
@@ -79,12 +84,17 @@ extension BLAS.DOT: Tensor {
                 await withUnsafePointer(xm(), ym()) { x, y in
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
-                            $0.initialize(repeating: .zero)
                             for offset in offset {
                                 let x = x.advanced(by: offset.x)
                                 let y = y.advanced(by: offset.y)
                                 let z = z.advanced(by: offset.z)
-                                for offset in length {
+                                Element.Outer(m: n, n: m,
+                                              α: 1,
+                                              x: y.advanced(by: offset.y), ldx: max(1, incy),
+                                              y: x.advanced(by: offset.x), ldy: max(1, incx),
+                                              β: 0,
+                                              a: z, lda: ldc)
+                                for offset in length.dropFirst() {
                                     Element.Outer(m: n, n: m,
                                                   α: 1,
                                                   x: y.advanced(by: offset.y), ldx: max(1, incy),
@@ -567,12 +577,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                 withUnsafePointer(xm(), ym()) { x, y in
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
-                            $0.initialize(repeating: .zero)
                             for offset in offset {
                                 let x = x.advanced(by: offset.x)
                                 let y = y.advanced(by: offset.y)
                                 let z = z.advanced(by: offset.z)
-                                for offset in length {
+                                Element.Outer(m: m, n: n,
+                                              α: 1,
+                                              x: x.advanced(by: offset.x), ldx: max(1, incx),
+                                              y: y.advanced(by: offset.y), ldy: max(1, incy),
+                                              β: 0,
+                                              a: z, lda: ldc)
+                                for offset in length.dropFirst() {
                                     Element.Outer(m: m, n: n,
                                                   α: 1,
                                                   x: x.advanced(by: offset.x), ldx: max(1, incx),
@@ -596,7 +611,13 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let x = x.advanced(by: offset.x)
                                 let y = y.advanced(by: offset.y)
                                 let z = z.advanced(by: offset.z)
-                                for offset in length {
+                                Element.Outer(m: n, n: m,
+                                              α: 1,
+                                              x: y.advanced(by: offset.y), ldx: max(1, incy),
+                                              y: x.advanced(by: offset.x), ldy: max(1, incx),
+                                              β: 0,
+                                              a: z, lda: ldc)
+                                for offset in length.dropFirst() {
                                     Element.Outer(m: n, n: m,
                                                   α: 1,
                                                   x: y.advanced(by: offset.y), ldx: max(1, incy),
