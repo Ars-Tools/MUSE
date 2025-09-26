@@ -105,6 +105,10 @@ extension Complex.Ortho: InstantTensor where X: InstantTensor, Y: InstantTensor 
     }
 }
 @inlinable
+public func complex<Element: ComplexElement>(r: some Scalar<Element.Magnitude>, i: some Scalar<Element.Magnitude>) -> some Scalar<Element> {
+    Complex.Ortho(x: r, y: i)
+}
+@inlinable
 public func complex<Element: ComplexElement>(r: some Vector<Element.Magnitude>, i: some Vector<Element.Magnitude>) -> some Vector<Element> {
     Complex.Ortho(x: r, y: i)
 }
@@ -114,6 +118,10 @@ public func complex<Element: ComplexElement>(r: some Matrix<Element.Magnitude>, 
 }
 @inlinable
 public func complex<Element: ComplexElement>(r: some Tensor<Element.Magnitude>, i: some Vector<Element.Magnitude>) -> some Tensor<Element> {
+    Complex.Ortho(x: r, y: i)
+}
+@inlinable
+public func complex<Element: ComplexElement>(r: some InstantScalar<Element.Magnitude>, i: some InstantScalar<Element.Magnitude>) -> some InstantScalar<Element> {
     Complex.Ortho(x: r, y: i)
 }
 @inlinable
@@ -192,6 +200,10 @@ extension Complex.Polar: InstantTensor where X: InstantTensor, Y: InstantTensor 
     }
 }
 @inlinable
+public func complex<Element: ComplexElement>(r: some Scalar<Element.Magnitude>, θ: some Scalar<Element.Magnitude>) -> some Scalar<Element> {
+    Complex.Polar(x: r, y: θ)
+}
+@inlinable
 public func complex<Element: ComplexElement>(r: some Vector<Element.Magnitude>, θ: some Vector<Element.Magnitude>) -> some Vector<Element> {
     Complex.Polar(x: r, y: θ)
 }
@@ -201,6 +213,10 @@ public func complex<Element: ComplexElement>(r: some Matrix<Element.Magnitude>, 
 }
 @inlinable
 public func complex<Element: ComplexElement>(r: some Tensor<Element.Magnitude>, θ: some Vector<Element.Magnitude>) -> some Tensor<Element> {
+    Complex.Polar(x: r, y: θ)
+}
+@inlinable
+public func complex<Element: ComplexElement>(r: some InstantScalar<Element.Magnitude>, θ: some InstantScalar<Element.Magnitude>) -> some InstantScalar<Element> {
     Complex.Polar(x: r, y: θ)
 }
 @inlinable

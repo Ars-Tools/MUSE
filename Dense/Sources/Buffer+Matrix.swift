@@ -19,8 +19,8 @@ import func Layout.product
 	public typealias V = VectorBuffer<R.SubSequence>
 	public let rows: Int
 	public let cols: Int
-	@usableFromInline let ldr: Int
-	@usableFromInline let ldc: Int
+	public let ldr: Int
+    public let ldc: Int
 	@usableFromInline
 	private(set) var data: R
 }
@@ -40,6 +40,16 @@ extension MatrixBuffer {
 			yield &data[keyPath: lookup]
 		}
 	}
+}
+extension MatrixBuffer: AccelerateBuffer {
+    @inline(__always)
+    public var count: Int {
+        data.count
+    }
+    @inline(__always)
+    public func withUnsafeBufferPointer<Λ>(_ body: (UnsafeBufferPointer<Element>) throws -> Λ) rethrows -> Λ {
+        try data.withUnsafeBufferPointer(body)
+    }
 }
 extension MatrixBuffer: InstantMatrix {
     @inline(__always)
