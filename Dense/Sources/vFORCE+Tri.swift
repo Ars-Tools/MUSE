@@ -7,63 +7,63 @@
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
 extension vFORCE {
-    public struct Sin<X: Tensor<Element>> {
+    @frozen public struct Sin<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Cos<X: Tensor<Element>> {
+    @frozen public struct Cos<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Tan<X: Tensor<Element>> {
+    @frozen public struct Tan<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Sinπ<X: Tensor<Element>> {
+    @frozen public struct Sinπ<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Cosπ<X: Tensor<Element>> {
+    @frozen public struct Cosπ<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Tanπ<X: Tensor<Element>> {
+    @frozen public struct Tanπ<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Sinh<X: Tensor<Element>> {
+    @frozen public struct Sinh<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Cosh<X: Tensor<Element>> {
+    @frozen public struct Cosh<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct Tanh<X: Tensor<Element>> {
+    @frozen public struct Tanh<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {

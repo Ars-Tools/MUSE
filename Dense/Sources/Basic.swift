@@ -2,24 +2,20 @@
 //  Basic.swift
 //  MUSE
 //
-//  Created by Kota on 9/18/R7.
+//  Created by Kota on 9/26/25.
 //
 import Accelerate.vecLib
 import typealias Layout.MemoryStrategy
 public enum Basic<Element: BitwiseCopyable & Sendable> {}
 extension Basic {
-    public enum AB<A: Tensor<Element>, B: Tensor<Element>> {
-        public typealias R = Array<Element>
-        public typealias S = AB<A.S, B.S>
-        public typealias T = AB<A.T, B.T>
-        public typealias U = AB<A.U, B.U>
-        public typealias V = AB<A.V, B.V>
+    public enum Choice<A: Tensor<Element>, B: Tensor<Element>> {
+        public typealias Storage = Array<Element>
         case A(A)
         case B(B)
     }
 }
-extension Basic.AB: Scalar where A: Scalar, B: Scalar {}
-extension Basic.AB: Vector where A: Vector, B: Vector {
+extension Basic.Choice: Scalar where A: Scalar, B: Scalar {}
+extension Basic.Choice: Vector where A: Vector, B: Vector {
     @inlinable@_transparent
     public var count: Int {
         switch self {
@@ -48,7 +44,7 @@ extension Basic.AB: Vector where A: Vector, B: Vector {
         }
     }
 }
-extension Basic.AB: Matrix where A: Matrix, B: Matrix {
+extension Basic.Choice: Matrix where A: Matrix, B: Matrix {
     @inlinable@_transparent
     public var rows: Int {
         switch self {
@@ -104,16 +100,11 @@ extension Basic.AB: Matrix where A: Matrix, B: Matrix {
         }
     }
 }
-extension Basic.AB: Tensor {
-    @inlinable@_transparent
-    public var shape: Array<Int> {
-        switch self {
-        case.A(let a):
-            a.shape
-        case .B(let b):
-            b.shape
-        }
-    }
+extension Basic.Choice: ElasticTensor where A: ElasticTensor, B: ElasticTensor {
+    public typealias S = Basic.Choice<A.S, B.S>
+    public typealias T = Basic.Choice<A.T, B.T>
+    public typealias U = Basic.Choice<A.U, B.U>
+    public typealias V = Basic.Choice<A.V, B.V>
     @inlinable@_transparent
     public var transpose: T {
         switch self {
@@ -133,7 +124,7 @@ extension Basic.AB: Tensor {
         }
     }
     @inlinable
-    public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index == Int {
+    public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
         switch self {
         case.A(let a):
             .A(a[position])
@@ -142,12 +133,23 @@ extension Basic.AB: Tensor {
         }
     }
     @inlinable
-    public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index == Int, Q.Element.Bound == Int {
+    public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
         switch self {
         case.A(let a):
             .A(a[bounds])
         case.B(let b):
             .B(b[bounds])
+        }
+    }
+}
+extension Basic.Choice: Tensor {
+    @inlinable@_transparent
+    public var shape: Array<Int> {
+        switch self {
+        case.A(let a):
+            a.shape
+        case .B(let b):
+            b.shape
         }
     }
     @inlinable
@@ -170,10 +172,7 @@ extension Basic.AB: Tensor {
         }
     }
 }
-extension Basic.AB: InstantScalar where A: InstantScalar, B: InstantScalar {}
-extension Basic.AB: InstantVector where A: InstantVector, B: InstantVector {}
-extension Basic.AB: InstantMatrix where A: InstantMatrix, B: InstantMatrix {}
-extension Basic.AB: InstantTensor where A: InstantTensor, B: InstantTensor {
+extension Basic.Choice: InstantTensor where A: InstantTensor, B: InstantTensor {
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch self {
         case.A(let a):

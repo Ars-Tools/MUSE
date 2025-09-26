@@ -2,58 +2,34 @@
 //  vFORCE+Exp.swift
 //  MUSE
 //
-//  Created by Kota on 9/23/25.
+//  Created by Kota on 9/26/25.
 //
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
 extension vFORCE {
-    @usableFromInline
-    struct Exp<X: Tensor<Element>> {
-        @usableFromInline typealias R = Array<Element>
-        @usableFromInline typealias S = Exp<X.S>
-        @usableFromInline typealias T = Exp<X.T>
-        @usableFromInline typealias U = Exp<X.U>
-        @usableFromInline typealias V = Exp<X.V>
-        @usableFromInline let x: X
+    @frozen public struct Exp<X: Tensor<Element>> {
+        public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    @usableFromInline
-    struct Exp2<X: Tensor<Element>> {
-        @usableFromInline typealias R = Array<Element>
-        @usableFromInline typealias S = Exp2<X.S>
-        @usableFromInline typealias T = Exp2<X.T>
-        @usableFromInline typealias U = Exp2<X.U>
-        @usableFromInline typealias V = Exp2<X.V>
-        @usableFromInline let x: X
+    @frozen public struct Exp2<X: Tensor<Element>> {
+        public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    @usableFromInline
-    struct Exp10<X: Tensor<Element>> {
-        @usableFromInline typealias R = Array<Element>
-        @usableFromInline typealias S = Exp10<X.S>
-        @usableFromInline typealias T = Exp10<X.T>
-        @usableFromInline typealias U = Exp10<X.U>
-        @usableFromInline typealias V = Exp10<X.V>
-        @usableFromInline let x: X
+    @frozen public struct Exp10<X: Tensor<Element>> {
+        public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    @usableFromInline
-    struct Expm1<X: Tensor<Element>> {
-        @usableFromInline typealias R = Array<Element>
-        @usableFromInline typealias S = Expm1<X.S>
-        @usableFromInline typealias T = Expm1<X.T>
-        @usableFromInline typealias U = Expm1<X.U>
-        @usableFromInline typealias V = Expm1<X.V>
-        @usableFromInline let x: X
+    @frozen public struct Expm1<X: Tensor<Element>> {
+        public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
@@ -61,12 +37,11 @@ extension vFORCE {
     }
 }
 // MARK: Exp
-extension vFORCE.Exp: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension vFORCE.Exp: Vector & Operators.UnaryVector where X: Vector {}
-extension vFORCE.Exp: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension vFORCE.Exp: Tensor & Operators.UnaryTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+extension vFORCE.Exp: Tensor {
+    @inlinable@inline(__always)@_transparent
+    public var shape: Array<Int> { x.shape }
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -75,26 +50,23 @@ extension vFORCE.Exp: Tensor & Operators.UnaryTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.exp(x.advanced(by: offset.x), stride.x,
-                                        y.advanced(by: offset.y), stride.y,
-                                        length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.exp(x.advanced(by: offset.x), stride.x,
+                                            y.advanced(by: offset.y), stride.y,
+                                            length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-extension vFORCE.Exp: InstantScalar where X: InstantScalar {}
-extension vFORCE.Exp: InstantVector where X: InstantVector {}
-extension vFORCE.Exp: InstantMatrix where X: InstantMatrix {}
 extension vFORCE.Exp: InstantTensor where X: InstantTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -103,27 +75,35 @@ extension vFORCE.Exp: InstantTensor where X: InstantTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.exp(x.advanced(by: offset.x), stride.x,
-                                        y.advanced(by: offset.y), stride.y,
-                                        length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.exp(x.advanced(by: offset.x), stride.x,
+                                            y.advanced(by: offset.y), stride.y,
+                                            length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
+extension vFORCE.Exp: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension vFORCE.Exp: Vector & Operator.UnaryVector where X: Vector {}
+extension vFORCE.Exp: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension vFORCE.Exp: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
+    public typealias S = vFORCE.Exp<X.S>
+    public typealias T = vFORCE.Exp<X.T>
+    public typealias U = vFORCE.Exp<X.U>
+    public typealias V = vFORCE.Exp<X.V>
+}
 // MARK: Exp2
-extension vFORCE.Exp2: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension vFORCE.Exp2: Vector & Operators.UnaryVector where X: Vector {}
-extension vFORCE.Exp2: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension vFORCE.Exp2: Tensor & Operators.UnaryTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+extension vFORCE.Exp2: Tensor {
+    @inlinable@inline(__always)@_transparent
+    public var shape: Array<Int> { x.shape }
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -132,67 +112,23 @@ extension vFORCE.Exp2: Tensor & Operators.UnaryTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.exp2(x.advanced(by: offset.x), stride.x,
-                                         y.advanced(by: offset.y), stride.y,
-                                         length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.exp2(x.advanced(by: offset.x), stride.x,
+                                             y.advanced(by: offset.y), stride.y,
+                                             length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Scalar<Element>) -> some Scalar<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Vector<Element>) -> some Vector<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Matrix<Element>) -> some Matrix<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Tensor<Element>) -> some Tensor<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantScalar<Element>) -> some InstantScalar<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantVector<Element>) -> some InstantVector<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantMatrix<Element>) -> some InstantMatrix<Element> {
-    vFORCE.Exp(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantTensor<Element>) -> some InstantTensor<Element> {
-    vFORCE.Exp(x: x)
-}
-// MARK: Exp2
-extension vFORCE.Exp2: InstantScalar where X: InstantScalar {}
-extension vFORCE.Exp2: InstantVector where X: InstantVector {}
-extension vFORCE.Exp2: InstantMatrix where X: InstantMatrix {}
 extension vFORCE.Exp2: InstantTensor where X: InstantTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -201,67 +137,35 @@ extension vFORCE.Exp2: InstantTensor where X: InstantTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.exp2(x.advanced(by: offset.x), stride.x,
-                                         y.advanced(by: offset.y), stride.y,
-                                         length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.exp2(x.advanced(by: offset.x), stride.x,
+                                             y.advanced(by: offset.y), stride.y,
+                                             length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Scalar<Element>) -> some Scalar<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Vector<Element>) -> some Vector<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Matrix<Element>) -> some Matrix<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Tensor<Element>) -> some Tensor<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantScalar<Element>) -> some InstantScalar<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantVector<Element>) -> some InstantVector<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantMatrix<Element>) -> some InstantMatrix<Element> {
-    vFORCE.Exp2(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp2<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantTensor<Element>) -> some InstantTensor<Element> {
-    vFORCE.Exp2(x: x)
+extension vFORCE.Exp2: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension vFORCE.Exp2: Vector & Operator.UnaryVector where X: Vector {}
+extension vFORCE.Exp2: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension vFORCE.Exp2: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
+    public typealias S = vFORCE.Exp2<X.S>
+    public typealias T = vFORCE.Exp2<X.T>
+    public typealias U = vFORCE.Exp2<X.U>
+    public typealias V = vFORCE.Exp2<X.V>
 }
 // MARK: Exp10
-extension vFORCE.Exp10: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension vFORCE.Exp10: Vector & Operators.UnaryVector where X: Vector {}
-extension vFORCE.Exp10: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension vFORCE.Exp10: Tensor & Operators.UnaryTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+extension vFORCE.Exp10: Tensor {
+    @inlinable@inline(__always)@_transparent
+    public var shape: Array<Int> { x.shape }
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -270,26 +174,23 @@ extension vFORCE.Exp10: Tensor & Operators.UnaryTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.exp10(x.advanced(by: offset.x), stride.x,
-                                          y.advanced(by: offset.y), stride.y,
-                                          length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.exp10(x.advanced(by: offset.x), stride.x,
+                                              y.advanced(by: offset.y), stride.y,
+                                              length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-extension vFORCE.Exp10: InstantScalar where X: InstantScalar {}
-extension vFORCE.Exp10: InstantVector where X: InstantVector {}
-extension vFORCE.Exp10: InstantMatrix where X: InstantMatrix {}
 extension vFORCE.Exp10: InstantTensor where X: InstantTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -298,67 +199,35 @@ extension vFORCE.Exp10: InstantTensor where X: InstantTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.exp10(x.advanced(by: offset.x), stride.x,
-                                        y.advanced(by: offset.y), stride.y,
-                                        length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.exp10(x.advanced(by: offset.x), stride.x,
+                                              y.advanced(by: offset.y), stride.y,
+                                              length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Scalar<Element>) -> some Scalar<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Vector<Element>) -> some Vector<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Matrix<Element>) -> some Matrix<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Tensor<Element>) -> some Tensor<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantScalar<Element>) -> some InstantScalar<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantVector<Element>) -> some InstantVector<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantMatrix<Element>) -> some InstantMatrix<Element> {
-    vFORCE.Exp10(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func exp10<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantTensor<Element>) -> some InstantTensor<Element> {
-    vFORCE.Exp10(x: x)
+extension vFORCE.Exp10: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension vFORCE.Exp10: Vector & Operator.UnaryVector where X: Vector {}
+extension vFORCE.Exp10: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension vFORCE.Exp10: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
+    public typealias S = vFORCE.Exp10<X.S>
+    public typealias T = vFORCE.Exp10<X.T>
+    public typealias U = vFORCE.Exp10<X.U>
+    public typealias V = vFORCE.Exp10<X.V>
 }
 // MARK: Expm1
-extension vFORCE.Expm1: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension vFORCE.Expm1: Vector & Operators.UnaryVector where X: Vector {}
-extension vFORCE.Expm1: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension vFORCE.Expm1: Tensor & Operators.UnaryTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
+extension vFORCE.Expm1: Tensor {
+    @inlinable@inline(__always)@_transparent
+    public var shape: Array<Int> { x.shape }
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -367,26 +236,23 @@ extension vFORCE.Expm1: Tensor & Operators.UnaryTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 await withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.expm1(x.advanced(by: offset.x), stride.x,
-                                          y.advanced(by: offset.y), stride.y,
-                                          length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.expm1(x.advanced(by: offset.x), stride.x,
+                                              y.advanced(by: offset.y), stride.y,
+                                              length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-extension vFORCE.Expm1: InstantScalar where X: InstantScalar {}
-extension vFORCE.Expm1: InstantVector where X: InstantVector {}
-extension vFORCE.Expm1: InstantMatrix where X: InstantMatrix {}
 extension vFORCE.Expm1: InstantTensor where X: InstantTensor {
-    @usableFromInline
-    func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let shape = x.shape
@@ -395,58 +261,38 @@ extension vFORCE.Expm1: InstantTensor where X: InstantTensor {
             let (length, stride, offset) = strategy.flatten(shape: shape, xs: xs, ys: ys)
             return (ys, {
                 withUnsafePointer(xm()) { x in
-                    R(unsafeUninitializedCapacity: capacity) {
-                        let y = $0.baseAddress.unsafelyUnwrapped
-                        for offset in offset {
-                            Element.expm1(x.advanced(by: offset.x), stride.x,
-                                          y.advanced(by: offset.y), stride.y,
-                                          length)
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.expm1(x.advanced(by: offset.x), stride.x,
+                                              y.advanced(by: offset.y), stride.y,
+                                              length)
+                            }
+                            $1 = $0.count
                         }
-                        $1 = $0.count
-                    }
                 }
             })
         }
     }
 }
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Scalar<Element>) -> some Scalar<Element> {
-    vFORCE.Expm1(x: x)
+extension vFORCE.Expm1: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension vFORCE.Expm1: Vector & Operator.UnaryVector where X: Vector {}
+extension vFORCE.Expm1: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension vFORCE.Expm1: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
+    public typealias S = vFORCE.Expm1<X.S>
+    public typealias T = vFORCE.Expm1<X.T>
+    public typealias U = vFORCE.Expm1<X.U>
+    public typealias V = vFORCE.Expm1<X.V>
 }
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Vector<Element>) -> some Vector<Element> {
-    vFORCE.Expm1(x: x)
+public func exp<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Exp<X> {
+    .init(x: x)
 }
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Matrix<Element>) -> some Matrix<Element> {
-    vFORCE.Expm1(x: x)
+public func exp2<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Exp2<X> {
+    .init(x: x)
 }
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some Tensor<Element>) -> some Tensor<Element> {
-    vFORCE.Expm1(x: x)
+public func exp10<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Exp10<X> {
+    .init(x: x)
 }
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantScalar<Element>) -> some InstantScalar<Element> {
-    vFORCE.Expm1(x: x)
+public func expm1<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Expm1<X> {
+    .init(x: x)
 }
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantVector<Element>) -> some InstantVector<Element> {
-    vFORCE.Expm1(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantMatrix<Element>) -> some InstantMatrix<Element> {
-    vFORCE.Expm1(x: x)
-}
-@_disfavoredOverload
-@inlinable
-public func expm1<Element: vFORCESuiteElement & ArithmeticElement>(_ x: some InstantTensor<Element>) -> some InstantTensor<Element> {
-    vFORCE.Expm1(x: x)
-}
-

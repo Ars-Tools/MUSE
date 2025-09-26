@@ -2,195 +2,158 @@
 //  Buffer+Vector.swift
 //  MUSE
 //
-//  Created by Kota on 9/8/R7.
+//  Created by Kota on 9/25/25.
 //
-import protocol Accelerate.AccelerateBuffer
-import protocol Accelerate.AccelerateMutableBuffer
 import typealias Layout.MemoryStrategy
-import func Layout.capacity
-@dynamicMemberLookup
-@frozen public struct VectorBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: ScalarBuffer, R.SubSequence: Storage {
-	public typealias Element = R.Element
-	public typealias S = VectorBuffer<R.SubSequence>
-	public typealias T = Self
-	public typealias U = Element
-	public typealias V = Self
-	public let count: Int
-	public let inc: Int
-	@usableFromInline
-	private(set) var data: R
+extension Buffer {
+    @dynamicMemberLookup
+    @frozen public struct Vector {
+        public typealias Element = Storage.Element
+        public typealias S = Buffer<Storage.SubSequence>.Vector
+        public typealias T = Self
+        public typealias U = Element
+        public typealias V = Self
+        public let count: Int
+        public let inc: Int
+        @usableFromInline
+        private(set) var store: Storage
+    }
 }
-extension VectorBuffer {
+extension Buffer.Vector {
     @_disfavoredOverload
     @inlinable@inline(__always)
-    public subscript<T>(dynamicMember lookup: KeyPath<R, T>) -> T {
-		data[keyPath: lookup]
-	}
+    public subscript<R>(dynamicMember lookup: KeyPath<Storage, R>) -> R {
+        store[keyPath: lookup]
+    }
     @_disfavoredOverload
     @inlinable@inline(__always)
-	public subscript<T>(dynamicMember lookup: ReferenceWritableKeyPath<R, T>) -> T {
-		_read {
-			yield data[keyPath: lookup]
-		}
-		_modify {
-			yield &data[keyPath: lookup]
-		}
-	}
-}
-extension VectorBuffer: InstantVector {
-	@inlinable
-	public subscript(position: Int) -> U {
-		data[data.startIndex.advanced(by: position * inc)]
-	}
-	public subscript(bounds: some RangeExpression<Int>) -> S {
-		let range = bounds.relative(to: 0..<count)
-		let lower = data.startIndex.advanced(by: range.lowerBound * inc)
-		let upper = lower.advanced(by: range.count * inc)
-		return.init(count: range.count, inc: inc, data: data[lower..<upper])
-	}
-	@inlinable
-	public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
-		([inc], {data})
-	}
-}
-extension VectorBuffer: MutableTensor & MutableVector where R: MutableStorage, R.SubSequence: MutableStorage {
-	@inlinable
-	public subscript(position: Int) -> U {
-		_read {
-			yield data[data.startIndex.advanced(by: position * inc)]
-		}
-		_modify {
-			yield &data[data.startIndex.advanced(by: position * inc)]
-		}
-	}
-	public subscript(bounds: some RangeExpression<Int>) -> S {
-		get {
-			let range = bounds.relative(to: 0..<count)
-			let lower = data.startIndex.advanced(by: range.lowerBound * inc)
-			let upper = lower.advanced(by: range.count * inc)
-			return.init(count: range.count, inc: inc, data: data[lower..<upper])
-		}
-		set {
-			let range = bounds.relative(to: 0..<count)
-			for (offset, element) in range.enumerated() {
-				data[data.startIndex.advanced(by: element * inc)] = newValue[offset]
-			}
-		}
-	}
-}
-// MARK: Zero-Cost Initializers
-extension VectorBuffer {
-	@inlinable@inline(__always)@_transparent
-	public init(shape: (Int), stride: (Int), data memory: R) {
-		precondition(capacity(alloc: [shape], stride: [stride]) <= memory.count)
-		count = shape
-		inc = stride
-		data = memory
-	}
-    @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) throws where Source: InstantTensor, Source.R == R {
-		switch strategy {
-		case.rowMajor:
-            let (stride, kernel) = try source.evaluation(for: .rowMajor)
-			count = source.shape.last ?? 1
-			inc = stride.last ?? 0
-			data = kernel()
-		case.columnMajor:
-			let (stride, kernel) = try source.evaluation(for: .columnMajor)
-			count = source.shape.first ?? 1
-			inc = stride.first ?? 0
-			data = kernel()
-		}
-	}
-    @inlinable@inline(__always)@_transparent
-	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .rowMajor) async throws where Source: Tensor, Source.R == R {
-		switch strategy {
-		case.rowMajor:
-			let (stride, kernel) = try source.evaluation(for: .rowMajor)
-			async let result = kernel()
-			count = source.shape.last ?? 1
-			inc = stride.last ?? 0
-			data = await result
-		case.columnMajor:
-            let (stride, kernel) = try source.evaluation(for: .columnMajor)
-			async let result = kernel()
-			count = source.shape.first ?? 1
-			inc = stride.first ?? 0
-			data = await result
-		}
-	}
-}
-// MARK: Type-specified Initializers
-extension VectorBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
-    @_disfavoredOverload
-    @inlinable@inline(__always)@_transparent
-    public init(_ source: some Tensor<Element>, for strategy: MemoryStrategy = .rowMajor) async throws {
-        switch strategy {
-        case.rowMajor:
-            let (stride, kernel) = try source.evaluation(for: .rowMajor)
-            async let result = kernel()
-            count = source.shape.last ?? 1
-            inc = stride.last ?? 0
-            data = await R(result)
-        case.columnMajor:
-            let (stride, kernel) = try source.evaluation(for: .columnMajor)
-            async let result = kernel()
-            count = source.shape.first ?? 1
-            inc = stride.first ?? 0
-            data = await.init(result)
+    public subscript<R>(dynamicMember lookup: ReferenceWritableKeyPath<Storage, R>) -> R {
+        _read {
+            yield store[keyPath: lookup]
         }
+        _modify {
+            yield &store[keyPath: lookup]
+        }
+    }
+}
+extension Buffer.Vector: InstantTensor {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Storage) {
+        (zip([count], [inc]).compactMap { $0 != .zero ? .some($1) : .none }, {[store] in store})
+    }
+}
+extension Buffer.Vector: Vector {
+    @inlinable@inline(__always)
+    public subscript(position: Int) -> Element {
+        store[store.startIndex.advanced(by: position * inc)]
+    }
+    public subscript(bounds: some RangeExpression<Int>) -> Buffer<Storage.SubSequence>.Vector {
+        let bounds = bounds.relative(to: 0..<count)
+        let lower = store.startIndex.advanced(by: bounds.lowerBound * inc)
+        let upper = lower.advanced(by: Swift.max(0, bounds.count - 1) * inc + 1)
+        return.init(count: bounds.count, inc: inc, store: store[lower..<upper])
+    }
+}
+extension Buffer.Vector: MutableTensor & MutableVector where Storage: MutableCollection {
+    @inlinable@inline(__always)
+    public subscript(position: Int) -> Element {
+        _read {
+            yield store[store.startIndex.advanced(by: position * inc)]
+        }
+        _modify {
+            yield &store[store.startIndex.advanced(by: position * inc)]
+        }
+    }
+    public subscript(bounds: some RangeExpression<Int>) -> Buffer<Storage.SubSequence>.Vector {
+        get {
+            let bounds = bounds.relative(to: 0..<count)
+            let lower = store.startIndex.advanced(by: bounds.lowerBound * inc)
+            let upper = lower.advanced(by: Swift.max(0, bounds.count - 1) * inc + 1)
+            return.init(count: bounds.count, inc: inc, store: store[lower..<upper])
+        }
+        set {
+            for (offset, element) in bounds.relative(to: 0..<count).enumerated() {
+                store[store.startIndex.advanced(by: inc * element)] = newValue[offset]
+            }
+        }
+    }
+}
+extension Buffer.Vector {
+    @inlinable@inline(__always)@_transparent
+    public init<Source: InstantTensor<Element>>(_ source: Source, for strategy: MemoryStrategy = .default) throws where Source.Storage == Storage {
+        let (stride, kernel) = try source.evaluation(for: strategy)
+        (count, inc) = switch strategy {
+        case.rowMajor:
+            (source.shape.last ?? 1, stride.last ?? 0)
+        case.columnMajor:
+            (source.shape.first ?? 1, stride.first ?? 0)
+        }
+        store = kernel()
+    }
+    @inlinable@inline(__always)@_transparent
+    public init<Source: Tensor<Element>>(_ source: Source, for strategy: MemoryStrategy = .default) async throws where Source.Storage == Storage {
+        let (stride, kernel) = try source.evaluation(for: strategy)
+        async let result = kernel()
+        (count, inc) = switch strategy {
+        case.rowMajor:
+            (source.shape.last ?? 1, stride.last ?? 0)
+        case.columnMajor:
+            (source.shape.first ?? 1, stride.first ?? 0)
+        }
+        store = await result
+    }
+}
+extension Buffer.Vector: ExpressibleByArrayLiteral where Storage: RangeReplaceableCollection {
+    @_disfavoredOverload
+    @inlinable@inline(__always)@_transparent
+    public init(_ source: any InstantTensor<Element>, for strategy: MemoryStrategy = .default) throws {
+        let (stride, kernel) = try source.evaluation(for: strategy)
+        (count, inc) = switch strategy {
+        case.rowMajor:
+            (source.shape.last ?? 1, stride.last ?? 0)
+        case.columnMajor:
+            (source.shape.first ?? 1, stride.first ?? 0)
+        }
+        store = .init(kernel())
     }
     @_disfavoredOverload
     @inlinable@inline(__always)@_transparent
-    public init(_ source: some InstantTensor<Element>, for strategy: MemoryStrategy = .rowMajor) throws {
-		switch strategy {
-		case.rowMajor:
-            let (stride, kernel) = try source.evaluation(for: .rowMajor)
-			count = source.shape.last ?? 1
-			inc = stride.last ?? 0
-			data = .init(kernel())
-		case.columnMajor:
-			let (stride, kernel) = try source.evaluation(for: .columnMajor)
-			count = source.shape.first ?? 1
-			inc = stride.first ?? 0
-            data = .init(kernel())
-		}
-	}
+    public init(_ source: any Tensor<Element>, for strategy: MemoryStrategy = .default) async throws {
+        let (stride, kernel) = try source.evaluation(for: strategy)
+        async let result = kernel()
+        (count, inc) = switch strategy {
+        case.rowMajor:
+            (source.shape.last ?? 1, stride.last ?? 0)
+        case.columnMajor:
+            (source.shape.first ?? 1, stride.first ?? 0)
+        }
+        store = await.init(result)
+    }
     @inlinable@inline(__always)@_transparent
-	public init(shape: Int, with value: Element) {
-		count = shape
-		inc = 1
-		data = .init(repeating: value, count: count)
-	}
+    public init(_ elements: some Collection<Element>) {
+        count = elements.count
+        inc = 1
+        store = .init(elements)
+    }
     @inlinable@inline(__always)@_transparent
-	public init(_ elements: some Collection<Element>) {
-		count = elements.count
-        precondition(0 < count, "empty vector is not allowed")
-		inc = 1
-		data = .init(elements)
-	}
-    @inlinable@inline(__always)@_transparent
-	public init(arrayLiteral elements: Element...) {
-		self.init(elements)
-	}
+    public init(arrayLiteral elements: Element...) {
+        self.init(elements)
+    }
 }
-// MARK: StringConvertible
-extension VectorBuffer: CustomStringConvertible {
+extension Buffer.Vector: CustomStringConvertible {
     @inlinable@inline(__always)@_transparent
-	public var description: String {
-		(0..<count).lazy.map { data[data.startIndex.advanced(by: $0 * inc)] }.description
-	}
+    public var description: String {
+        (0..<count).lazy.map { store.startIndex.advanced(by: $0 * inc) }.map { store[$0] }.description
+    }
 }
-// MARK: Misc Protocols
-extension VectorBuffer: RandomAccessCollection {
+extension Buffer.Vector: RandomAccessCollection {
     @inlinable@inline(__always)@_transparent
     public var startIndex: Int {
-		0
-	}
+        0
+    }
     @inlinable@inline(__always)@_transparent
-	public var endIndex: Int {
-		count
-	}
+    public var endIndex: Int {
+        count
+    }
 }
-// MARK: typealias
-public typealias VecBuf<T: ScalarBuffer> = VectorBuffer<Array<T>>
+public typealias VecBuf<Element: MutableScalar<Element>> = Buffer<Array<Element>>.Vector

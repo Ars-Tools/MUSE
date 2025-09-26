@@ -2,78 +2,49 @@
 //  Protocol+Tensor.swift
 //  MUSE
 //
-//  Created by Kota on 9/8/R7.
+//  Created by Kota on 9/25/25.
 //
-import protocol Accelerate.AccelerateBuffer
-import protocol Accelerate.AccelerateMutableBuffer
-import typealias Layout.MemoryStrategy
-public typealias Storage = Sendable & RandomAccessCollection & AccelerateBuffer
-public typealias MutableStorage = Storage & MutableCollection & AccelerateMutableBuffer
-public protocol Scalar<Element>: Tensor & Vector & Matrix where S: Scalar<Element>, T: Scalar<Element>, U: Scalar<Element>, V: Scalar<Element> {
-//    @inlinable subscript() -> Element { get async throws }
+public protocol ElasticTensor<Element>: Tensor {
+    associatedtype S: ElasticTensor<Element>
+    associatedtype T: ElasticTensor<Element>
+    associatedtype U: ElasticTensor<Element>
+    associatedtype V: ElasticTensor<Element>
+    var transpose: T { get }
+    var diagonal: V { get }
+    subscript<P>(position: P) -> U where P: RandomAccessCollection, P.Index: Strideable, P.Index.Stride == Int, P.Element == Int { get }
+    subscript<Q>(bounds: Q) -> S where Q: RandomAccessCollection, Q.Index: Strideable, Q.Index.Stride == Int, Q.Element: RangeExpression<Int> { get }
 }
-public protocol Vector<Element>: Tensor where S: Vector<Element>, T: Vector<Element>, U: Scalar<Element>, V: Vector<Element> {
-	@inlinable var count: Int { get }
-	@inlinable subscript(position: Int) -> U { get }
-	@inlinable subscript(bounds: some RangeExpression<Int>) -> S { get }
+public protocol MutableTensor<Element>: ElasticTensor & InstantTensor where S: MutableTensor<Element>, T: MutableTensor<Element>, U: MutableTensor<Element>, V: MutableTensor<Element> {
+    subscript<P>(position: P) -> U where P: RandomAccessCollection, P.Index: Strideable, P.Index.Stride == Int, P.Element == Int { get set }
+    subscript<Q>(bounds: Q) -> S where Q: RandomAccessCollection, Q.Index: Strideable, Q.Index.Stride == Int, Q.Element: RangeExpression<Int> { get set }
 }
-public protocol Matrix<Element>: Tensor where S: Matrix<Element>, T: Matrix<Element>, U: Scalar<Element>, V: Vector<Element> {
-	@inlinable var rows: Int { get }
-	@inlinable var cols: Int { get }
-	@inlinable subscript(row: Int, col: Int) -> U { get }
-	@inlinable subscript(row: Int, col: some RangeExpression<Int>) -> V { get }
-	@inlinable subscript(row: some RangeExpression<Int>, col: Int) -> V { get }
-	@inlinable subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S { get }
+extension ElasticTensor {
+    @_disfavoredOverload
+    public subscript(position: Int...) -> U {
+        self[position]
+    }
+    @_disfavoredOverload
+    public subscript<Bounds: RangeExpression<Int>>(bounds: Bounds...) -> S {
+        self[bounds]
+    }
 }
-public protocol Tensor<Element>: Sendable {
-	associatedtype Element: BitwiseCopyable & Sendable
-	associatedtype S: Tensor<Element>
-	associatedtype T: Tensor<Element>
-	associatedtype U: Scalar<Element>
-	associatedtype V: Vector<Element>
-	associatedtype R: Storage where R.Element == Element, R.Index: Strideable, R.Index.Stride == Int, R.SubSequence: Storage
-	@inlinable var shape: Array<Int> { get }
-	@inlinable var transpose: T { get }
-	@inlinable var diagonal: V { get }
-	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get }
-	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get }
-	@inlinable func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R)
-}
-public protocol InstantScalar<Element>: Scalar & InstantTensor & InstantMatrix & InstantVector where S: InstantScalar, T: InstantScalar, U: InstantScalar, V: InstantScalar {
-//    @inlinable subscript() -> Element { get throws }
-}
-public protocol InstantVector<Element>: Vector & InstantTensor where S: InstantVector<Element>, T: InstantVector<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
-}
-public protocol InstantMatrix<Element>: Matrix & InstantTensor where S: InstantMatrix<Element>, T: InstantMatrix<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
-}
-public protocol InstantTensor<Element>: Tensor where S: InstantTensor<Element>, T: InstantTensor<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
-    @inlinable func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R)
-}
-public protocol MutableScalar<Element>: InstantScalar & MutableTensor & MutableMatrix & MutableVector where S: MutableScalar, T: MutableScalar, U: MutableScalar, V: MutableScalar {
-//    @inlinable subscript() -> Element { get set }
-}
-public protocol MutableVector<Element>: InstantVector & MutableTensor where S: MutableVector<Element>, T: MutableVector<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
-	@inlinable subscript(position: Int) -> U { get set }
-	@inlinable subscript(bounds: some RangeExpression<Int>) -> S { get set }
-}
-public protocol MutableMatrix<Element>: InstantMatrix & MutableTensor where S: MutableMatrix<Element>, T: MutableMatrix<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
-	@inlinable subscript(row: Int, col: Int) -> U { get set }
-	@inlinable subscript(row: Int, col: some RangeExpression<Int>) -> V { get set }
-	@inlinable subscript(row: some RangeExpression<Int>, col: Int) -> V { get set }
-	@inlinable subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S { get set }
-}
-public protocol MutableTensor<Element>: InstantTensor {
-	@inlinable subscript<P: RandomAccessCollection>(position: P) -> U where P.Index == Int, P.Element == Int { get set }
-	@inlinable subscript<Q: RandomAccessCollection>(bounds: Q) -> S where Q.Index == Int, Q.Element: RangeExpression<Int> { get set }
-}
-// MARK: Default
-extension InstantTensor {
-    @inlinable@inline(__always)
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> R) {
-        switch try evaluation(for: strategy) as (Array<Int>, @Sendable () -> R) {
-        case (let stride, let kernel):
-            (stride, {kernel()})
+extension MutableTensor {
+    @inlinable
+    public subscript(position: Int...) -> U {
+        _read {
+            yield self[position]
+        }
+        _modify {
+            yield &self[position]
+        }
+    }
+    @inlinable
+    public subscript<Bounds: RangeExpression<Int>>(bounds: Bounds...) -> S {
+        _read {
+            yield self[bounds]
+        }
+        _modify {
+            yield &self[bounds]
         }
     }
 }
-// MARK: Default

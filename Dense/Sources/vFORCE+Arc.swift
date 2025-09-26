@@ -7,42 +7,42 @@
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
 extension vFORCE {
-    public struct ArcSin<X: Tensor<Element>> {
+    @frozen public struct ArcSin<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct ArcCos<X: Tensor<Element>> {
+    @frozen public struct ArcCos<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct ArcTan<X: Tensor<Element>> {
+    @frozen public struct ArcTan<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct ArcSinh<X: Tensor<Element>> {
+    @frozen public struct ArcSinh<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct ArcCosh<X: Tensor<Element>> {
+    @frozen public struct ArcCosh<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
-    public struct ArcTanh<X: Tensor<Element>> {
+    @frozen public struct ArcTanh<X: Tensor<Element>> {
         public let x: X
         @inlinable@_transparent
         init(x: X) {
@@ -435,7 +435,7 @@ public func atan<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Tan<X> {
     .init(x: x)
 }
 @_disfavoredOverload
-public func sainh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Sinh<X> {
+public func asinh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Sinh<X> {
     .init(x: x)
 }
 @_disfavoredOverload

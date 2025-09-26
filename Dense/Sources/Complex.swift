@@ -2,14 +2,14 @@
 //  Complex.swift
 //  MUSE
 //
-//  Created by Kota on 9/24/25.
+//  Created by Kota on 9/26/25.
 //
 import Accelerate.vecLib
 import protocol Numerics.ComplexNumber
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
 public enum Complex<Element: ComplexElement> where Element.Magnitude: BitwiseCopyable & Sendable {}
-public protocol ComplexElement: vFORCESuiteElement & ComplexNumber {
+public protocol ComplexElement: ArithmeticElement & ComplexNumber {
     static func Copy(z: UnsafePointer<Self>, ldz: Int, r: UnsafeMutablePointer<Magnitude>, ldr: Int, length: Int)
     static func Copy(z: UnsafePointer<Self>, ldz: Int, i: UnsafeMutablePointer<Magnitude>, ldi: Int, length: Int)
     static func Copy(z: UnsafePointer<Self>, ldz: Int, θ: UnsafeMutablePointer<Magnitude>, ldθ: Int, length: Int)

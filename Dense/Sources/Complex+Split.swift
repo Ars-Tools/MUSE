@@ -2,13 +2,13 @@
 //  Complex+Split.swift
 //  MUSE
 //
-//  Created by Kota on 9/24/25.
+//  Created by Kota on 9/26/25.
 //
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
 extension Complex {
-    public struct Realp<X: Tensor<Element>> {
-        public typealias R = Array<X.Element.Magnitude>
+    @frozen public struct Realp<X: ElasticTensor<Element>> {
+        public typealias Storage = Array<X.Element.Magnitude>
         public typealias S = Realp<X.S>
         public typealias T = Realp<X.T>
         public typealias U = Realp<X.U>
@@ -18,8 +18,8 @@ extension Complex {
             self.x = x
         }
     }
-    public struct Imagp<X: Tensor<Element>> {
-        public typealias R = Array<X.Element.Magnitude>
+    @frozen public struct Imagp<X: ElasticTensor<Element>> {
+        public typealias Storage = Array<X.Element.Magnitude>
         public typealias S = Imagp<X.S>
         public typealias T = Imagp<X.T>
         public typealias U = Imagp<X.U>
@@ -29,7 +29,7 @@ extension Complex {
             self.x = x
         }
     }
-    public struct Phase<X: Tensor<Element>> {
+    @frozen public struct Phase<X: ElasticTensor<Element>> {
         public typealias Element = X.Element.Magnitude
         public typealias R = Array<X.Element.Magnitude>
         public typealias S = Phase<X.S>
@@ -44,10 +44,10 @@ extension Complex {
     }
 }
 // MARK: R
-extension Complex.Realp: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension Complex.Realp: Vector & Operators.UnaryVector where X: Vector {}
-extension Complex.Realp: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension Complex.Realp: Tensor & Operators.UnaryTensor where X: Tensor {
+extension Complex.Realp: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension Complex.Realp: Vector & Operator.UnaryVector where X: Vector {}
+extension Complex.Realp: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension Complex.Realp: ElasticTensor & Operator.UnaryTensor {
     @inlinable
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
@@ -57,9 +57,8 @@ extension Complex.Realp: Tensor & Operators.UnaryTensor where X: Tensor {
             let capacity = capacity(alloc: yk, stride: ys)
             let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
-                await xm().withUnsafeBufferPointer {
-                    let x = $0.baseAddress.unsafelyUnwrapped
-                    return.init(unsafeUninitializedCapacity: capacity) {
+                await withUnsafePointer(xm()) { x in
+                    .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
                             X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
@@ -72,9 +71,6 @@ extension Complex.Realp: Tensor & Operators.UnaryTensor where X: Tensor {
         }
     }
 }
-extension Complex.Realp: InstantScalar where X: InstantScalar {}
-extension Complex.Realp: InstantVector where X: InstantVector {}
-extension Complex.Realp: InstantMatrix where X: InstantMatrix {}
 extension Complex.Realp: InstantTensor where X: InstantTensor {
     @inlinable
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<X.Element.Magnitude>) {
@@ -85,9 +81,8 @@ extension Complex.Realp: InstantTensor where X: InstantTensor {
             let capacity = capacity(alloc: yk, stride: ys)
             let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
-                xm().withUnsafeBufferPointer {
-                    let x = $0.baseAddress.unsafelyUnwrapped
-                    return.init(unsafeUninitializedCapacity: capacity) {
+                withUnsafePointer(xm()) { x in
+                    .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
                             X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
@@ -100,16 +95,16 @@ extension Complex.Realp: InstantTensor where X: InstantTensor {
         }
     }
 }
-extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+extension ElasticTensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
     public var r: Complex<Element>.Realp<Self> {
         .init(x: self)
     }
 }
 // MARK: I
-extension Complex.Imagp: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension Complex.Imagp: Vector & Operators.UnaryVector where X: Vector {}
-extension Complex.Imagp: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension Complex.Imagp: Tensor & Operators.UnaryTensor where X: Tensor {
+extension Complex.Imagp: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension Complex.Imagp: Vector & Operator.UnaryVector where X: Vector {}
+extension Complex.Imagp: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension Complex.Imagp: ElasticTensor & Operator.UnaryTensor {
     @inlinable
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
@@ -119,9 +114,8 @@ extension Complex.Imagp: Tensor & Operators.UnaryTensor where X: Tensor {
             let capacity = capacity(alloc: yk, stride: ys)
             let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
-                await xm().withUnsafeBufferPointer {
-                    let x = $0.baseAddress.unsafelyUnwrapped
-                    return.init(unsafeUninitializedCapacity: capacity) {
+                await withUnsafePointer(xm()) { x in
+                    .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
                             X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
@@ -134,9 +128,6 @@ extension Complex.Imagp: Tensor & Operators.UnaryTensor where X: Tensor {
         }
     }
 }
-extension Complex.Imagp: InstantScalar where X: InstantScalar {}
-extension Complex.Imagp: InstantVector where X: InstantVector {}
-extension Complex.Imagp: InstantMatrix where X: InstantMatrix {}
 extension Complex.Imagp: InstantTensor where X: InstantTensor {
     @inlinable
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<X.Element.Magnitude>) {
@@ -147,9 +138,8 @@ extension Complex.Imagp: InstantTensor where X: InstantTensor {
             let capacity = capacity(alloc: yk, stride: ys)
             let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
-                xm().withUnsafeBufferPointer {
-                    let x = $0.baseAddress.unsafelyUnwrapped
-                    return.init(unsafeUninitializedCapacity: capacity) {
+                withUnsafePointer(xm()) { x in
+                    .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
                             X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
@@ -162,16 +152,16 @@ extension Complex.Imagp: InstantTensor where X: InstantTensor {
         }
     }
 }
-extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+extension ElasticTensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
     public var i: Complex<Element>.Imagp<Self> {
         .init(x: self)
     }
 }
 // MARK: θ
-extension Complex.Phase: Scalar & Operators.UnaryScalar where X: Scalar {}
-extension Complex.Phase: Vector & Operators.UnaryVector where X: Vector {}
-extension Complex.Phase: Matrix & Operators.UnaryMatrix where X: Matrix {}
-extension Complex.Phase: Tensor & Operators.UnaryTensor where X: Tensor {
+extension Complex.Phase: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension Complex.Phase: Vector & Operator.UnaryVector where X: Vector {}
+extension Complex.Phase: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension Complex.Phase: ElasticTensor & Operator.UnaryTensor {
     @inlinable
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
@@ -181,9 +171,8 @@ extension Complex.Phase: Tensor & Operators.UnaryTensor where X: Tensor {
             let capacity = capacity(alloc: yk, stride: ys)
             let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
-                await xm().withUnsafeBufferPointer {
-                    let x = $0.baseAddress.unsafelyUnwrapped
-                    return.init(unsafeUninitializedCapacity: capacity) {
+                await withUnsafePointer(xm()) { x in
+                    .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
                             X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
@@ -196,9 +185,6 @@ extension Complex.Phase: Tensor & Operators.UnaryTensor where X: Tensor {
         }
     }
 }
-extension Complex.Phase: InstantScalar where X: InstantScalar {}
-extension Complex.Phase: InstantVector where X: InstantVector {}
-extension Complex.Phase: InstantMatrix where X: InstantMatrix {}
 extension Complex.Phase: InstantTensor where X: InstantTensor {
     @inlinable
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<X.Element.Magnitude>) {
@@ -209,9 +195,8 @@ extension Complex.Phase: InstantTensor where X: InstantTensor {
             let capacity = capacity(alloc: yk, stride: ys)
             let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
             return (ys, {
-                xm().withUnsafeBufferPointer {
-                    let x = $0.baseAddress.unsafelyUnwrapped
-                    return.init(unsafeUninitializedCapacity: capacity) {
+                withUnsafePointer(xm()) { x in
+                    .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
                             X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
@@ -224,7 +209,7 @@ extension Complex.Phase: InstantTensor where X: InstantTensor {
         }
     }
 }
-extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+extension ElasticTensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
     public var θ: Complex<Element>.Phase<Self> {
         .init(x: self)
     }
