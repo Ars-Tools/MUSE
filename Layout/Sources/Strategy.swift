@@ -31,7 +31,7 @@ extension MemoryStrategy: @retroactive AtomicRepresentable {
             case newValue:
                 break
             case let oldValue:
-                os_log(.info, "MemoryLayout.default has been changed from %{public}@ to %{public}@", String(describing: oldValue), String(describing: newValue))
+                os_log(.info, "%{public}@ has been changed from %{public}@ to %{public}@", #function, String(describing: oldValue), String(describing: newValue))
             }
         }
     }

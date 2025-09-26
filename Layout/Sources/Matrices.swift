@@ -11,6 +11,11 @@ public func contraction(lhs: some BidirectionalCollection<Int>, rhs: some Bidire
 	return lhs.dropLast(order) + rhs.dropFirst(order)
 }
 @inlinable@inline(__always)@_transparent
+public func contraction(x: some BidirectionalCollection<Int>, y: some BidirectionalCollection<Int>, count: Int) -> Array<Int> {
+    assert([x.count, y.count].allSatisfy { count <= $0 })
+    return x.dropLast(count) + y.dropFirst(count)
+}
+@inlinable@inline(__always)@_transparent
 public func matricise(size: some BidirectionalCollection<Int>) -> Optional<(Int, Int)> {
 	switch (size.dropLast().first, size.dropFirst().last) {
 	case(.some(let r), .some(let c)):
