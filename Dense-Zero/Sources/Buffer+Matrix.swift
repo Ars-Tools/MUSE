@@ -1,0 +1,312 @@
+//
+//  Buffer+Matrix.swift
+//  MUSE
+//
+//  Created by Kota on 5/26/R7.
+//
+import protocol Accelerate.AccelerateBuffer
+import protocol Accelerate.AccelerateMutableBuffer
+import typealias Layout.MemoryStrategy
+import func Layout.offset
+import func Layout.capacity
+import func Layout.product
+@dynamicMemberLookup
+@frozen public struct MatrixBuffer<R: Storage> where R.Index: Strideable, R.Index.Stride == Int, R.Element: ScalarBuffer, R.SubSequence: Storage {
+	public typealias Element = R.Element
+	public typealias S = MatrixBuffer<R.SubSequence>
+	public typealias T = Self
+	public typealias U = Element
+	public typealias V = VectorBuffer<R.SubSequence>
+	public let rows: Int
+	public let cols: Int
+	public let ldr: Int
+    public let ldc: Int
+	@usableFromInline
+	private(set) var data: R
+}
+extension MatrixBuffer {
+    @_disfavoredOverload
+    @inlinable@inline(__always)
+	public subscript<Λ>(dynamicMember lookup: KeyPath<R, Λ>) -> Λ {
+		data[keyPath: lookup]
+	}
+    @_disfavoredOverload
+    @inlinable@inline(__always)
+	public subscript<Λ>(dynamicMember lookup: ReferenceWritableKeyPath<R, Λ>) -> Λ {
+		_read {
+			yield data[keyPath: lookup]
+		}
+		_modify {
+			yield &data[keyPath: lookup]
+		}
+	}
+}
+extension MatrixBuffer: AccelerateBuffer {
+    @inline(__always)
+    public var count: Int {
+        data.count
+    }
+    @inline(__always)
+    public func withUnsafeBufferPointer<Λ>(_ body: (UnsafeBufferPointer<Element>) throws -> Λ) rethrows -> Λ {
+        try data.withUnsafeBufferPointer(body)
+    }
+}
+extension MatrixBuffer: InstantMatrix {
+    @inline(__always)
+	public var diagonal: VectorBuffer<R.SubSequence> {
+		.init(count: min(rows, cols), inc: ldr + ldc, data: data[data.startIndex..<data.endIndex])
+	}
+    @inline(__always)
+	public var transpose: Self {
+		.init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, data: data)
+	}
+    @inline(__always)
+	public subscript(row: Int, col: Int) -> R.Element {
+		data[data.startIndex.advanced(by: row * ldr + col * ldc)]
+	}
+    @inline(__always)
+	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
+		let col = col.relative(to: 0..<cols)
+        let lower = data.startIndex.advanced(by: offset(position: [row, col.lowerBound], stride: [ldr, ldc]))
+		let upper = lower.advanced(by: capacity(slice: [1, col.count], stride: [ldr, ldc]))
+		return.init(count: col.count, inc: ldc, data: data[lower..<upper])
+	}
+    @inline(__always)
+	public subscript(row: some RangeExpression<Int>, col: Int) -> V {
+		let row = row.relative(to: 0..<rows)
+		let lower = data.startIndex.advanced(by: offset(position: [row.lowerBound, col], stride: [ldr, ldc]))
+		let upper = lower.advanced(by: capacity(slice: [row.count, 1], stride: [ldr, ldc]))
+		return.init(count: row.count, inc: ldr, data: data[lower..<upper])
+	}
+    @inline(__always)
+	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
+		let row = row.relative(to: 0..<rows)
+		let col = col.relative(to: 0..<cols)
+		let lower = data.startIndex.advanced(by: offset(position: [row.lowerBound, col.lowerBound], stride: [ldr, ldc]))
+		let upper = lower.advanced(by: capacity(slice: [row.count, col.count], stride: [ldr, ldc]))
+		return.init(rows: row.count, cols: col.count, ldr: ldr, ldc: ldc, data: data[lower..<upper])
+	}
+    @inline(__always)@_transparent
+	public func evaluation(for strategy: Layout.MemoryStrategy) throws -> (Array<Int>, @Sendable () -> R) {
+		([ldr, ldc], {data})
+	}
+}
+extension MatrixBuffer: MutableTensor & MutableMatrix where R: MutableStorage, R.SubSequence: MutableStorage {
+	public typealias U = R.Element
+	public typealias S = MatrixBuffer<R.SubSequence>
+	public typealias V = VectorBuffer<R.SubSequence>
+	public typealias T = Self
+    @inline(__always)
+	public var diagonal: V {
+		get {
+			.init(count: min(rows, cols), inc: ldr + ldc, data: data[data.startIndex..<data.endIndex])
+		}
+		set {
+			for index in 0..<min(rows, cols) {
+				data[data.startIndex.advanced(by: index * (ldr + ldc))] = newValue[index]
+			}
+		}
+	}
+    @inline(__always)
+	public var transpose: T {
+		.init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, data: data)
+	}
+    @inline(__always)
+	public subscript(row: Int, col: Int) -> U {
+		_read {
+			yield data[data.startIndex.advanced(by: row * ldr + col * ldc)]
+		}
+		_modify {
+			yield &data[data.startIndex.advanced(by: row * ldr + col * ldc)]
+		}
+	}
+    @inline(__always)
+	public subscript(row: Int, col: some RangeExpression<Int>) -> V {
+		get {
+			let col = col.relative(to: 0..<cols)
+            let lower = data.startIndex.advanced(by: offset(position: [row, col.lowerBound], stride: [ldr, ldc]))
+			let upper = lower.advanced(by: capacity(slice: [1, col.count], stride: [ldr, ldc]))
+			return.init(count: col.count, inc: ldc, data: data[lower..<upper])
+		}
+		set {
+			let idx = data.startIndex.advanced(by: row * ldr)
+			for col in col.relative(to: 0..<cols) {
+				data[idx.advanced(by: col * ldc)] = newValue.data[newValue.data.startIndex.advanced(by: col * newValue.inc)]
+			}
+		}
+	}
+    @inline(__always)
+	public subscript(row: some RangeExpression<Int>, col: Int) -> V {
+		get {
+			let row = row.relative(to: 0..<rows)
+            let lower = data.startIndex.advanced(by: offset(position: [row.lowerBound, col], stride: [ldr, ldc]))
+			let upper = lower.advanced(by: capacity(slice: [row.count, 1], stride: [ldr, ldc]))
+			return.init(count: row.count, inc: ldr, data: data[lower..<upper])
+		}
+		set {
+			let idx = data.startIndex.advanced(by: col * ldc)
+			for row in row.relative(to: 0..<rows) {
+				data[idx.advanced(by: row * ldr)] = newValue.data[newValue.data.startIndex.advanced(by: col * newValue.inc)]
+			}
+		}
+	}
+    @inline(__always)
+	public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
+		get {
+			let row = row.relative(to: 0..<rows)
+			let col = col.relative(to: 0..<cols)
+			let lower = data.startIndex.advanced(by: offset(position: [row.lowerBound, col.lowerBound], stride: [ldr, ldc]))
+			let upper = lower.advanced(by: capacity(slice: [row.count, col.count], stride: [ldr, ldc]))
+			return.init(rows: row.count, cols: col.count, ldr: ldr, ldc: ldc, data: data[lower..<upper])
+		}
+		set {
+			for (row, col) in product(row.relative(to: 0..<rows).enumerated(), col.relative(to: 0..<cols).enumerated()) {
+				data[data.startIndex.advanced(by: row.1 * ldr + col.1 * ldc)] = newValue[row.0, col.0]
+			}
+		}
+	}
+}
+extension MatrixBuffer {
+    @inlinable@inline(__always)@_transparent
+	public init<Source>(_ source: Source, as strategy: MemoryStrategy = .default) async throws where Source: Tensor, Source.R == R {
+		switch strategy {
+		case.rowMajor:
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
+			async let result = kernel()
+			rows = source.shape.dropLast().last ?? 1
+			cols = source.shape.last ?? 1
+			ldr = stride.dropLast().last ?? 0
+			ldc = stride.last ?? 0
+			data = await result
+		case.columnMajor:
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
+			async let result = kernel()
+			rows = source.shape.first ?? 1
+			cols = source.shape.dropFirst().first ?? 1
+			ldr = stride.first ?? 0
+			ldc = stride.dropFirst().first ?? 0
+			data = await result
+		}
+	}
+    @inlinable@inline(__always)@_transparent
+	public init<Source>(_ source: Source, by strategy: MemoryStrategy = .default) throws where Source: InstantTensor, Source.R == R {
+		switch strategy {
+		case.rowMajor:
+            let (stride, kernel) = try source.evaluation(for: .rowMajor)
+			rows = source.shape.dropLast().last ?? 1
+			cols = source.shape.last ?? 1
+			ldr = stride.dropLast().last ?? 0
+			ldc = stride.last ?? 0
+			data = kernel()
+		case.columnMajor:
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
+			rows = source.shape.first ?? 1
+			cols = source.shape.dropFirst().first ?? 1
+			ldr = stride.first ?? 0
+			ldc = stride.dropFirst().first ?? 0
+			data = kernel()
+		}
+	}
+    @inlinable@inline(__always)@_transparent
+	public init(shape: (Int, Int), stride: (Int, Int), data memory: R) {
+		precondition(capacity(alloc: [shape.0, shape.1], stride: [stride.0, stride.1]) <= memory.count)
+		(rows, cols) = shape
+		(ldr, ldc) = stride
+		data = memory
+	}
+}
+// MARK: Type-specified Initializers
+extension MatrixBuffer: ExpressibleByArrayLiteral where R: RangeReplaceableCollection {
+    @_disfavoredOverload
+    @inlinable@inline(__always)@_transparent
+	public init(_ source: some Tensor<Element>, for strategy: MemoryStrategy = .default) async throws {
+		switch strategy {
+		case.rowMajor:
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
+			async let result = kernel()
+			rows = source.shape.dropLast().last ?? 1
+			cols = source.shape.last ?? 1
+			ldr = stride.dropLast().last ?? 0
+			ldc = stride.last ?? 0
+            data = await.init(result)
+		case.columnMajor:
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
+			async let result = kernel()
+			rows = source.shape.first ?? 1
+			cols = source.shape.dropFirst().first ?? 1
+			ldr = stride.first ?? 0
+			ldc = stride.dropFirst().first ?? 0
+			data = await.init(result)
+		}
+	}
+    @_disfavoredOverload
+    @inlinable@inline(__always)@_transparent
+	public init(_ source: some InstantTensor<Element>, for strategy: MemoryStrategy = .default) throws {
+		switch strategy {
+		case.rowMajor:
+			let (stride, kernel) = try source.evaluation(for: .rowMajor)
+			rows = source.shape.dropLast().last ?? 1
+			cols = source.shape.last ?? 1
+			ldr = stride.dropLast().last ?? 0
+			ldc = stride.last ?? 0
+            data = .init(kernel())
+		case.columnMajor:
+			let (stride, kernel) = try source.evaluation(for: .columnMajor)
+			rows = source.shape.first ?? 1
+			cols = source.shape.dropFirst().first ?? 1
+			ldr = stride.first ?? 0
+			ldc = stride.dropFirst().first ?? 0
+			data = .init(kernel())
+		}
+	}
+    @inlinable@inline(__always)@_transparent
+	public init(shape: (Int, Int), for layout: MemoryStrategy = .rowMajor, with value: Element) {
+		(rows, cols) = shape
+		(ldr, ldc) = switch layout {
+		case.rowMajor:
+			(cols, 1)
+		case.columnMajor:
+			(1, rows)
+		}
+		data = .init(repeating: value, count: capacity(alloc: [rows, cols], stride: [ldr, ldc]))
+	}
+    @inlinable@inline(__always)@_transparent
+	public init(rows vec: some Collection<some Collection<Element>>) {
+		let counts = vec.map(\.count)
+		rows = vec.count
+        precondition(0 < rows, "empty matrix is not allowed")
+		cols = counts.min() ?? 1
+		ldr = cols
+		ldc = 1
+		data = .init(vec.lazy.flatMap { [ldr] in $0.prefix(ldr) })
+	}
+    @inlinable@inline(__always)@_transparent
+	public init(cols vec: some Collection<some Collection<Element>>) {
+		let counts = vec.map(\.count)
+		cols = vec.count
+        precondition(0 < cols, "empty matrix is not allowed")
+		rows = counts.min() ?? 1
+		ldc = rows
+		ldr = 1
+		data = .init(vec.lazy.flatMap { [ldc] in $0.prefix(ldc) })
+	}
+    @inlinable@inline(__always)@_transparent
+	public init(arrayLiteral elements: Array<Element>...) {
+		self.init(rows: elements)
+	}
+}
+// MARK: StringConvertible
+extension MatrixBuffer: CustomStringConvertible {
+    @inlinable@inline(__always)@_transparent
+	public var description: String {
+		"[" + (0..<rows).map {
+			let idx = data.startIndex.advanced(by: $0 * ldr)
+			return (0..<cols).map {
+				data[idx.advanced(by: $0 * ldc)]
+			}.description
+		}.joined(separator: ",\r\n ") + "]"
+	}
+}
+// MARK: Misc Protocols
+// MARK: typealias
+public typealias MatBuf<T: ScalarBuffer> = MatrixBuffer<Array<T>>
