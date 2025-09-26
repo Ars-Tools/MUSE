@@ -143,7 +143,12 @@ extension Buffer.Vector: ExpressibleByArrayLiteral where Storage: RangeReplaceab
 extension Buffer.Vector: CustomStringConvertible {
     @inlinable@inline(__always)@_transparent
     public var description: String {
-        (0..<count).lazy.map { store.startIndex.advanced(by: $0 * inc) }.map { store[$0] }.description
+        switch count {
+        case 0:
+            store.first.map(String.init(describing:)) ?? "()"
+        default:
+            (0..<count).lazy.map { store.startIndex.advanced(by: $0 * inc) }.map { store[$0] }.description
+        }
     }
 }
 extension Buffer.Vector: RandomAccessCollection {
