@@ -220,12 +220,21 @@ extension Buffer.Matrix: ExpressibleByArrayLiteral where Storage: RangeReplaceab
 extension Buffer.Matrix: CustomStringConvertible {
     @inlinable@inline(__always)@_transparent
     public var description: String {
-        "[" + (0..<rows).map {
-            let idx = store.startIndex.advanced(by: $0 * ldr)
-            return (0..<cols).map {
-                store[idx.advanced(by: $0 * ldc)]
-            }.description
-        }.joined(separator: ",\r\n ") + "]"
+        switch (rows, cols) {
+        case (0, 0):
+            store.first.map(String.init(describing:)) ?? "()"
+        case (0, let count):
+            (0..<count).map { store[store.startIndex.advanced(by: $0 * ldc)] }.description
+        case (let count, 0):
+            (0..<count).map { store[store.startIndex.advanced(by: $0 * ldr)] }.description
+        default:
+            "[" + (0..<rows).map {
+                let idx = store.startIndex.advanced(by: $0 * ldr)
+                return (0..<cols).map {
+                    store[idx.advanced(by: $0 * ldc)]
+                }.description
+            }.joined(separator: ",\r\n ") + "]"
+        }
     }
 }
 public typealias MatBuf<Element: MutableScalar<Element>> = Buffer<Array<Element>>.Matrix
