@@ -2,12 +2,9 @@
 //  Protocol+Matrix.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
-import protocol Accelerate.AccelerateBuffer
-import protocol Accelerate.AccelerateMutableBuffer
-import typealias Layout.MemoryStrategy
-public protocol Matrix<Element>: ElasticTensor where S: Matrix<Element>, T: Matrix<Element>, U: Scalar<Element>, V: Vector<Element> {
+public protocol Matrix<Element>: Tensor where S: Matrix<Element>, T: Matrix<Element>, U: Scalar<Element>, V: Vector<Element> {
     @inlinable var rows: Int { get }
     @inlinable var cols: Int { get }
     @inlinable subscript(row: Int, col: Int) -> U { get }
@@ -15,7 +12,10 @@ public protocol Matrix<Element>: ElasticTensor where S: Matrix<Element>, T: Matr
     @inlinable subscript(row: some RangeExpression<Int>, col: Int) -> V { get }
     @inlinable subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S { get }
 }
-public protocol MutableMatrix<Element>: MutableTensor & Matrix where S: MutableMatrix<Element>, T: MutableMatrix<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
+public protocol InstantMatrix<Element>: InstantTensor & Matrix where S: InstantMatrix<Element>, T: InstantMatrix<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
+    
+}
+public protocol MutableMatrix<Element>: MutableTensor & InstantMatrix where S: MutableMatrix<Element>, T: MutableMatrix<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
     @inlinable subscript(row: Int, col: Int) -> U { get set }
     @inlinable subscript(row: Int, col: some RangeExpression<Int>) -> V { get set }
     @inlinable subscript(row: some RangeExpression<Int>, col: Int) -> V { get set }
