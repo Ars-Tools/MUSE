@@ -2,37 +2,36 @@
 //  Complex+Merge.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
 import func Layout.capacity
 import func Layout.flatten
 extension Complex {
-    @frozen public struct Ortho<X: ElasticTensor<Element.Magnitude>, Y: ElasticTensor<Element.Magnitude>> {
-        public typealias Storage = Array<Element>
+    @frozen public struct Ortho<X: Tensor<Element.Magnitude>, Y: Tensor<Element.Magnitude>> {
         public typealias S = Ortho<X.S, Y.S>
         public typealias T = Ortho<X.T, Y.T>
         public typealias U = Ortho<X.U, Y.U>
         public typealias V = Ortho<X.V, Y.V>
-        public let order: MemoryStrategy
-        public let x: X
-        public let y: Y
-        @inlinable public init(order: MemoryStrategy, x: X, y: Y) {
+        @usableFromInline let order: MemoryStrategy
+        @usableFromInline let x: X
+        @usableFromInline let y: Y
+        @inlinable
+        init(order: MemoryStrategy, x: X, y: Y) {
             self.order = order
             self.x = x
             self.y = y
         }
     }
-    @frozen public struct Polar<X: ElasticTensor<Element.Magnitude>, Y: ElasticTensor<Element.Magnitude>> {
-        public typealias Storage = Array<Element>
+    @frozen public struct Polar<X: Tensor<Element.Magnitude>, Y: Tensor<Element.Magnitude>> {
         public typealias S = Polar<X.S, Y.S>
         public typealias T = Polar<X.T, Y.T>
         public typealias U = Polar<X.U, Y.U>
         public typealias V = Polar<X.V, Y.V>
-        public let order: MemoryStrategy
-        public let x: X
-        public let y: Y
-        @inlinable public init(order: MemoryStrategy, x: X, y: Y) {
+        @usableFromInline let order: MemoryStrategy
+        @usableFromInline let x: X
+        @usableFromInline let y: Y
+        @inlinable
+        init(order: MemoryStrategy, x: X, y: Y) {
             self.order = order
             self.x = x
             self.y = y
@@ -43,8 +42,9 @@ extension Complex {
 extension Complex.Ortho: Scalar & Operator.BinaryScalar where X: Scalar, Y: Scalar {}
 extension Complex.Ortho: Vector & Operator.BinaryVector where X: Vector, Y: Vector {}
 extension Complex.Ortho: Matrix & Operator.BinaryMatrix where X: Matrix, Y: Matrix {}
-extension Complex.Ortho: ElasticTensor & Operator.BinaryTensor {
-    @inlinable
+extension Complex.Ortho: Tensor & Operator.BinaryTensor {
+    public typealias Element = Element
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
@@ -74,7 +74,7 @@ extension Complex.Ortho: ElasticTensor & Operator.BinaryTensor {
     }
 }
 extension Complex.Ortho: InstantTensor where X: InstantTensor, Y: InstantTensor {
-    @inlinable
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
@@ -107,8 +107,9 @@ extension Complex.Ortho: InstantTensor where X: InstantTensor, Y: InstantTensor 
 extension Complex.Polar: Scalar & Operator.BinaryScalar where X: Scalar, Y: Scalar {}
 extension Complex.Polar: Vector & Operator.BinaryVector where X: Vector, Y: Vector {}
 extension Complex.Polar: Matrix & Operator.BinaryMatrix where X: Matrix, Y: Matrix {}
-extension Complex.Polar: ElasticTensor & Operator.BinaryTensor {
-    @inlinable
+extension Complex.Polar: Tensor & Operator.BinaryTensor {
+    public typealias Element = Element
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
@@ -138,7 +139,7 @@ extension Complex.Polar: ElasticTensor & Operator.BinaryTensor {
     }
 }
 extension Complex.Polar: InstantTensor where X: InstantTensor, Y: InstantTensor {
-    @inlinable
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try (x.evaluation(for: strategy), y.evaluation(for: strategy)) {
         case ((let xs, let xm), (let ys, let ym)):
@@ -167,9 +168,9 @@ extension Complex.Polar: InstantTensor where X: InstantTensor, Y: InstantTensor 
         }
     }
 }
-public func complex<Element: ComplexElement, R: ElasticTensor<Element.Magnitude>, I: ElasticTensor<Element.Magnitude>>(r: R, i: I, as type: Element.Type = Element.self) -> Complex<Element>.Ortho<R, I> {
+public func complex<Element, R, I>(r: R, i: I, as type: Element.Type = Element.self) -> Complex<Element>.Ortho<R, I> {
     .init(order: .default, x: r, y: i)
 }
-public func complex<Element: ComplexElement, R: ElasticTensor<Element.Magnitude>, Θ: ElasticTensor<Element.Magnitude>>(r: R, θ: Θ, as type: Element.Type = Element.self) -> Complex<Element>.Polar<R, Θ> {
+public func complex<Element, R, Θ>(r: R, θ: Θ, as type: Element.Type = Element.self) -> Complex<Element>.Polar<R, Θ> {
     .init(order: .default, x: r, y: θ)
 }
