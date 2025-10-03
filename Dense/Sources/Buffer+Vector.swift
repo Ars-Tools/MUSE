@@ -2,9 +2,8 @@
 //  Buffer+Vector.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
 extension Buffer {
     @dynamicMemberLookup
     @frozen public struct Vector {
@@ -36,13 +35,11 @@ extension Buffer.Vector {
         }
     }
 }
-extension Buffer.Vector: InstantTensor {
+extension Buffer.Vector: InstantVector {
     @inlinable@inline(__always)@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Storage) {
         (zip([count], [inc]).compactMap { $0 != .zero ? .some($1) : .none }, {[store] in store})
     }
-}
-extension Buffer.Vector: Vector {
     @inlinable@inline(__always)
     public subscript(position: Int) -> Element {
         store[store.startIndex.advanced(by: position * inc)]
