@@ -2,7 +2,7 @@
 //  BLAS+DOT.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
 import typealias Layout.MemoryStrategy
 import func Layout.contraction
@@ -12,11 +12,14 @@ import func Layout.broadcast
 import os.log
 extension BLAS {
     @frozen public struct DOT<X: Tensor<Element>, Y: Tensor<Element>> {
-        public typealias Storage = Array<Element>
-        public let order: MemoryStrategy
-        public let width: Int
-        public let x: X
-        public let y: Y
+        public typealias S = DOT<X.S, Y.S>
+        public typealias T = DOT<Y.T, X.T>
+        public typealias U = DOT<X.S, Y.S>
+        public typealias V = DOT<X.S, Y.S>
+        @usableFromInline let order: MemoryStrategy
+        @usableFromInline let width: Int
+        @usableFromInline let x: X
+        @usableFromInline let y: Y
     }
 }
 extension BLAS.DOT: Tensor {
@@ -35,10 +38,7 @@ extension BLAS.DOT: Tensor {
         let length = k.1
         // MARK: Inner dot
         switch (m, n, k.0, lda, ldb, ldc) {
-        case(1, 1, let n, (0, let incx), (let incy, 0), (1, 1)),
-            (1, 1, let n, (let incx, 0), (let incy, 0), (1, 1)),
-            (1, 1, let n, (0, let incx), (0, let incy), (1, 1)),
-            (1, 1, let n, (let incx, 0), (0, let incy), (1, 1)):
+        case(1, 1, let n, (0, let incx), (let incy, 0), _):
             return (stride, {
                 await withUnsafePointer(xm(), ym()) { x, y in
                         .init(arrayLiteral: length.reduce(0 as Element) {
@@ -271,14 +271,14 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "F",
+                                             a: x, lda: lda, opa: "N",
                                              b: y, ldb: ldb, opb: "T",
                                              β: 0,
                                              c: z, ldc: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "F",
+                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
                                                  b: y.advanced(by: offset.y), ldb: ldb, opb: "T",
                                                  β: 1,
                                                  c: z, ldc: ldc)
@@ -549,7 +549,7 @@ extension BLAS.DOT: Tensor {
     }
 }
 extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
-    @inlinable@inline(__always)@_transparent
+//    @inlinable@inline(__always)@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let xk = x.shape
         let yk = y.shape
@@ -606,7 +606,6 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                 withUnsafePointer(xm(), ym()) { x, y in
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
-                            $0.initialize(repeating: .zero)
                             for offset in offset {
                                 let x = x.advanced(by: offset.x)
                                 let y = y.advanced(by: offset.y)
@@ -794,14 +793,14 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "F",
+                                             a: x, lda: lda, opa: "N",
                                              b: y, ldb: ldb, opb: "T",
                                              β: 0,
                                              c: z, ldc: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "F",
+                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
                                                  b: y.advanced(by: offset.y), ldb: ldb, opb: "T",
                                                  β: 1,
                                                  c: z, ldc: ldc)
@@ -1071,8 +1070,8 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
         }
     }
 }
-extension BLAS.DOT: Scalar where X: ElasticTensor, Y: ElasticTensor {}
-extension BLAS.DOT: Vector where X: ElasticTensor, Y: ElasticTensor {
+extension BLAS.DOT: Scalar {}
+extension BLAS.DOT: Vector {
     @inlinable@inline(__always)@_transparent
     public var count: Int {
         switch order {
@@ -1091,23 +1090,23 @@ extension BLAS.DOT: Vector where X: ElasticTensor, Y: ElasticTensor {
         self[[bounds]]
     }
 }
-extension BLAS.DOT: Matrix where X: ElasticTensor, Y: ElasticTensor {
+extension BLAS.DOT: Matrix {
     @inlinable@inline(__always)@_transparent
     public var rows: Int {
         switch order {
         case.rowMajor:
-            shape.first ?? 1
+            shape.first ?? 0
         case.columnMajor:
-            shape.dropLast().last ?? 1
+            shape.dropLast().last ?? 0
         }
     }
     @inlinable@inline(__always)@_transparent
     public var cols: Int {
         switch order {
         case.rowMajor:
-            shape.dropFirst().first ?? 1
+            shape.dropFirst().first ?? 0
         case.columnMajor:
-            shape.last ?? 1
+            shape.last ?? 0
         }
     }
     @inlinable@inline(__always)
@@ -1127,11 +1126,8 @@ extension BLAS.DOT: Matrix where X: ElasticTensor, Y: ElasticTensor {
         self[[row.relative(to: 0..<rows), col.relative(to: 0..<cols)]]
     }
 }
-extension BLAS.DOT: ElasticTensor where X: ElasticTensor, Y: ElasticTensor {
-    public typealias S = BLAS.DOT<X.S, Y.S>
-    public typealias T = BLAS.DOT<Y.T, X.T>
-    public typealias U = BLAS.DOT<X.S, Y.S>
-    public typealias V = BLAS.DOT<X.S, Y.S>
+extension BLAS.DOT {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
     public var diagonal: V {
         fatalError("WIP")
@@ -1160,22 +1156,28 @@ extension BLAS.DOT: ElasticTensor where X: ElasticTensor, Y: ElasticTensor {
             let yb = bounds.dropFirst(xb.count)
             let xs = xb + concat(xh.dropFirst(xb.count), xt).map { 0..<$0 }
             let ys = yh.map { 0..<$0 } + yb + (yt.dropFirst(yb.count).map { 0..<$0 } as Array<Range<Int>>)
+//            assert((xs.count, ys.count) == (xk.count, yk.count))
             return.init(order: order, width: width, x: x[xs], y: y[ys])
         case.columnMajor:
             let bounds = zk.dropLast(bounds.count).map { 0..<$0 } + zip(bounds, zk.suffix(bounds.count)).map { $0.relative(to: 0..<$1) }
             let yb = bounds.suffix(yt.count)
-            let xb = bounds.dropLast(yt.count)
+            let xb = bounds.dropLast(yb.count)
             let ys = concat(yh, yt.dropLast(yb.count)).map { 0..<$0 } + yb
-            let xs = (xt.dropLast(xb.count).map { 0..<$0 } as Array<Range<Int>>) + xb + xt.map { 0..<$0 }
+            let xs = (xh.dropLast(xb.count).map { 0..<$0 } as Array<Range<Int>>) + xb + xt.map { 0..<$0 }
+//            assert((xs.count, ys.count) == (xk.count, yk.count))
             return.init(order: order, width: width, x: x[xs], y: y[ys])
         }
     }
 }
+extension BLAS.DOT: InstantScalar where X: InstantTensor, Y: InstantTensor {}
+extension BLAS.DOT: InstantVector where X: InstantTensor, Y: InstantTensor {}
+extension BLAS.DOT: InstantMatrix where X: InstantTensor, Y: InstantTensor {}
+infix operator •: MultiplicationPrecedence
 @_disfavoredOverload
-public func •<Element: BLASElement, X: Tensor<Element>, Y: Tensor<Element>>(_ lhs: X, _ rhs: Y) -> BLAS<Element>.DOT<X, Y> {
+public func •<Element, X, Y>(_ lhs: X, _ rhs: Y) -> BLAS<Element>.DOT<X, Y> {
     .init(order: .default, width: 1, x: lhs, y: rhs)
 }
 @_disfavoredOverload
-public func outer<Element: BLASElement, X: Tensor<Element>, Y: Tensor<Element>>(_ lhs: X, _ rhs: Y) -> BLAS<Element>.DOT<X, Y> {
+public func outer<Element, X, Y>(_ lhs: X, _ rhs: Y) -> BLAS<Element>.DOT<X, Y> {
     .init(order: .default, width: 0, x: lhs, y: rhs)
 }
