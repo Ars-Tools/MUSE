@@ -2,7 +2,7 @@
 //  LINALG+LU.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 10/4/25.
 //
 import typealias Dense.LAPACK
 extension LAPACK.LU where Element: SparseScalar<Element> {
