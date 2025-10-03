@@ -2,18 +2,13 @@
 //  Arithmetic.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
 import Accelerate.vecLib
-import typealias Numerics.Complex64
-import typealias Numerics.Complex128
-import typealias Layout.MemoryStrategy
-import func Layout.flatten
-import func Layout.capacity
-public enum Arithmetic<Element: ArithmeticElement> {
+public enum Arithmetic<Element: BitwiseCopyable & Sendable & ArithmeticElement> {
     public typealias Storage = Array<Element>
 }
-public protocol ArithmeticElement: Numeric & BitwiseCopyable {
+public protocol ArithmeticElement: Numeric {
     @inlinable@inline(__always)
     static func Copy(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int)
     @inlinable@inline(__always)
