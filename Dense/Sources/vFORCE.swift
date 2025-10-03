@@ -2,15 +2,10 @@
 //  vFORCE.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import Accelerate.vecLib.vForce
-import protocol Numerics.ComplexNumber
-import typealias Numerics.Complex64
-import typealias Numerics.Complex128
-public enum vFORCE<Element: vFORCEElement & ArithmeticElement & BitwiseCopyable & Sendable> {
-    public typealias Storage = Array<Element>
-}
+public enum vFORCE<Element: vFORCEElement & ArithmeticElement & BitwiseCopyable & Sendable> {}
 public protocol vFORCEElement: Numeric {
     static func fabs(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int)
     static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int)
