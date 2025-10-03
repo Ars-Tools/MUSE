@@ -2,10 +2,8 @@
 //  Buffer+Matrix.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
-import func Layout.product
 extension Buffer {
     @dynamicMemberLookup
     @frozen public struct Matrix {
@@ -39,13 +37,11 @@ extension Buffer.Matrix {
         }
     }
 }
-extension Buffer.Matrix: InstantTensor {
+extension Buffer.Matrix: InstantMatrix {
     @inlinable@inline(__always)@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Storage) {
         (zip([rows, cols], [ldr, ldc]).compactMap { $0 != .zero ? .some($1) : .none }, {[store] in store})
     }
-}
-extension Buffer.Matrix: Matrix {
     public var transpose: T {
         .init(rows: cols, cols: rows, ldr: ldc, ldc: ldr, store: store)
     }
@@ -90,7 +86,7 @@ extension Buffer.Matrix: MutableTensor & MutableMatrix where Storage: MutableCol
         get {
             let col = col.relative(to: 0..<cols)
             let lower = store.startIndex.advanced(by: row * ldr + col.lowerBound * ldc)
-            let upper = lower.advanced(by: (col.count - 1) * ldc + 1)
+            let upper = lower.advanced(by: max(0, col.count - 1) * ldc + 1)
             return.init(count: col.count, inc: ldc, store: store[lower..<upper])
         }
         set {
@@ -103,7 +99,7 @@ extension Buffer.Matrix: MutableTensor & MutableMatrix where Storage: MutableCol
         get {
             let row = row.relative(to: 0..<rows)
             let lower = store.startIndex.advanced(by: row.lowerBound * ldr + col * ldc)
-            let upper = lower.advanced(by: (row.count - 1) * ldr + 1)
+            let upper = lower.advanced(by: max(0, row.count - 1) * ldr + 1)
             return.init(count: row.count, inc: ldr, store: store[lower..<upper])
         }
         set {
@@ -117,7 +113,7 @@ extension Buffer.Matrix: MutableTensor & MutableMatrix where Storage: MutableCol
             let row = row.relative(to: 0..<rows)
             let col = col.relative(to: 0..<cols)
             let lower = store.startIndex.advanced(by: row.lowerBound * ldr + col.lowerBound * ldc)
-            let upper = lower.advanced(by: (row.count - 1) * ldr + (col.count - 1) * ldc + 1)
+            let upper = lower.advanced(by: max(0, row.count - 1) * ldr + max(0, col.count - 1) * ldc + 1)
             return.init(rows: row.count, cols: col.count, ldr: ldr, ldc: ldc, store: store[lower..<upper])
         }
         set {
@@ -195,7 +191,7 @@ extension Buffer.Matrix: ExpressibleByArrayLiteral where Storage: RangeReplaceab
         cols = counts.min() ?? 1
         ldr = cols
         ldc = 1
-        store = .init(vec.lazy.flatMap { [ldr] in $0.prefix(ldr) })
+        store = .init(vec.flatMap { [ldr] in $0.prefix(ldr) })
     }
     @inlinable@inline(__always)@_transparent
     public init(cols vec: some Collection<some Collection<Element>>) {
@@ -205,7 +201,7 @@ extension Buffer.Matrix: ExpressibleByArrayLiteral where Storage: RangeReplaceab
         rows = counts.min() ?? 1
         ldc = rows
         ldr = 1
-        store = .init(vec.lazy.flatMap { [ldc] in $0.prefix(ldc) })
+        store = .init(vec.flatMap { [ldc] in $0.prefix(ldc) })
     }
     @inlinable
     public init(arrayLiteral elements: Array<Element>...) {
@@ -222,7 +218,7 @@ extension Buffer.Matrix: CustomStringConvertible {
     public var description: String {
         switch (rows, cols) {
         case (0, 0):
-            store.first.map(String.init(describing:)) ?? "()"
+            store.first.map(String.init(describing:)) ?? "φ"
         case (0, let count):
             (0..<count).map { store[store.startIndex.advanced(by: $0 * ldc)] }.description
         case (let count, 0):
