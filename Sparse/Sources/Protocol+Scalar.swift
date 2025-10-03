@@ -2,8 +2,9 @@
 //  Protocol+Scalar.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
-import protocol Dense.InstantTensor
+import protocol Dense.InstantScalar
 import protocol Dense.MutableScalar
-public typealias SparseScalar<Element: MutableScalar<Element>> = MutableScalar<Element>
+public typealias SparseScalar<Element> = MutableScalar<Element>
+public typealias MutableSparseScalar<Element> = MutableScalar<Element>
