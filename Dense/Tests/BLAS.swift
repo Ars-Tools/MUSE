@@ -2,7 +2,7 @@
 //  BLAS.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import Numerics
 import Testing
@@ -10,8 +10,13 @@ import Layout
 @testable import Dense
 @Suite
 struct BLASTestCases {
+    init() {
+        // Global Settings
+        MemoryStrategy.default = .rowMajor
+//        MemoryStrategy.default = .columnMajor
+    }
     @Test
-    func inner() throws {
+    func inner() async throws {
         let X = [0.0, 1.0, 2.0, 3.0]
         let Y = [0.0, 1.0, 2.0, 3.0]
         let x = VecBuf(X)
@@ -265,18 +270,18 @@ struct BLASTestCases {
     @Test
     func tt() throws {
         let x = [
-            [1.0, 1.0, 1.0],
+            [1.0, 8.0, 1.0],
             [4.0, 5.0, 6.0],
-        ] as NDArray
+        ] as MatBuf
         let y = [
             [2.0, 9.0, 9.0],
-            [5.0, 9.0, 7.0],
-        ] as NDArray
+            [5.0, 9.0, 2.0],
+        ] as MatBuf
         
-        let z = x • y
-        let w = try NDArray(z)
+        let z = x • y.transpose
+        let w = try MatBuf(z)
         print(w)
-        try print(NDArray(z[[0, 2]], for: .rowMajor))
+        try print(NDArray(z[[1]], for: .rowMajor))
         
     }
 }
