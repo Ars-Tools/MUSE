@@ -2,7 +2,7 @@
 //  Buffer.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
 public enum Buffer<Storage> where Storage: Collection & Sendable, Storage.Index: Strideable, Storage.Index.Stride == Int, Storage.Element: MutableScalar<Storage.Element>, Storage.SubSequence: Sendable {
     public typealias U = Storage.Element
@@ -12,7 +12,7 @@ extension Collection {
     func withUnsafePointerWithFallback<E, R>(_ body: (UnsafePointer<Element>) throws (E) -> R) rethrows -> R {
         try withContiguousStorageIfAvailable {
             try $0.baseAddress.map(body)
-        }.flatMap(\.self) ?? body(Array(self))
+        }.flatMap(\.self) ?? body(Array<Element>(self))
     }
 }
 @inlinable@inline(__always)@_transparent
