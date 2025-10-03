@@ -2,15 +2,15 @@
 //  BLAS.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
 import Accelerate.vecLib
-import typealias Numerics.Complex64
-import typealias Numerics.Complex128
-import typealias Layout.MemoryStrategy
-public enum BLAS<Element: BLASElement & ArithmeticElement> {}
-infix operator •: MultiplicationPrecedence
-public protocol BLASElement {
+public enum BLAS<Element: BLASElement & ArithmeticElement> {
+    public typealias Storage = Array<Element>
+}
+public protocol BLASElement: Numeric {
+    @inlinable@inline(__always)
+    static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude
     @inlinable@inline(__always)
     static func Inner(n: Int,
                       x: UnsafePointer<Self>, ldx: Int,
@@ -38,6 +38,10 @@ public protocol BLASElement {
                      y: UnsafeMutablePointer<Self>, ldy: Int)
 }
 extension Float32: BLASElement {
+    @inlinable@inline(__always)
+    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
+        snrm2_(withUnsafePointer(to: n, \.self), x, withUnsafePointer(to: ldx, \.self))
+    }
     @inlinable@inline(__always)
     public static func Scale(n: Int,
                              α: Self,
@@ -95,10 +99,10 @@ extension Float32: BLASElement {
     }
     @inlinable@inline(__always)
     public static func GEMV(m: Int, n: Int,
-                            α: Float,
+                            α: Self,
                             a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
                             x: UnsafePointer<Self>, ldx: Int,
-                            β: Float,
+                            β: Self,
                             y: UnsafeMutablePointer<Self>, ldy: Int) {
         sgemv_(opa,
                withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
@@ -110,6 +114,10 @@ extension Float32: BLASElement {
     }
 }
 extension Float64: BLASElement {
+    @inlinable@inline(__always)
+    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
+        dnrm2_(withUnsafePointer(to: n, \.self), x, withUnsafePointer(to: ldx, \.self))
+    }
     @inlinable@inline(__always)
     public static func Inner(n: Int,
                              x: UnsafePointer<Self>, ldx: Int,
@@ -174,6 +182,10 @@ extension Float64: BLASElement {
     }
 }
 extension Complex64: BLASElement {
+    @inlinable@inline(__always)
+    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
+        scnrm2_(withUnsafePointer(to: n, \.self), .init(.init(x)), withUnsafePointer(to: ldx, \.self))
+    }
     @inlinable@inline(__always)
     public static func Inner(n: Int,
                              x: UnsafePointer<Self>, ldx: Int,
@@ -242,6 +254,10 @@ extension Complex64: BLASElement {
     }
 }
 extension Complex128: BLASElement {
+    @inlinable@inline(__always)
+    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
+        dznrm2_(withUnsafePointer(to: n, \.self), .init(.init(x)), withUnsafePointer(to: ldx, \.self))
+    }
     @inlinable@inline(__always)
     public static func Inner(n: Int,
                              x: UnsafePointer<Self>, ldx: Int,
