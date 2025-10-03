@@ -2,7 +2,7 @@
 //  Operator.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
 @usableFromInline
 enum Operator {}
