@@ -2,17 +2,19 @@
 //  Protocol+Vector.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
-public protocol Vector<Element>: ElasticTensor where S: Vector<Element>, T: Vector<Element>, U: Scalar<Element>, V: Vector<Element> {
-    var count: Int { get }
-    subscript(position: Int) -> U { get }
-    subscript(bounds: some RangeExpression<Int>) -> S { get }
+public protocol Vector<Element>: Tensor where S: Vector<Element>, T: Vector<Element>, U: Scalar<Element>, V: Vector<Element> {
+    @inlinable var count: Int { get }
+    @inlinable subscript(position: Int) -> U { get }
+    @inlinable subscript(bounds: some RangeExpression<Int>) -> S { get }
 }
-public protocol MutableVector<Element>: MutableTensor & Vector where S: MutableVector<Element>, T: MutableVector<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
-    subscript(position: Int) -> U { get set }
-    subscript(bounds: some RangeExpression<Int>) -> S { get set }
+public protocol InstantVector<Element>: InstantTensor & Vector where S: InstantVector<Element>, T: InstantVector<Element>, U: InstantScalar<Element>, V: InstantVector<Element> {
+    
+}
+public protocol MutableVector<Element>: MutableTensor & InstantVector where S: MutableVector<Element>, T: MutableVector<Element>, U: MutableScalar<Element>, V: MutableVector<Element> {
+    @inlinable subscript(position: Int) -> U { get set }
+    @inlinable subscript(bounds: some RangeExpression<Int>) -> S { get set }
 }
 extension Vector {
     @inlinable@inline(__always)@_transparent
@@ -46,7 +48,21 @@ extension Vector {
         }
     }
 }
+// MARK: Default
+extension InstantVector {
+    
+}
+// MARK: Default
 extension MutableVector {
+    @inlinable@inline(__always)@_transparent
+    public var diagonal: Self {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
     @inlinable@inline(__always)
     public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
         _read {
@@ -71,17 +87,17 @@ extension MutableVector {
         _read {
             switch MemoryStrategy.default {
             case.rowMajor:
-                yield self[bounds.last.map { $0.relative(to: 0..<count) } ?? 0..<count]
+                yield self[bounds.last.map { $0.relative(to: 0..<count) } ?? 0..<0]
             case.columnMajor:
-                yield self[bounds.first.map { $0.relative(to: 0..<count) } ?? 0..<count]
+                yield self[bounds.first.map { $0.relative(to: 0..<count) } ?? 0..<0]
             }
         }
         _modify {
             switch MemoryStrategy.default {
             case.rowMajor:
-                yield &self[bounds.last.map { $0.relative(to: 0..<count) } ?? 0..<count]
+                yield &self[bounds.last.map { $0.relative(to: 0..<count) } ?? 0..<0]
             case.columnMajor:
-                yield &self[bounds.first.map { $0.relative(to: 0..<count) } ?? 0..<count]
+                yield &self[bounds.first.map { $0.relative(to: 0..<count) } ?? 0..<0]
             }
         }
     }
