@@ -2,7 +2,7 @@
 //  Extension+Collection.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 extension Collection {
     @inlinable@inline(__always)@_transparent
