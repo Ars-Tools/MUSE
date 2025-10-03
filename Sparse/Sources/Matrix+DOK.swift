@@ -2,19 +2,26 @@
 //  Matrix+DOK.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import protocol Dense.Matrix
+import protocol Dense.InstantMatrix
 import typealias Layout.MemoryStrategy
 import func simd.simd_reduce_min
-@dynamicMemberLookup
-@frozen public struct DOK<Element: SparseScalar<Element> & Numeric> {
-    public let rows: Int
-    public let cols: Int
-    @usableFromInline
-    private(set) var store: Dictionary<SIMD2<Int>, Element>
+extension Matrix where Element: Numeric {
+    @dynamicMemberLookup
+    @frozen public struct DOK {
+        public typealias S = Self
+        public typealias T = Self
+        public typealias U = Element
+        public typealias V = Vector<Element>.DOK
+        public let rows: Int
+        public let cols: Int
+        @usableFromInline
+        private(set) var store: Dictionary<SIMD2<Int>, Element>
+    }
 }
-extension DOK {
+extension Matrix.DOK {
     @inlinable
     public subscript<R>(dynamicMember lookup: KeyPath<Dictionary<SIMD2<Int>, Element>, R>) -> R {
         store[keyPath: lookup]
@@ -29,16 +36,16 @@ extension DOK {
         }
     }
 }
-extension DOK {
+extension Matrix.DOK {
     @inlinable
     public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Array<(Int, Element)>>) {
         switch layout {
         case.rowMajor:
-            (.rowMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: rows)) {
+            (.rowMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: max(1, rows))) {
                 $0[$1.0.x].append(($1.0.y, $1.1))
             })
         case.columnMajor:
-            (.columnMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: cols)) {
+            (.columnMajor, store.reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: max(1, cols))) {
                 $0[$1.0.y].append(($1.0.x, $1.1))
             })
         }
@@ -48,12 +55,8 @@ extension DOK {
         .init(store.keys)
     }
 }
-extension DOK: MutableSparseMatrix {
-    public typealias S = Self
-    public typealias T = Self
-    public typealias U = Element
-    public typealias V = SPV<Element>
-    public var transpose: DOK<Element> {
+extension Matrix.DOK: MutableSparseMatrix {
+    public var transpose: T {
         .init(rows: cols, cols: rows, store: .init(uniqueKeysWithValues: store.compactMap {
             switch ($0.x, $0.y, $1) {
             case (0..<rows, 0..<cols, .zero):
@@ -123,7 +126,7 @@ extension DOK: MutableSparseMatrix {
             return.init(count: row.count, store: .init(uniqueKeysWithValues: store.lazy.compactMap {
                 switch ($0.x, $0.y, $1) {
                 case (row, col, let v) where v != .zero:
-                    .some(($0.x - row.lowerBound, v))
+                    .some(($0.x &- row.lowerBound, v))
                 default:
                     .none
                 }
@@ -145,7 +148,9 @@ extension DOK: MutableSparseMatrix {
             let col = col.relative(to: 0..<cols)
             return.init(rows: row.count, cols: col.count, store: .init(uniqueKeysWithValues: store.compactMap {
                 switch ($0.x, $0.y, $1) {
-                case (row, col, let v) where v != .zero:
+                case (_, _, .zero):
+                    .none
+                case (row, col, let v),(row.lowerBound, col.lowerBound, let v):
                     .some((($0 &- .init(row.lowerBound, col.lowerBound), v)))
                 default:
                     .none
@@ -164,7 +169,7 @@ extension DOK: MutableSparseMatrix {
         }
     }
 }
-extension DOK {
+extension Matrix.DOK {
     @inlinable
     public init(shape: (Int, Int)) {
         (rows, cols) = shape
@@ -212,7 +217,7 @@ extension DOK {
         }
     }
 }
-extension DOK: ExpressibleByArrayLiteral {
+extension Matrix.DOK: ExpressibleByArrayLiteral {
     @_disfavoredOverload
     @inlinable
     public init(arrayLiteral elements: Array<Element>...) {
@@ -224,4 +229,5 @@ extension DOK: ExpressibleByArrayLiteral {
         }
     }
 }
-extension DOK: CustomStringConvertible {}
+extension Matrix.DOK: CustomStringConvertible {}
+public typealias DOK<Element: MutableSparseScalar<Element> & Numeric> = Matrix<Element>.DOK
