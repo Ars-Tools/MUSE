@@ -2,7 +2,7 @@
 //  LINALG+QR.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 10/4/25.
 //
 import protocol Dense.Matrix
 extension LINALG {
@@ -24,7 +24,7 @@ extension LINALG {
             case ...(.ulpOfOne):
                 continue
             case let n:assert(.ulpOfOne < n)
-                var h = LIL<Element>(major: .columnMajor, store: .init(repeating: .init(), count: r.count), count: r.count)
+                var h = LIL<Element>(major: .columnMajor, count: r.count, store: .init(repeating: .init(), count: r.count))
                 let p = LIL<Element>(identity: u.count, for: .columnMajor) - (2 / n) * outer(u, u)
                 h[0..<col, 0..<col] = .init(identity: col, for: .columnMajor)
                 h[col..., col...] = .init(p)
