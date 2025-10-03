@@ -2,69 +2,105 @@
 //  vFORCE+Tri.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
 extension vFORCE {
     @frozen public struct Sin<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = vFORCE.Sin<X.S>
+        public typealias T = vFORCE.Sin<X.T>
+        public typealias U = vFORCE.Sin<X.U>
+        public typealias V = vFORCE.Sin<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Cos<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Cos<X.S>
+        public typealias T = Cos<X.T>
+        public typealias U = Cos<X.U>
+        public typealias V = Cos<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Tan<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Tan<X.S>
+        public typealias T = Tan<X.T>
+        public typealias U = Tan<X.U>
+        public typealias V = Tan<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Sinπ<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Sinπ<X.S>
+        public typealias T = Sinπ<X.T>
+        public typealias U = Sinπ<X.U>
+        public typealias V = Sinπ<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Cosπ<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Cosπ<X.S>
+        public typealias T = Cosπ<X.T>
+        public typealias U = Cosπ<X.U>
+        public typealias V = Cosπ<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Tanπ<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Tanπ<X.S>
+        public typealias T = Tanπ<X.T>
+        public typealias U = Tanπ<X.U>
+        public typealias V = Tanπ<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Sinh<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Sinh<X.S>
+        public typealias T = Sinh<X.T>
+        public typealias U = Sinh<X.U>
+        public typealias V = Sinh<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Cosh<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Cosh<X.S>
+        public typealias T = Cosh<X.T>
+        public typealias U = Cosh<X.U>
+        public typealias V = Cosh<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
         }
     }
     @frozen public struct Tanh<X: Tensor<Element>> {
-        public let x: X
+        public typealias S = Tanh<X.S>
+        public typealias T = Tanh<X.T>
+        public typealias U = Tanh<X.U>
+        public typealias V = Tanh<X.V>
+        @usableFromInline let x: X
         @inlinable@_transparent
         init(x: X) {
             self.x = x
@@ -72,73 +108,13 @@ extension vFORCE {
     }
 }
 // MARK: Sin
-extension vFORCE.Sin: Tensor {
-    @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
-        switch try x.evaluation(for: strategy) {
-        case (let xs, let xm):
-            let yk = shape
-            let ys = strategy.stride(for: yk)
-            let capacity = capacity(alloc: yk, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
-            return (ys, {
-                await withUnsafePointer(xm()) { x in
-                        .init(unsafeUninitializedCapacity: capacity) {
-                            let y = $0.baseAddress.unsafelyUnwrapped
-                            for offset in offset {
-                                Element.sin(x.advanced(by: offset.x), stride.x,
-                                            y.advanced(by: offset.y), stride.y,
-                                            length)
-                            }
-                            $1 = $0.count
-                        }
-                }
-            })
-        }
-    }
-}
-extension vFORCE.Sin: InstantTensor where X: InstantTensor {
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
-        switch try x.evaluation(for: strategy) {
-        case (let xs, let xm):
-            let yk = shape
-            let ys = strategy.stride(for: yk)
-            let capacity = capacity(alloc: yk, stride: ys)
-            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
-            return (ys, {
-                withUnsafePointer(xm()) { x in
-                        .init(unsafeUninitializedCapacity: capacity) {
-                            let y = $0.baseAddress.unsafelyUnwrapped
-                            for offset in offset {
-                                Element.sin(x.advanced(by: offset.x), stride.x,
-                                            y.advanced(by: offset.y), stride.y,
-                                            length)
-                            }
-                            $1 = $0.count
-                        }
-                }
-            })
-        }
-    }
-}
 extension vFORCE.Sin: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Sin: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Sin: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Sin: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Sin<X.S>
-    public typealias T = vFORCE.Sin<X.T>
-    public typealias U = vFORCE.Sin<X.U>
-    public typealias V = vFORCE.Sin<X.V>
-}
-// MARK: Cos
-extension vFORCE.Cos: Tensor {
+extension vFORCE.Sin: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -150,7 +126,7 @@ extension vFORCE.Cos: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.cos(x.advanced(by: offset.x), stride.x,
+                                Element.sin(x.advanced(by: offset.x), stride.x,
                                             y.advanced(by: offset.y), stride.y,
                                             length)
                             }
@@ -161,9 +137,12 @@ extension vFORCE.Cos: Tensor {
         }
     }
 }
-extension vFORCE.Cos: InstantTensor where X: InstantTensor {
+extension vFORCE.Sin: InstantScalar where X: InstantScalar {}
+extension vFORCE.Sin: InstantVector where X: InstantVector {}
+extension vFORCE.Sin: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Sin: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -175,7 +154,7 @@ extension vFORCE.Cos: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.cos(x.advanced(by: offset.x), stride.x,
+                                Element.sin(x.advanced(by: offset.x), stride.x,
                                             y.advanced(by: offset.y), stride.y,
                                             length)
                             }
@@ -186,21 +165,14 @@ extension vFORCE.Cos: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Cos
 extension vFORCE.Cos: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Cos: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Cos: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Cos: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Cos<X.S>
-    public typealias T = vFORCE.Cos<X.T>
-    public typealias U = vFORCE.Cos<X.U>
-    public typealias V = vFORCE.Cos<X.V>
-}
-// MARK: Tan
-extension vFORCE.Tan: Tensor {
+extension vFORCE.Cos: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -212,7 +184,7 @@ extension vFORCE.Tan: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.tan(x.advanced(by: offset.x), stride.x,
+                                Element.cos(x.advanced(by: offset.x), stride.x,
                                             y.advanced(by: offset.y), stride.y,
                                             length)
                             }
@@ -223,9 +195,12 @@ extension vFORCE.Tan: Tensor {
         }
     }
 }
-extension vFORCE.Tan: InstantTensor where X: InstantTensor {
+extension vFORCE.Cos: InstantScalar where X: InstantScalar {}
+extension vFORCE.Cos: InstantVector where X: InstantVector {}
+extension vFORCE.Cos: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Cos: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -237,7 +212,7 @@ extension vFORCE.Tan: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.tan(x.advanced(by: offset.x), stride.x,
+                                Element.cos(x.advanced(by: offset.x), stride.x,
                                             y.advanced(by: offset.y), stride.y,
                                             length)
                             }
@@ -248,21 +223,14 @@ extension vFORCE.Tan: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Tan
 extension vFORCE.Tan: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Tan: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Tan: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Tan: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Tan<X.S>
-    public typealias T = vFORCE.Tan<X.T>
-    public typealias U = vFORCE.Tan<X.U>
-    public typealias V = vFORCE.Tan<X.V>
-}
-// MARK: Sinπ
-extension vFORCE.Sinπ: Tensor {
+extension vFORCE.Tan: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -274,9 +242,9 @@ extension vFORCE.Sinπ: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.sinπ(x.advanced(by: offset.x), stride.x,
-                                             y.advanced(by: offset.y), stride.y,
-                                             length)
+                                Element.tan(x.advanced(by: offset.x), stride.x,
+                                            y.advanced(by: offset.y), stride.y,
+                                            length)
                             }
                             $1 = $0.count
                         }
@@ -285,9 +253,12 @@ extension vFORCE.Sinπ: Tensor {
         }
     }
 }
-extension vFORCE.Sinπ: InstantTensor where X: InstantTensor {
+extension vFORCE.Tan: InstantScalar where X: InstantScalar {}
+extension vFORCE.Tan: InstantVector where X: InstantVector {}
+extension vFORCE.Tan: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Tan: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -299,9 +270,9 @@ extension vFORCE.Sinπ: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.sinπ(x.advanced(by: offset.x), stride.x,
-                                             y.advanced(by: offset.y), stride.y,
-                                             length)
+                                Element.tan(x.advanced(by: offset.x), stride.x,
+                                            y.advanced(by: offset.y), stride.y,
+                                            length)
                             }
                             $1 = $0.count
                         }
@@ -310,21 +281,14 @@ extension vFORCE.Sinπ: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Sinπ
 extension vFORCE.Sinπ: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Sinπ: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Sinπ: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Sinπ: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Sinπ<X.S>
-    public typealias T = vFORCE.Sinπ<X.T>
-    public typealias U = vFORCE.Sinπ<X.U>
-    public typealias V = vFORCE.Sinπ<X.V>
-}
-// MARK: Cosπ
-extension vFORCE.Cosπ: Tensor {
+extension vFORCE.Sinπ: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -336,7 +300,7 @@ extension vFORCE.Cosπ: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.cosπ(x.advanced(by: offset.x), stride.x,
+                                Element.sinπ(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -347,9 +311,12 @@ extension vFORCE.Cosπ: Tensor {
         }
     }
 }
-extension vFORCE.Cosπ: InstantTensor where X: InstantTensor {
+extension vFORCE.Sinπ: InstantScalar where X: InstantScalar {}
+extension vFORCE.Sinπ: InstantVector where X: InstantVector {}
+extension vFORCE.Sinπ: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Sinπ: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -361,7 +328,7 @@ extension vFORCE.Cosπ: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.cosπ(x.advanced(by: offset.x), stride.x,
+                                Element.sinπ(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -372,21 +339,14 @@ extension vFORCE.Cosπ: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Cosπ
 extension vFORCE.Cosπ: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Cosπ: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Cosπ: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Cosπ: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Cosπ<X.S>
-    public typealias T = vFORCE.Cosπ<X.T>
-    public typealias U = vFORCE.Cosπ<X.U>
-    public typealias V = vFORCE.Cosπ<X.V>
-}
-// MARK: Tanπ
-extension vFORCE.Tanπ: Tensor {
+extension vFORCE.Cosπ: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -398,7 +358,7 @@ extension vFORCE.Tanπ: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.tanπ(x.advanced(by: offset.x), stride.x,
+                                Element.cosπ(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -409,9 +369,12 @@ extension vFORCE.Tanπ: Tensor {
         }
     }
 }
-extension vFORCE.Tanπ: InstantTensor where X: InstantTensor {
+extension vFORCE.Cosπ: InstantScalar where X: InstantScalar {}
+extension vFORCE.Cosπ: InstantVector where X: InstantVector {}
+extension vFORCE.Cosπ: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Cosπ: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -423,7 +386,7 @@ extension vFORCE.Tanπ: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.tanπ(x.advanced(by: offset.x), stride.x,
+                                Element.cosπ(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -434,21 +397,14 @@ extension vFORCE.Tanπ: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Tanπ
 extension vFORCE.Tanπ: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Tanπ: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Tanπ: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Tanπ: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Tanπ<X.S>
-    public typealias T = vFORCE.Tanπ<X.T>
-    public typealias U = vFORCE.Tanπ<X.U>
-    public typealias V = vFORCE.Tanπ<X.V>
-}
-// MARK: Sinh
-extension vFORCE.Sinh: Tensor {
+extension vFORCE.Tanπ: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -460,7 +416,7 @@ extension vFORCE.Sinh: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.sinh(x.advanced(by: offset.x), stride.x,
+                                Element.tanπ(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -471,9 +427,12 @@ extension vFORCE.Sinh: Tensor {
         }
     }
 }
-extension vFORCE.Sinh: InstantTensor where X: InstantTensor {
+extension vFORCE.Tanπ: InstantScalar where X: InstantScalar {}
+extension vFORCE.Tanπ: InstantVector where X: InstantVector {}
+extension vFORCE.Tanπ: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Tanπ: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -485,7 +444,7 @@ extension vFORCE.Sinh: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.sinh(x.advanced(by: offset.x), stride.x,
+                                Element.tanπ(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -496,21 +455,14 @@ extension vFORCE.Sinh: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Sinh
 extension vFORCE.Sinh: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Sinh: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Sinh: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Sinh: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Sinh<X.S>
-    public typealias T = vFORCE.Sinh<X.T>
-    public typealias U = vFORCE.Sinh<X.U>
-    public typealias V = vFORCE.Sinh<X.V>
-}
-// MARK: Cosh
-extension vFORCE.Cosh: Tensor {
+extension vFORCE.Sinh: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -522,7 +474,7 @@ extension vFORCE.Cosh: Tensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.cosh(x.advanced(by: offset.x), stride.x,
+                                Element.sinh(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -533,9 +485,12 @@ extension vFORCE.Cosh: Tensor {
         }
     }
 }
-extension vFORCE.Cosh: InstantTensor where X: InstantTensor {
+extension vFORCE.Sinh: InstantScalar where X: InstantScalar {}
+extension vFORCE.Sinh: InstantVector where X: InstantVector {}
+extension vFORCE.Sinh: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Sinh: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -547,7 +502,7 @@ extension vFORCE.Cosh: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.cosh(x.advanced(by: offset.x), stride.x,
+                                Element.sinh(x.advanced(by: offset.x), stride.x,
                                              y.advanced(by: offset.y), stride.y,
                                              length)
                             }
@@ -558,21 +513,72 @@ extension vFORCE.Cosh: InstantTensor where X: InstantTensor {
         }
     }
 }
+// MARK: Cosh
 extension vFORCE.Cosh: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension vFORCE.Cosh: Vector & Operator.UnaryVector where X: Vector {}
 extension vFORCE.Cosh: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Cosh: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Cosh<X.S>
-    public typealias T = vFORCE.Cosh<X.T>
-    public typealias U = vFORCE.Cosh<X.U>
-    public typealias V = vFORCE.Cosh<X.V>
+extension vFORCE.Cosh: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
+        switch try x.evaluation(for: strategy) {
+        case (let xs, let xm):
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
+            return (ys, {
+                await withUnsafePointer(xm()) { x in
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.cosh(x.advanced(by: offset.x), stride.x,
+                                             y.advanced(by: offset.y), stride.y,
+                                             length)
+                            }
+                            $1 = $0.count
+                        }
+                }
+            })
+        }
+    }
+}
+extension vFORCE.Cosh: InstantScalar where X: InstantScalar {}
+extension vFORCE.Cosh: InstantVector where X: InstantVector {}
+extension vFORCE.Cosh: InstantMatrix where X: InstantMatrix {}
+extension vFORCE.Cosh: InstantTensor where X: InstantTensor {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
+        switch try x.evaluation(for: strategy) {
+        case (let xs, let xm):
+            let yk = shape
+            let ys = strategy.stride(for: yk)
+            let capacity = capacity(alloc: yk, stride: ys)
+            let (length, stride, offset) = strategy.flatten(shape: yk, xs: xs, ys: ys)
+            return (ys, {
+                withUnsafePointer(xm()) { x in
+                        .init(unsafeUninitializedCapacity: capacity) {
+                            let y = $0.baseAddress.unsafelyUnwrapped
+                            for offset in offset {
+                                Element.cosh(x.advanced(by: offset.x), stride.x,
+                                             y.advanced(by: offset.y), stride.y,
+                                             length)
+                            }
+                            $1 = $0.count
+                        }
+                }
+            })
+        }
+    }
 }
 // MARK: Tanh
-extension vFORCE.Tanh: Tensor {
+extension vFORCE.Tanh: Scalar & Operator.UnaryScalar where X: Scalar {}
+extension vFORCE.Tanh: Vector & Operator.UnaryVector where X: Vector {}
+extension vFORCE.Tanh: Matrix & Operator.UnaryMatrix where X: Matrix {}
+extension vFORCE.Tanh: Tensor & Operator.UnaryTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)@_transparent
-    public var shape: Array<Int> { x.shape }
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -595,9 +601,12 @@ extension vFORCE.Tanh: Tensor {
         }
     }
 }
+extension vFORCE.Tanh: InstantScalar where X: InstantScalar {}
+extension vFORCE.Tanh: InstantVector where X: InstantVector {}
+extension vFORCE.Tanh: InstantMatrix where X: InstantMatrix {}
 extension vFORCE.Tanh: InstantTensor where X: InstantTensor {
     @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> vFORCE.Storage) {
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
             let yk = shape
@@ -619,15 +628,6 @@ extension vFORCE.Tanh: InstantTensor where X: InstantTensor {
             })
         }
     }
-}
-extension vFORCE.Tanh: Scalar & Operator.UnaryScalar where X: Scalar {}
-extension vFORCE.Tanh: Vector & Operator.UnaryVector where X: Vector {}
-extension vFORCE.Tanh: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension vFORCE.Tanh: ElasticTensor & Operator.UnaryTensor where X: ElasticTensor {
-    public typealias S = vFORCE.Tanh<X.S>
-    public typealias T = vFORCE.Tanh<X.T>
-    public typealias U = vFORCE.Tanh<X.U>
-    public typealias V = vFORCE.Tanh<X.V>
 }
 @_disfavoredOverload
 public func sin<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Sin<X> {
