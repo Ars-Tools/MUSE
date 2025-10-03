@@ -2,12 +2,9 @@
 //  Buffer+Tensor.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
-import func Layout.product
-import func Layout.concat
-import func Layout.capacity
+import Accelerate.vecLib
 extension Buffer {
     @dynamicMemberLookup
     @frozen public struct Tensor {
@@ -38,16 +35,10 @@ extension Buffer.Tensor {
         }
     }
 }
-extension Buffer.Tensor: InstantTensor {
-    @inlinable@inline(__always)@_transparent
-    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Storage) {
-        (zip(shape, pitch).compactMap { $0 != .zero ? .some($1) : .none }, {[store] in store})
-    }
-}
-extension Buffer.Tensor: Scalar {
+extension Buffer.Tensor: InstantScalar {
     
 }
-extension Buffer.Tensor: Vector {
+extension Buffer.Tensor: InstantVector {
     @inlinable@inline(__always)
     public var count: Int {
         switch MemoryStrategy.default {
@@ -66,7 +57,7 @@ extension Buffer.Tensor: Vector {
         self[[bounds]]
     }
 }
-extension Buffer.Tensor: Matrix {
+extension Buffer.Tensor: InstantMatrix {
     @inlinable@inline(__always)
     public var rows: Int {
         switch MemoryStrategy.default {
@@ -102,22 +93,24 @@ extension Buffer.Tensor: Matrix {
         self[[row.relative(to: 0..<rows), col.relative(to: 0..<cols)]]
     }
 }
-extension Buffer.Tensor: ElasticTensor {
+extension Buffer.Tensor: InstantTensor {
+    @inlinable@inline(__always)@_transparent
+    public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Storage) {
+        (zip(shape, pitch).compactMap { $0 != .zero ? .some($1) : .none }, {[store] in store})
+    }
+    @inline(__always)
     public var transpose: T {
         .init(shape: shape.reversed(), pitch: pitch.reversed(), store: store)
     }
+    @inline(__always)
     public var diagonal: V {
-        .init(shape: shape.min().map { Array(arrayLiteral: $0) } ?? .init(), pitch: .init(arrayLiteral: pitch.reduce(0, +)), store: store[store.startIndex...])
+        .init(shape: shape.sorted(by: >).suffix(1), pitch: .init(arrayLiteral: pitch.reduce(0, +)), store: store[store.startIndex...])
     }
     @inlinable@inline(__always)
     public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
-        switch MemoryStrategy.default {
-        case.rowMajor:
-            self[position.map{$0..<$0} + shape.dropFirst(position.count).map{0..<$0}]
-        case.columnMajor:
-            self[shape.dropLast(position.count).map{0..<$0} + position.map{$0..<$0}]
-        }
+        self[position.map{$0..<$0}]
     }
+    @inline(__always)
     public subscript<Q>(bounds: Q) -> S where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
         precondition(bounds.count <= shape.count)
         switch MemoryStrategy.default {
@@ -147,25 +140,16 @@ extension Buffer.Tensor: ElasticTensor {
     }
 }
 extension Buffer.Tensor: MutableTensor where Storage: MutableCollection {
+    @inline(__always)
     public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
         _read {
-            switch MemoryStrategy.default {
-            case.rowMajor:
-                yield self[position.map{$0..<$0} + shape.dropFirst(position.count).map{0..<$0}]
-            case.columnMajor:
-                yield self[shape.dropLast(position.count).map{0..<$0} + position.map{$0..<$0}]
-            }
+            yield self[position.map{$0..<$0}]
         }
         _modify {
-            let order = MemoryStrategy.default
-            switch order {
-            case.rowMajor:
-                yield &self[position.map{$0..<$0} + shape.dropFirst(position.count).map{0..<$0}]
-            case.columnMajor:
-                yield &self[shape.dropLast(position.count).map{0..<$0} + position.map{$0..<$0}]
-            }
+            yield &self[position.map{$0..<$0}]
         }
     }
+    @inline(__always)
     public subscript<Q>(bounds: Q) -> Buffer<Storage.SubSequence>.Tensor where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
         get {
             precondition(bounds.count <= shape.count)
@@ -236,7 +220,7 @@ extension Buffer.Tensor: MutableTensor where Storage: MutableCollection {
     }
 }
 extension Buffer.Tensor: CustomStringConvertible {
-    @inlinable@_transparent
+    @inlinable@inline(__always)@_transparent
     func describing(depth: Int, start: Storage.Index, container: ArraySlice<(Int, Int)>) -> String {
         switch container.first {
         case.some((let length, let stride)) where 1 < container.count:
@@ -249,19 +233,20 @@ extension Buffer.Tensor: CustomStringConvertible {
             store.first.map { "\($0)" } ?? "()"
         }
     }
+    @inlinable@_transparent
     public var description: String {
         describing(depth: 1, start: store.startIndex, container: .init(zip(shape, pitch)))
     }
 }
 extension Buffer.Tensor {
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init<Source: InstantTensor>(_ source: Source, for strategy: MemoryStrategy = .default) throws where Source.Storage == Storage {
         let (stride, kernel) = try source.evaluation(for: strategy)
         shape = source.shape
         pitch = stride
         store = kernel()
     }
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init<Source: Tensor>(_ source: Source, for strategy: MemoryStrategy = .default) async throws where Source.Storage == Storage {
         let (stride, kernel) = try source.evaluation(for: strategy)
         async let result = kernel()
@@ -271,14 +256,14 @@ extension Buffer.Tensor {
     }
 }
 extension Buffer.Tensor where Storage: RangeReplaceableCollection {
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(_ source: any InstantTensor<Element>, for strategy: MemoryStrategy = .default) throws {
         let (stride, kernel) = try source.evaluation(for: strategy)
         shape = source.shape
         pitch = stride
         store = .init(kernel())
     }
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(_ source: any Tensor<Element>, for strategy: MemoryStrategy = .default) async throws {
         let (stride, kernel) = try source.evaluation(for: strategy)
         async let result = kernel()
@@ -286,7 +271,7 @@ extension Buffer.Tensor where Storage: RangeReplaceableCollection {
         pitch = stride
         store = await.init(result)
     }
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(shape s: some Collection<Int>, for strategy: MemoryStrategy = .default, with value: Element) {
         shape = .init(s)
         pitch = strategy.stride(for: shape)
@@ -294,7 +279,7 @@ extension Buffer.Tensor where Storage: RangeReplaceableCollection {
     }
 }
 extension Buffer.Tensor: ExpressibleByBooleanLiteral where Storage: RangeReplaceableCollection, Element == BooleanLiteralType {
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(booleanLiteral value: Element) {
         shape = .init()
         pitch = .init()
@@ -302,7 +287,7 @@ extension Buffer.Tensor: ExpressibleByBooleanLiteral where Storage: RangeReplace
     }
 }
 extension Buffer.Tensor: ExpressibleByIntegerLiteral where Storage: RangeReplaceableCollection, Element == IntegerLiteralType {
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(integerLiteral value: Element) {
         shape = .init()
         pitch = .init()
@@ -310,7 +295,7 @@ extension Buffer.Tensor: ExpressibleByIntegerLiteral where Storage: RangeReplace
     }
 }
 extension Buffer.Tensor: ExpressibleByFloatLiteral where Storage: RangeReplaceableCollection, Element == FloatLiteralType {
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(floatLiteral value: Element) {
         shape = .init()
         pitch = .init()
@@ -318,7 +303,7 @@ extension Buffer.Tensor: ExpressibleByFloatLiteral where Storage: RangeReplaceab
     }
 }
 extension Buffer.Tensor: ExpressibleByArrayLiteral where Storage: RangeReplaceableCollection {
-    @inlinable@inline(__always)@_transparent
+    @inlinable@_transparent
     public init(arrayLiteral elements: Buffer<Storage>.Tensor...) {
         precondition(0 < elements.count, "empty tensor is not allowed")
         let order = MemoryStrategy.default
