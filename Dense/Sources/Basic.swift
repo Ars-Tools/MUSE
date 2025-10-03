@@ -2,10 +2,9 @@
 //  Basic.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import Accelerate.vecLib
-import typealias Layout.MemoryStrategy
 public enum Basic<Element: BitwiseCopyable & Sendable> {}
 extension Basic {
     public enum Choice<A: Tensor<Element>, B: Tensor<Element>> {
@@ -100,7 +99,8 @@ extension Basic.Choice: Matrix where A: Matrix, B: Matrix {
         }
     }
 }
-extension Basic.Choice: ElasticTensor where A: ElasticTensor, B: ElasticTensor {
+extension Basic.Choice: Tensor {
+    public typealias Element = Element
     public typealias S = Basic.Choice<A.S, B.S>
     public typealias T = Basic.Choice<A.T, B.T>
     public typealias U = Basic.Choice<A.U, B.U>
@@ -114,15 +114,15 @@ extension Basic.Choice: ElasticTensor where A: ElasticTensor, B: ElasticTensor {
             .B(b.transpose)
         }
     }
-    @inlinable@_transparent
-    public var diagonal: V {
-        switch self {
-        case.A(let a):
-            .A(a.diagonal)
-        case.B(let b):
-            .B(b.diagonal)
-        }
-    }
+//    @inlinable@_transparent
+//    public var diagonal: V {
+//        switch self {
+//        case.A(let a):
+//            .A(a.diagonal)
+//        case.B(let b):
+//            .B(b.diagonal)
+//        }
+//    }
     @inlinable
     public subscript<P>(position: P) -> U where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
         switch self {
@@ -142,7 +142,7 @@ extension Basic.Choice: ElasticTensor where A: ElasticTensor, B: ElasticTensor {
         }
     }
 }
-extension Basic.Choice: Tensor {
+extension Basic.Choice {
     @inlinable@_transparent
     public var shape: Array<Int> {
         switch self {
