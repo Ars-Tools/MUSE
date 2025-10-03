@@ -2,7 +2,7 @@
 //  Logical+DOT.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
@@ -12,47 +12,52 @@ extension Logical {
     @frozen enum DOT {
         @usableFromInline
         @frozen struct Outer<LHS: SparseVector<Bool>, RHS: SparseVector<Bool>> {
-            @usableFromInline typealias Storage = Array<Bool>
             @usableFromInline typealias S = Outer<LHS.S, RHS.S>
             @usableFromInline typealias T = Outer<RHS.T, LHS.T>
             @usableFromInline typealias U = Element
-            @usableFromInline typealias V = VSK
+            @usableFromInline typealias V = Vector<Bool>.MSK
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct DD<LHS: SparseMatrix<Bool>, RHS: SparseMatrix<Bool>> {
-            @usableFromInline typealias Storage = Array<Bool>
             @usableFromInline typealias S = DD<LHS.S, RHS.S>
+            @usableFromInline typealias T = Self
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct MV<LHS: SparseMatrix<Bool>, RHS: SparseVector<Bool>> {
-            @usableFromInline typealias Storage = Array<Bool>
             @usableFromInline typealias S = MV<LHS.S, RHS>
+            @usableFromInline typealias T = Self
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct VM<LHS: SparseVector<Bool>, RHS: SparseMatrix<Bool>> {
-            @usableFromInline typealias Storage = Array<Bool>
             @usableFromInline typealias S = VM<LHS, RHS.S>
+            @usableFromInline typealias T = Self
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen enum VV<X: SparseMatrix<Bool>, Y: SparseMatrix<Bool>> {
+            @usableFromInline typealias S = Logical.DOT.VV<X.S, Y.S>
+            @usableFromInline typealias T = Self
+            @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             case DD(X, Y)
             case MV(X, Y)
             case VM(X, Y)
         }
         @usableFromInline
         @frozen struct MM<LHS: SparseMatrix<Bool>, RHS: SparseMatrix<Bool>> {
-            @usableFromInline typealias Storage = Array<Bool>
             @usableFromInline typealias S = MM<LHS.S, RHS.S>
             @usableFromInline typealias T = MM<RHS.T, LHS.T>
             @usableFromInline typealias U = Element
@@ -63,6 +68,7 @@ extension Logical {
     }
 }
 extension Logical.DOT.Outer: SparseMatrix {
+    @usableFromInline typealias Element = Bool
     @inlinable var rows: Int { lhs.count }
     @inlinable var cols: Int { rhs.count }
     @usableFromInline
@@ -97,6 +103,7 @@ extension Logical.DOT.Outer: SparseMatrix {
     }
 }
 extension Logical.DOT.DD: SparseVector {
+    @usableFromInline typealias Element = Bool
     @inlinable
     var count: Int {
         min(lhs.rows, rhs.cols)
@@ -123,6 +130,7 @@ extension Logical.DOT.DD: SparseVector {
     }
 }
 extension Logical.DOT.MV: SparseVector {
+    @usableFromInline typealias Element = Bool
     @inlinable
     var count: Int { lhs.rows }
     @inlinable
@@ -144,6 +152,7 @@ extension Logical.DOT.MV: SparseVector {
     }
 }
 extension Logical.DOT.VM: SparseVector {
+    @usableFromInline typealias Element = Bool
     @inlinable
     var count: Int { rhs.cols }
     @inlinable
@@ -165,9 +174,7 @@ extension Logical.DOT.VM: SparseVector {
     }
 }
 extension Logical.DOT.VV: SparseVector {
-    @usableFromInline typealias Storage = Array<Bool>
-    @usableFromInline typealias S = Logical.DOT.VV<X.S, Y.S>
-    @usableFromInline typealias U = Bool
+    @usableFromInline typealias Element = Bool
     @inlinable
     var count: Int {
         switch self {
@@ -214,6 +221,7 @@ extension Logical.DOT.VV: SparseVector {
     }
 }
 extension Logical.DOT.MM: SparseMatrix {
+    @usableFromInline typealias Element = Bool
     @usableFromInline
     var rows: Int { lhs.rows }
     @usableFromInline
