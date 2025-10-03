@@ -2,7 +2,7 @@
 //  Extension+Sequence.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 extension LazyMapSequence: @retroactive @unchecked Sendable {}
 extension Optional: @retroactive IteratorProtocol where Wrapped: IteratorProtocol {
