@@ -2,52 +2,72 @@
 //  Protocol+Scalar.swift
 //  MUSE
 //
-//  Created by Kota on 9/25/25.
+//  Created by Kota on 9/27/25.
 //
-import protocol Accelerate.AccelerateBuffer
-import protocol Accelerate.AccelerateMutableBuffer
-import typealias Layout.MemoryStrategy
-public protocol Scalar<Element>: ElasticTensor where S: Scalar<Element>, T: Scalar<Element>, U: Scalar<Element>, V: Scalar<Element> {
-    
-}
-public protocol MutableScalar<Element>: MutableTensor & Scalar where S: MutableScalar<Element>, T: MutableScalar<Element>, U: MutableScalar<Element>, V: MutableScalar<Element> {
-    
-}
+import Accelerate.vecLib
+public protocol Scalar<Element>: Tensor where S: Scalar<Element>, T: Scalar<Element>, U: Scalar<Element>, V: Scalar<Element> {}
+public protocol InstantScalar<Element>: InstantTensor & Scalar where S: InstantScalar<Element>, T: InstantScalar<Element>, U: InstantScalar<Element>, V: InstantScalar<Element> {}
+public protocol MutableScalar<Element>: MutableTensor & InstantScalar where S: MutableScalar<Element>, T: MutableScalar<Element>, U: MutableScalar<Element>, V: MutableScalar<Element> {}
 extension Scalar {
-    public var shape: Array<Int> { .init() }
-    public var transpose: Self { self }
-    public var diagonal: Self { self }
-    public subscript<P>(position: P) -> Self where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
-        self
+    @inlinable@inline(__always)
+    public var shape: Array<Int> {
+        .init()
     }
-    public subscript<Q>(bounds: Q) -> Self where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
+    @inlinable@inline(__always)
+    public var transpose: Self {
         self
     }
     @inlinable@inline(__always)
+    public var diagonal: Self {
+        self
+    }
+    @inlinable@inline(__always)
+    public subscript<P>(position: P) -> Self where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
+        self
+    }
+    @inlinable@inline(__always)
+    public subscript<Q>(bounds: Q) -> Self where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
+        self
+    }
+    @_disfavoredOverload
+    @inlinable@inline(__always)
     public subscript() -> Element {
         get async throws {
-            switch try evaluation(for: .rowMajor) {
-            case (let stride, let kernel):
-                precondition(zip(shape, stride).lazy.map(*).reduce(1, max) == 1)
-                return await kernel().first.unsafelyUnwrapped
+            switch try evaluation(for: .default) {
+            case (let stride, let kernel) where 1 == capacity(alloc: shape, stride: stride):
+                await kernel().first.unsafelyUnwrapped
+            default:
+                throw Error.shapeMismatch
             }
         }
     }
 }
-extension Scalar where Self: InstantTensor {
+extension InstantScalar {
     @inlinable@inline(__always)
     public subscript() -> Element {
         get throws {
-            switch try evaluation(for: .rowMajor) {
-            case (let stride, let kernel):
-                precondition(zip(shape, stride).lazy.map(*).reduce(1, max) == 1)
-                return kernel().first.unsafelyUnwrapped
+            switch try evaluation(for: .default) {
+            case (let stride, let kernel) where 1 == capacity(alloc: shape, stride: stride):
+                kernel().first.unsafelyUnwrapped
+            default:
+                throw Error.shapeMismatch
             }
+        }
+    }
+}
+extension MutableScalar where Self == Element {
+    @inlinable@inline(__always)
+    public subscript() -> Element {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
         }
     }
 }
 extension MutableScalar {
-    public var shape: Array<Int> { .init() }
+    @inlinable@inline(__always)
     public var diagonal: Self {
         _read {
             yield self
@@ -56,15 +76,8 @@ extension MutableScalar {
             yield &self
         }
     }
-    public subscript<P>(position: P) -> Self where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
-        _read {
-            yield self
-        }
-        _modify {
-            yield &self
-        }
-    }
-    public subscript<Q>(bounds: Q) -> Self where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
+    @inlinable@inline(__always)
+    public subscript(position: Int) -> Self {
         _read {
             yield self
         }
@@ -73,7 +86,65 @@ extension MutableScalar {
         }
     }
     @inlinable@inline(__always)
-    public subscript() -> Self {
+    public subscript(bounds: some RangeExpression<Int>) -> Self {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+}
+extension MutableScalar {
+    @inlinable@inline(__always)
+    public subscript(row: Int, col: Int) -> Self {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+    @inlinable@inline(__always)
+    public subscript(row: Int, col: some RangeExpression<Int>) -> Self {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+    @inlinable@inline(__always)
+    public subscript(row: some RangeExpression<Int>, col: Int) -> Self {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+    @inlinable@inline(__always)
+    public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> Self {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+}
+extension MutableScalar {
+    @inlinable@inline(__always)
+    public subscript<P>(position: P) -> Self where P : RandomAccessCollection, P.Element == Int, P.Index : Strideable, P.Index.Stride == Int {
+        _read {
+            yield self
+        }
+        _modify {
+            yield &self
+        }
+    }
+    @inlinable@inline(__always)
+    public subscript<Q>(bounds: Q) -> Self where Q : RandomAccessCollection, Q.Element : RangeExpression, Q.Index : Strideable, Q.Element.Bound == Int, Q.Index.Stride == Int {
         _read {
             yield self
         }
