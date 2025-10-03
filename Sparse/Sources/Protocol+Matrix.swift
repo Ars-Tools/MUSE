@@ -2,48 +2,41 @@
 //  Protocol+Matrix.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
-import protocol Dense.InstantTensor
-import protocol Dense.Vector
+@_exported import typealias Layout.MemoryStrategy
 import protocol Dense.Matrix
-import protocol Dense.MutableVector
+import protocol Dense.InstantMatrix
 import protocol Dense.MutableMatrix
-public protocol SparseMatrix<Element>: Matrix & InstantTensor where S: SparseMatrix<Element>, T: SparseMatrix<Element>, U: SparseScalar<U>, V: SparseVector<Element> {
+public protocol SparseMatrix<Element>: InstantMatrix where S: SparseMatrix<Element>, T: SparseMatrix<Element>, U == Element, V: SparseVector<Element> {
     associatedtype LIL: RandomAccessCollection where LIL.Index == Int, LIL.Element: Sequence, LIL.Element.Element == (Int, Element)
     @inlinable func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL)
     @inlinable var entry: Set<SIMD2<Int>> { get }
 }
-public protocol MutableSparseMatrix<Element>: MutableMatrix & SparseMatrix where S: MutableSparseMatrix<Element>, T: MutableSparseMatrix<Element>, U: SparseScalar<U>, V: MutableSparseVector<Element> {
+public protocol MutableSparseMatrix<Element>: MutableMatrix & SparseMatrix where S: MutableSparseMatrix<Element>, T: MutableSparseMatrix<Element>, U == Element, V: MutableSparseVector<Element> {
     @inlinable init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>)
 }
 extension SparseMatrix where Element: Numeric {
     @inlinable@inline(__always)@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-        let (layout, memory) = switch lil(for: strategy) {
+        switch lil(for: strategy) {
         case(.rowMajor, let lil):
-            ([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
-                for (row, col) in lil.enumerated() {
-                    $0[row*cols..<row*cols+cols].initialize(repeating: .zero)
-                    for (col, val) in col where val != .zero {
-                        $0[row*cols+col] = val
-                    }
+            let ldr = max(1, cols)
+            let (layout, memory) = (zip([rows, cols], [ldr, 1]).compactMap { 0 < $0 ? .some($1) : .none }, lil.enumerated().reduce(into: Array<Element>(repeating: .zero, count: lil.count * ldr)) {
+                for (col, val) in $1.1 {
+                    $0[$1.0*ldr+col] = val
                 }
-                $1 = $0.count
             })
+            return (layout, {memory})
         case(.columnMajor, let lil):
-            ([1, rows], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
-                for (col, row) in lil.enumerated() {
-                    $0[col*rows..<col*rows+rows].initialize(repeating: .zero)
-                    for (row, val) in row where val != .zero {
-                        $0[row+rows*col] = val
-                    }
+            let ldc = max(1, rows)
+            let (layout, memory) = (zip([rows, cols], [1, ldc]).compactMap { 0 < $0 ? .some($1) : .none }, lil.enumerated().reduce(into: Array<Element>(repeating: .zero, count: lil.count * ldc)) {
+                for (row, val) in $1.1 {
+                    $0[$1.0*ldc+row] = val
                 }
-                $1 = $0.count
             })
+            return (layout, {memory})
         }
-        return (layout, {memory})
     }
     @inlinable@inline(__always)@_transparent
     public var entry: Set<SIMD2<Int>> {
@@ -64,79 +57,133 @@ extension SparseMatrix where Element: Numeric {
     }
     @inlinable@inline(__always)@_transparent
     public var description: String {
-        switch lil(for: .rowMajor) {
-        case(.rowMajor, let lil):
-            "[" + lil.lazy.map { row in
-                Array<Element>(unsafeUninitializedCapacity: cols) {
-                    $0.initialize(repeating: .zero)
-                    for (c, v) in row where v != .zero {
-                        $0[c] = v
-                    }
-                    $1 = $0.count
+        switch (rows, cols) {
+        case (0, 0):
+            .init(describing: lil(for: .columnMajor).1.flatMap(\.self).first.map(\.1) ?? .zero)
+        case (0, let count):
+            switch lil(for: .rowMajor) {
+            case (.rowMajor, let lil):
+                lil.flatMap(\.self).reduce(into: Array<Element>(repeating: .zero, count: count)) {
+                    $0[$1.0] = $1.1
                 }.description
-            }.joined(separator: ",\r\n ") + "]"
-        case(.columnMajor, let lil):
-            "[" + Sparse.transpose(lil: lil, for: rows).lazy.map { row in
-                Array<Element>(unsafeUninitializedCapacity: cols) {
-                    $0.initialize(repeating: .zero)
-                    for (c, v) in row where v != .zero {
-                        $0[c] = v
+            case (.columnMajor, let lil):
+                lil.enumerated().reduce(into: Array<Element>(repeating: .zero, count: count)) {
+                    for (row, val) in $1.1 where row == .zero {
+                        $0[$1.0] = val
                     }
-                    $1 = $0.count
                 }.description
-            }.joined(separator: ",\r\n ") + "]"
+            }
+        case (let count, 0):
+            switch lil(for: .columnMajor) {
+            case (.rowMajor, let lil):
+                lil.enumerated().reduce(into: Array<Element>(repeating: .zero, count: count)) {
+                    for (row, val) in $1.1 where row == .zero {
+                        $0[$1.0] = val
+                    }
+                }.description
+            case (.columnMajor, let lil):
+                lil.flatMap(\.self).reduce(into: Array<Element>(repeating: .zero, count: count)) {
+                    $0[$1.0] = $1.1
+                }.description
+            }
+        default:
+            switch lil(for: .rowMajor) {
+            case(.rowMajor, let lil):
+                "[" + lil.lazy.map { row in
+                    row.reduce(into: Array<Element>(repeating: .zero, count: cols)) {
+                        $0[$1.0] = $1.1
+                    }.description
+                }.joined(separator: ",\r\n ") + "]"
+            case(.columnMajor, let lil):
+                "[" + Sparse.transpose(lil: lil, for: rows).lazy.map { row in
+                    row.reduce(into: Array<Element>(repeating: .zero, count: cols)) {
+                        $0[$1.0] = $1.1
+                    }.description
+                }.joined(separator: ",\r\n ") + "]"
+            }
         }
     }
 }
 extension SparseMatrix where Element == Bool {
     @inlinable@inline(__always)@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
-        let (layout, result) = switch strategy {
+        switch strategy {
         case.rowMajor:
-            ([cols, 1], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
-                $0.initialize(repeating: false)
-                for position in entry {
-                    $0[position.x*cols+position.y] = true
-                }
-                $1 = $0.count
+            let ldr = max(1, cols)
+            let (layout, result) = (zip([rows, cols], [ldr, 1]).compactMap { 0 < $0 ? .some($1) : .none },
+                                    entry.reduce(into: Array<Element>(repeating: false, count: max(1, rows) * ldr)) {
+                $0[$1.x*ldr+$1.y] = true
             })
+            return (layout, {result})
         case.columnMajor:
-            ([1, rows], Array<Element>(unsafeUninitializedCapacity: rows * cols) {
-                $0.initialize(repeating: false)
-                for position in entry {
-                    $0[position.x+rows*position.y] = true
-                }
-                $1 = $0.count
+            let ldc = max(1, rows)
+            let (layout, result) = (zip([rows, cols], [1, ldc]).compactMap { 0 < $0 ? .some($1) : .none },
+                                    entry.reduce(into: Array<Element>(repeating: false, count: max(1, cols) * ldc)) {
+                $0[$1.x+ldc*$1.y] = true
             })
+            return (layout, {result})
         }
-        return (layout, {result})
     }
     @inlinable@inline(__always)@_transparent
     public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LazyMapSequence<Array<Set<Int>>, LazyMapSequence<Set<Int>, (Int, Element)>>) {
         switch layout {
         case.rowMajor:
-            (.rowMajor, entry.reduce(into: Array<Set<Int>>(repeating: .init(), count: rows)) {
+            (.rowMajor, entry.reduce(into: Array<Set<Int>>(repeating: .init(), count: max(1, rows))) {
                 $0[$1.x].insert($1.y)
             }.lazy.map { $0.lazy.map { ($0, true) } })
         case.columnMajor:
-            (.columnMajor, entry.reduce(into: Array<Set<Int>>(repeating: .init(), count: cols)) {
+            (.columnMajor, entry.reduce(into: Array<Set<Int>>(repeating: .init(), count: max(1, cols))) {
                 $0[$1.y].insert($1.x)
             }.lazy.map { $0.lazy.map { ($0, true) } })
         }
     }
     @inlinable@inline(__always)@_transparent
     public var description: String {
-        "[" + entry.reduce(into: Array<Set<Int>>(repeating: .init(), count: rows)) {
-            $0[$1.x].insert($1.y)
-        }.lazy.map { $0.lazy.map { ($0, true) } }.lazy.map { row in
-            Array<Element>(unsafeUninitializedCapacity: cols) {
-                $0.initialize(repeating: false)
-                for (c, v) in row where v {
-                    $0[c] = v
-                }
-                $1 = $0.count
-            }.description
-        }.joined(separator: ",\r\n ") + "]"
+        switch (rows, cols) {
+        case (0, 0):
+            .init(describing: lil(for: .columnMajor).1.flatMap(\.self).first.map(\.1) ?? false)
+        case (0, let count):
+            switch lil(for: .rowMajor) {
+            case (.rowMajor, let lil):
+                lil.flatMap(\.self).reduce(into: Array<Element>(repeating: false, count: count)) {
+                    $0[$1.0] = $1.1
+                }.description
+            case (.columnMajor, let lil):
+                lil.enumerated().reduce(into: Array<Element>(repeating: false, count: count)) {
+                    for (row, val) in $1.1 where row == .zero {
+                        $0[$1.0] = val
+                    }
+                }.description
+            }
+        case (let count, 0):
+            switch lil(for: .columnMajor) {
+            case (.rowMajor, let lil):
+                lil.enumerated().reduce(into: Array<Element>(repeating: false, count: count)) {
+                    for (row, val) in $1.1 where row == .zero {
+                        $0[$1.0] = val
+                    }
+                }.description
+            case (.columnMajor, let lil):
+                lil.flatMap(\.self).reduce(into: Array<Element>(repeating: false, count: count)) {
+                    $0[$1.0] = $1.1
+                }.description
+            }
+        default:
+            switch lil(for: .rowMajor) {
+            case(.rowMajor, let lil):
+                "[" + lil.lazy.map { row in
+                    row.reduce(into: Array<Element>(repeating: false, count: cols)) {
+                        $0[$1.0] = $1.1
+                    }.description
+                }.joined(separator: ",\r\n ") + "]"
+            case(.columnMajor, let lil):
+                "[" + Sparse.transpose(lil: lil, for: rows).lazy.map { row in
+                    row.reduce(into: Array<Element>(repeating: false, count: cols)) {
+                        $0[$1.0] = $1.1
+                    }.description
+                }.joined(separator: ",\r\n ") + "]"
+            }
+        }
     }
 }
 extension MutableSparseMatrix {
@@ -175,3 +222,4 @@ extension MutableSparseMatrix where Element == Bool {
         self.init(diagonal: repeatElement(true, count: count))
     }
 }
+public enum Matrix<Element: MutableSparseScalar<Element>> {}
