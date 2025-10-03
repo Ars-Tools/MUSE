@@ -41,13 +41,13 @@ extension MemoryStrategy {
 	public func stride(for shape: some BidirectionalCollection<Int>) -> Array<Int> {
         switch self {
         case.rowMajor:
-            shape.reversed().dropLast().reduce(into: Array<Int>(arrayLiteral: 1)) {
+            shape.reversed().reduce(into: Array<Int>(arrayLiteral: 1)) {
                 $0.append($0.last.unsafelyUnwrapped * $1)
-            }.reversed()
+            }.dropLast().reversed()
         case.columnMajor:
-            shape.dropLast().reduce(into: Array<Int>(arrayLiteral: 1)) {
+            shape.reduce(into: Array<Int>(arrayLiteral: 1)) {
                 $0.append($0.last.unsafelyUnwrapped * $1)
-            }
+            }.dropLast()
         }
 	}
 }
