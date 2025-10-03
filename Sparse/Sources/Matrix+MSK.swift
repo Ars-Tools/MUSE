@@ -2,19 +2,25 @@
 //  Matrix+MSK.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
 import func simd.simd_reduce_min
-@dynamicMemberLookup
-@frozen public struct MSK {
-    public typealias Element = Bool
-    public let rows: Int
-    public let cols: Int
-    private(set) public var entry: Set<SIMD2<Int>>
+extension Matrix where Element == Bool {
+    @dynamicMemberLookup
+    @frozen public struct MSK {
+        public typealias Element = Bool
+        public typealias S = Self
+        public typealias T = Self
+        public typealias U = Element
+        public typealias V = Vector<Bool>.MSK
+        public let rows: Int
+        public let cols: Int
+        private(set) public var entry: Set<SIMD2<Int>>
+    }
 }
-extension MSK {
+extension Matrix.MSK {
     @inlinable
     public subscript<R>(dynamicMember lookup: KeyPath<Set<SIMD2<Int>>, R>) -> R {
         entry[keyPath: lookup]
@@ -29,11 +35,7 @@ extension MSK {
         }
     }
 }
-extension MSK {
-    public typealias S = Self
-    public typealias T = Self
-    public typealias U = Element
-    public typealias V = VSK
+extension Matrix.MSK {
     public var diagonal: V {
         .init(count: min(rows, cols), entry: .init(entry.lazy.compactMap {
             $0.x == $0.y ? .some(simd_reduce_min($0)) : .none
@@ -124,7 +126,7 @@ extension MSK {
         }
     }
 }
-extension MSK: MutableSparseMatrix {
+extension Matrix.MSK: MutableSparseMatrix {
     public init(shape: (Int, Int)) {
         (rows, cols) = shape
         entry = .init()
@@ -138,11 +140,12 @@ extension MSK: MutableSparseMatrix {
         }
     }
 }
-extension MSK {
+extension Matrix.MSK {
     public init(_ source: some SparseMatrix) {
         rows = source.rows
         cols = source.cols
         entry = source.entry
     }
 }
-extension MSK: CustomStringConvertible {}
+extension Matrix.MSK: CustomStringConvertible {}
+public typealias MSK = Matrix<Bool>.MSK
