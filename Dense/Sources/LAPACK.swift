@@ -2,7 +2,7 @@
 //  LAPACK.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 10/1/25.
 //
 import Accelerate.vecLib
 import typealias Numerics.Complex64
