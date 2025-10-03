@@ -2,9 +2,10 @@
 //  Logical+MSK.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 10/4/25.
 //
 import protocol Dense.Matrix
+import protocol Dense.InstantMatrix
 import typealias Layout.MemoryStrategy
 import func Layout.broadcast
 import func Layout.narrowcast
@@ -18,7 +19,9 @@ extension Logical {
             @usableFromInline typealias Element = Maskee.Element
             @usableFromInline typealias Storage = Array<Element>
             @usableFromInline typealias S = Vector<Maskee.S, Masker.S>
+            @usableFromInline typealias T = Self
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let maskee: Maskee
             @usableFromInline let masker: Masker
         }
@@ -78,30 +81,30 @@ extension Logical.MSK.Matrix: SparseMatrix {
     var transpose: T {
         .init(maskee: maskee.transpose, masker: masker.transpose)
     }
-    @usableFromInline
-    var diagonal: V {
-        let maskee = switch (rows / maskee.rows, cols / maskee.cols) {
-        case (1, 1):
-            maskee.diagonal
-        case (1, 2...):
-            maskee[0, 0...]
-        case (2..., 1):
-            maskee[0..., 0]
-        default:
-            maskee.diagonal
-        }
-        let masker = switch (rows / masker.rows, cols / masker.cols) {
-        case (1, 1):
-            masker.diagonal
-        case (1, 2...):
-            masker[0, 0...]
-        case (2..., 1):
-            masker[0..., 0]
-        default:
-            masker.diagonal
-        }
-        return.init(maskee: maskee, masker: masker)
-    }
+//    @usableFromInline
+//    var diagonal: V {
+//        let maskee = switch (rows / maskee.rows, cols / maskee.cols) {
+//        case (1, 1):
+//            maskee.diagonal
+//        case (1, 2...):
+//            maskee[0, 0...]
+//        case (2..., 1):
+//            maskee[0..., 0]
+//        default:
+//            maskee.diagonal
+//        }
+//        let masker = switch (rows / masker.rows, cols / masker.cols) {
+//        case (1, 1):
+//            masker.diagonal
+//        case (1, 2...):
+//            masker[0, 0...]
+//        case (2..., 1):
+//            masker[0..., 0]
+//        default:
+//            masker.diagonal
+//        }
+//        return.init(maskee: maskee, masker: masker)
+//    }
     @inlinable
     subscript(row: Int, col: Int) -> Element {
         masker[narrowcast(point: row, shape: masker.rows),
@@ -185,15 +188,31 @@ extension DOK {
         }))
     }
 }
-extension Matrix {
+extension Dense.Matrix {
     @_disfavoredOverload
-    public subscript(_ masker: some SparseMatrix<Bool>, for strategy: MemoryStrategy = .rowMajor) -> DOK<Element> {
+    public subscript(_ masker: some SparseMatrix<Bool>, for strategy: MemoryStrategy = .default) -> Matrix<Element>.DOK {
         get async throws {
             let (layout, maskee) = try evaluation(for: strategy)
             precondition(layout.count == 2)
             async let result = maskee()
             let masker = masker.entry
             return await result.withUnsafePointerWithFallback { memory in
+                .init(rows: rows, cols: cols, store: .init(uniqueKeysWithValues: masker.lazy.map {
+                    ($0, memory[layout[0] * $0.x + layout[1] * $0.y])
+                }))
+            }
+        }
+    }
+}
+extension Dense.InstantMatrix {
+    @_disfavoredOverload
+    public subscript(_ masker: some SparseMatrix<Bool>, for strategy: MemoryStrategy = .default) -> Matrix<Element>.DOK {
+        get throws {
+            let (layout, maskee) = try evaluation(for: strategy)
+            precondition(layout.count == 2)
+            let result = maskee()
+            let masker = masker.entry
+            return result.withUnsafePointerWithFallback { memory in
                 .init(rows: rows, cols: cols, store: .init(uniqueKeysWithValues: masker.lazy.map {
                     ($0, memory[layout[0] * $0.x + layout[1] * $0.y])
                 }))
