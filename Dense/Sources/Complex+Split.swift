@@ -2,43 +2,39 @@
 //  Complex+Split.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
-import func Layout.capacity
 extension Complex {
-    @frozen public struct Realp<X: ElasticTensor<Element>> {
-        public typealias Storage = Array<X.Element.Magnitude>
+    @frozen public struct Realp<X: Tensor<Element>> {
         public typealias S = Realp<X.S>
         public typealias T = Realp<X.T>
         public typealias U = Realp<X.U>
         public typealias V = Realp<X.V>
-        public let x: X
-        public init(x: X) {
+        @usableFromInline let x: X
+        @inlinable@_transparent
+        init(x: X) {
             self.x = x
         }
     }
-    @frozen public struct Imagp<X: ElasticTensor<Element>> {
-        public typealias Storage = Array<X.Element.Magnitude>
+    @frozen public struct Imagp<X: Tensor<Element>> {
         public typealias S = Imagp<X.S>
         public typealias T = Imagp<X.T>
         public typealias U = Imagp<X.U>
         public typealias V = Imagp<X.V>
-        public let x: X
-        public init(x: X) {
+        @usableFromInline let x: X
+        @inlinable@_transparent
+        init(x: X) {
             self.x = x
         }
     }
-    @frozen public struct Phase<X: ElasticTensor<Element>> {
-        public typealias Element = X.Element.Magnitude
-        public typealias R = Array<X.Element.Magnitude>
+    @frozen public struct Phase<X: Tensor<Element>> {
         public typealias S = Phase<X.S>
         public typealias T = Phase<X.T>
         public typealias U = Phase<X.U>
         public typealias V = Phase<X.V>
-        public let x: X
-        @inlinable
-        public init(x: X) {
+        @usableFromInline let x: X
+        @inlinable@_transparent
+        init(x: X) {
             self.x = x
         }
     }
@@ -47,8 +43,9 @@ extension Complex {
 extension Complex.Realp: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension Complex.Realp: Vector & Operator.UnaryVector where X: Vector {}
 extension Complex.Realp: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension Complex.Realp: ElasticTensor & Operator.UnaryTensor {
-    @inlinable
+extension Complex.Realp: Tensor & Operator.UnaryTensor {
+    public typealias Element = X.Element.Magnitude
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
@@ -95,7 +92,8 @@ extension Complex.Realp: InstantTensor where X: InstantTensor {
         }
     }
 }
-extension ElasticTensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+    @inlinable@_transparent
     public var r: Complex<Element>.Realp<Self> {
         .init(x: self)
     }
@@ -104,8 +102,9 @@ extension ElasticTensor where Element: ComplexElement, Element.Magnitude: Bitwis
 extension Complex.Imagp: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension Complex.Imagp: Vector & Operator.UnaryVector where X: Vector {}
 extension Complex.Imagp: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension Complex.Imagp: ElasticTensor & Operator.UnaryTensor {
-    @inlinable
+extension Complex.Imagp: Tensor & Operator.UnaryTensor {
+    public typealias Element = X.Element.Magnitude
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
@@ -129,7 +128,7 @@ extension Complex.Imagp: ElasticTensor & Operator.UnaryTensor {
     }
 }
 extension Complex.Imagp: InstantTensor where X: InstantTensor {
-    @inlinable
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
@@ -152,7 +151,8 @@ extension Complex.Imagp: InstantTensor where X: InstantTensor {
         }
     }
 }
-extension ElasticTensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+    @inlinable@_transparent
     public var i: Complex<Element>.Imagp<Self> {
         .init(x: self)
     }
@@ -161,8 +161,9 @@ extension ElasticTensor where Element: ComplexElement, Element.Magnitude: Bitwis
 extension Complex.Phase: Scalar & Operator.UnaryScalar where X: Scalar {}
 extension Complex.Phase: Vector & Operator.UnaryVector where X: Vector {}
 extension Complex.Phase: Matrix & Operator.UnaryMatrix where X: Matrix {}
-extension Complex.Phase: ElasticTensor & Operator.UnaryTensor {
-    @inlinable
+extension Complex.Phase: Tensor & Operator.UnaryTensor {
+    public typealias Element = X.Element.Magnitude
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () async -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
@@ -186,7 +187,7 @@ extension Complex.Phase: ElasticTensor & Operator.UnaryTensor {
     }
 }
 extension Complex.Phase: InstantTensor where X: InstantTensor {
-    @inlinable
+    @inlinable@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<X.Element.Magnitude>) {
         switch try x.evaluation(for: strategy) {
         case (let xs, let xm):
@@ -209,7 +210,8 @@ extension Complex.Phase: InstantTensor where X: InstantTensor {
         }
     }
 }
-extension ElasticTensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
+    @inlinable@_transparent
     public var θ: Complex<Element>.Phase<Self> {
         .init(x: self)
     }
