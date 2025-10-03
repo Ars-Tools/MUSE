@@ -2,7 +2,7 @@
 //  LIL.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import Testing
 @testable import Sparse
@@ -10,7 +10,7 @@ import Testing
 struct LILTestCases {
     @Test
     func alt() {
-        var eye = LIL<Int>(identity: 4)
+        var eye = Matrix<Int>.LIL(identity: 4)
         eye[0, 0] = 5
         eye[2, 2] = 0
         eye[2, 3] = 4
@@ -24,7 +24,7 @@ struct LILTestCases {
         var eye = DOK<Int>(diagonal: 1, 2, 3)
         #expect(eye[2, 0] == 0)
         eye[2, 0] = 10
-        let test = LIL(eye)
+        let test = Matrix<Int>.LIL(eye)
         #expect(test[2, 0] == 10)
         #expect(test[0, 0] == 1)
         #expect(test[1, 1] == 2)
@@ -34,7 +34,7 @@ struct LILTestCases {
     func pb() {
         var eye = DOK<Int>(diagonal: 1, 2, 3)
         eye[2, 0...] = .init(arrayLiteral: 3, 2, 1)
-        let test = LIL(eye)
+        let test = Matrix<Int>.LIL(eye)
         #expect(test[0, 0] == 1)
         #expect(test[1, 1] == 2)
         #expect(test[2, 2] == 1)
@@ -45,7 +45,7 @@ struct LILTestCases {
     func bp() {
         var eye = DOK<Int>(diagonal: 1, 2, 3)
         eye[0..., 2] = .init(arrayLiteral: 3, 2, 1)
-        let test = LIL(eye)
+        let test = Matrix<Int>.LIL(eye)
         #expect(test[0, 0] == 1)
         #expect(test[1, 1] == 2)
         #expect(test[2, 2] == 1)
@@ -59,7 +59,7 @@ struct LILTestCases {
         #expect(eye[1, 1] == 2)
         #expect(eye[2, 2] == 3)
         eye[0..<2, 0..<2] = .init(diagonal: 4, 5)
-        let test = LIL(eye)
+        let test = Matrix<Int>.LIL(eye)
         #expect(test[0, 0] == 4)
         #expect(test[1, 1] == 5)
         #expect(test[2, 2] == 3)
@@ -67,7 +67,7 @@ struct LILTestCases {
     }
     @Test
     func modVR() {
-        var eye = LIL(CRS<Int>(identity: 4))
+        var eye = Matrix<Int>.LIL(CRS<Int>(identity: 4))
         eye[3, 0] = 10
         #expect(eye.major == .rowMajor)
         eye[1..., 0] = .init(arrayLiteral: 2, 4, 8)
@@ -80,7 +80,7 @@ struct LILTestCases {
     }
     @Test
     func modVC() {
-        var eye = LIL(CCS<Int>(identity: 4))
+        var eye = Matrix<Int>.LIL(CCS<Int>(identity: 4))
         eye[3, 0] = 10
         #expect(eye.major == .columnMajor)
         eye[1..., 0] = .init(arrayLiteral: 2, 4, 8)
@@ -93,7 +93,7 @@ struct LILTestCases {
     }
     @Test
     func modHR() {
-        var eye = LIL(CRS<Int>(identity: 4))
+        var eye = Matrix<Int>.LIL(CRS<Int>(identity: 4))
         eye[3, 0] = 10
         #expect(eye.major == .rowMajor)
         eye[0, 1...] = .init(arrayLiteral: 2, 4, 8)
@@ -106,7 +106,7 @@ struct LILTestCases {
     }
     @Test
     func modHC() {
-        var eye = LIL(CCS<Int>(identity: 4))
+        var eye = Matrix<Int>.LIL(CCS<Int>(identity: 4))
         eye[3, 0] = 10
         #expect(eye.major == .columnMajor)
         eye[0, 1...] = .init(arrayLiteral: 2, 4, 8)

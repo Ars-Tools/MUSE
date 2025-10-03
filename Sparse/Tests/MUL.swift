@@ -2,7 +2,7 @@
 //  MUL.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import Testing
 import func Layout.product
@@ -14,10 +14,10 @@ struct MulTestCases {
         ([0, 3, 5], [0, 0, 11]),
     ])
     func vv(lhs: Array<Int>, rhs: Array<Int>) {
-        let x = SPV<Int>(lhs, ε: .zero)
-        let y = SPV<Int>(rhs, ε: .zero)
+        let x = Vector<Int>.DOK(lhs, ε: .zero)
+        let y = Vector<Int>.DOK(rhs, ε: .zero)
         let z = x * y
-        let w = SPV(z)
+        let w = Vector<Int>.DOK(z)
         #expect(w.store.count == 1)
         for idx in 0..<3 {
             #expect(z[idx] == x[idx] * y[idx])

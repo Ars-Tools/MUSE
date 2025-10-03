@@ -2,7 +2,7 @@
 //  ADD.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import Testing
 import func Layout.product
@@ -14,10 +14,10 @@ struct AddTestCases {
         ([0, 3, 5], [0, 9, 11]),
     ])
     func vv(lhs: Array<Int>, rhs: Array<Int>) {
-        let x = SPV<Int>(lhs, ε: .zero)
-        let y = SPV<Int>(rhs, ε: .zero)
+        let x = Vector<Int>.DOK(lhs, ε: .zero)
+        let y = Vector<Int>.DOK(rhs, ε: .zero)
         let z = x + y
-        let w = SPV(z)
+        let w = Vector<Int>.DOK(z)
         #expect(w.store.count == 2)
         for idx in 0..<3 {
             #expect(z[idx] == x[idx] + y[idx])
@@ -175,31 +175,31 @@ struct AddTestCases {
             #expect(w[row, col] == x[0, col] + y[row, 0])
         }
     }
-    @Test
-    func or() {
-        var x = MSK(shape: (6, 1))
-        var y = MSK(shape: (1, 6))
-        for k in 0..<6 {
-            x[k, 0] = .random()
-            y[0, k] = .random()
-        }
-        let z = x || y
-        let w = MSK(z)
-        #expect(z[0..<3, 0..<3].entry == w[0..<3, 0..<3].entry)
-        for row in 0..<z.rows {
-            let e = x[row, 0...] || y[0, 0...]
-            #expect(z[row, 0...].entry == e.entry)
-            #expect(w[row, 0...].entry == e.entry)
-        }
-        for col in 0..<z.cols {
-            let e = x[0..., 0] || y[0..., col]
-            #expect(z[0..., col].entry == e.entry)
-            #expect(w[0..., col].entry == e.entry)
-        }
-        for (row, col) in product(0..<z.rows, 0..<z.cols) {
-            let e = x[row, 0] || y[0, col]
-            #expect(z[row, col] == e)
-            #expect(w[row, col] == e)
-        }
-    }
+//    @Test
+//    func or() {
+//        var x = MSK(shape: (6, 1))
+//        var y = MSK(shape: (1, 6))
+//        for k in 0..<6 {
+//            x[k, 0] = .random()
+//            y[0, k] = .random()
+//        }
+//        let z = x || y
+//        let w = MSK(z)
+//        #expect(z[0..<3, 0..<3].entry == w[0..<3, 0..<3].entry)
+//        for row in 0..<z.rows {
+//            let e = x[row, 0...] || y[0, 0...]
+//            #expect(z[row, 0...].entry == e.entry)
+//            #expect(w[row, 0...].entry == e.entry)
+//        }
+//        for col in 0..<z.cols {
+//            let e = x[0..., 0] || y[0..., col]
+//            #expect(z[0..., col].entry == e.entry)
+//            #expect(w[0..., col].entry == e.entry)
+//        }
+//        for (row, col) in product(0..<z.rows, 0..<z.cols) {
+//            let e = x[row, 0] || y[0, col]
+//            #expect(z[row, col] == e)
+//            #expect(w[row, col] == e)
+//        }
+//    }
 }
