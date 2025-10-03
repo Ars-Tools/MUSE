@@ -2,19 +2,24 @@
 //  Matrix+COO.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
-import func Layout.product
-@frozen public struct COO<Element: SparseScalar<Element> & Numeric> {
-    public let rows: Int
-    public let cols: Int
-    @usableFromInline private(set) var rowIndex: Array<Int32>
-    @usableFromInline private(set) var colIndex: Array<Int32>
-    @usableFromInline private(set) var valArray: Array<Element>
+extension Matrix where Element: Numeric {
+    @frozen public struct COO {
+        public typealias S = Self
+        public typealias T = Self
+        public typealias U = Element
+        public typealias V = Vector<Element>.DOK
+        public let rows: Int
+        public let cols: Int
+        @usableFromInline private(set) var rowIndex: Array<Int32>
+        @usableFromInline private(set) var colIndex: Array<Int32>
+        @usableFromInline private(set) var valArray: Array<Element>
+    }
 }
-extension COO {
+extension Matrix.COO {
     @inlinable
     var indices: LazyMapSequence<Zip2Sequence<Array<Int32>, Array<Int32>>, (Int, Int)> {
         zip(rowIndex, colIndex).lazy.map { (.init($0), .init($1)) }
@@ -24,12 +29,7 @@ extension COO {
         Array(indices.map(SIMD2<Int>.init(x:y:))).firstIndex(of: position)
     }
 }
-extension COO: MutableSparseMatrix {
-    public typealias R = Array<Element>
-    public typealias S = Self
-    public typealias T = Self
-    public typealias U = Element
-    public typealias V = SPV<Element>
+extension Matrix.COO: MutableSparseMatrix {
     public var transpose: T {
         .init(rows: cols, cols: rows, rowIndex: colIndex, colIndex: rowIndex, valArray: valArray)
     }
@@ -148,7 +148,7 @@ extension COO: MutableSparseMatrix {
             let col = col.relative(to: 0..<cols)
             return.init(shape: (row.count, col.count), indices.enumerated().compactMap {
                 switch $1 {
-                case (row, col):
+                case (row, col), (row.lowerBound, col.lowerBound):
                     .some((SIMD2<Int>(.init(rowIndex[$0]), .init(colIndex[$0])) &- SIMD2<Int>(row.lowerBound, col.lowerBound), valArray[$0]))
                 default:
                     .none
@@ -174,21 +174,21 @@ extension COO: MutableSparseMatrix {
         }
     }
 }
-extension COO {
+extension Matrix.COO {
     public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, Array<Array<(Int, Element)>>) {
         switch layout {
         case.rowMajor:
-            (.rowMajor, valArray.enumerated().reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: rows)) {
+            (.rowMajor, valArray.enumerated().reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: max(1, rows))) {
                 $0[.init(rowIndex[$1.0])].append((.init(colIndex[$1.0]), $1.1))
             })
         case.columnMajor:
-            (.columnMajor, valArray.enumerated().reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: cols)) {
+            (.columnMajor, valArray.enumerated().reduce(into: Array<Array<(Int, Element)>>(repeating: .init(), count: max(1, cols))) {
                 $0[.init(colIndex[$1.0])].append((.init(rowIndex[$1.0]), $1.1))
             })
         }
     }
 }
-extension COO {
+extension Matrix.COO {
     @inlinable
     public init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>) {
         (rows, cols) = shape
@@ -245,11 +245,12 @@ extension COO {
         }
     }
 }
-extension COO: ExpressibleByArrayLiteral {
+extension Matrix.COO: ExpressibleByArrayLiteral {
     @_disfavoredOverload
     @inlinable
     public init(arrayLiteral elements: Array<Element>...) {
         self.init(rows: elements)
     }
 }
-extension COO: CustomStringConvertible {}
+extension Matrix.COO: CustomStringConvertible {}
+public typealias COO<Element: MutableSparseScalar<Element> & Numeric> = Matrix<Element>.COO
