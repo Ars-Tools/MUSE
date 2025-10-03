@@ -2,7 +2,7 @@
 //  Arithmetic+DOT.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import protocol Dense.InstantTensor
 import protocol Dense.Scalar
@@ -15,53 +15,61 @@ extension Arithmetic {
     @frozen enum DOT {
         @usableFromInline
         @frozen struct Inner<X: SparseVector<Element>, Y: SparseVector<Element>> {
-            @usableFromInline typealias Storage = CollectionOfOne<Element>
+            @usableFromInline typealias S = Self
+            @usableFromInline typealias T = Self
+            @usableFromInline typealias U = Self
+            @usableFromInline typealias V = Self
             @usableFromInline let x: X
             @usableFromInline let y: Y
         }
         @usableFromInline
         @frozen struct Outer<LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
-            @usableFromInline typealias T = Outer<RHS.T, LHS.T>
-            @usableFromInline typealias V = Arithmetic.MUL.Vector<LHS.S, RHS.S>
             @usableFromInline typealias S = Outer<LHS.S, RHS.S>
+            @usableFromInline typealias T = Outer<RHS.T, LHS.T>
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Arithmetic.MUL.Vector<LHS.S, RHS.S>
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct DD<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
-            @usableFromInline typealias U = Element
             @usableFromInline typealias S = DD<LHS.S, RHS.S>
+            @usableFromInline typealias T = Self
+            @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct MV<LHS: SparseMatrix<Element>, RHS: SparseVector<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
-            @usableFromInline typealias U = Element
             @usableFromInline typealias S = MV<LHS.S, RHS>
+            @usableFromInline typealias T = Self
+            @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct VM<LHS: SparseVector<Element>, RHS: SparseMatrix<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
-            @usableFromInline typealias U = Element
             @usableFromInline typealias S = VM<LHS, RHS.S>
+            @usableFromInline typealias T = Self
+            @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen enum VV<X: SparseMatrix<Element>, Y: SparseMatrix<Element>> {
+            @usableFromInline typealias S = Arithmetic.DOT.VV<X.S, Y.S>
+            @usableFromInline typealias T = Self
+            @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             case DD(X, Y)
             case MV(X, Y)
             case VM(X, Y)
         }
         @usableFromInline
         @frozen struct MM<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
             @usableFromInline typealias S = MM<LHS.S, RHS.S>
             @usableFromInline typealias T = MM<RHS.T, LHS.T>
             @usableFromInline typealias U = Element
@@ -72,12 +80,14 @@ extension Arithmetic {
     }
 }
 extension Arithmetic.DOT.Inner: Scalar & InstantTensor {
+    public typealias Element = Element
     @inlinable@inline(__always)
     func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> CollectionOfOne<Element>) {
         ([], {.init(x.coo • y.coo)})
     }
 }
 extension Arithmetic.DOT.Outer: SparseMatrix {
+    public typealias Element = Element
     @inlinable@inline(__always)
     var rows: Int { lhs.count }
     @inlinable@inline(__always)
@@ -123,6 +133,7 @@ extension Arithmetic.DOT.Outer: SparseMatrix {
     }
 }
 extension Arithmetic.DOT.DD: SparseVector {
+    public typealias Element = Element
     @inlinable@inline(__always)
     var count: Int { min(lhs.rows, rhs.cols) }
     @inlinable@inline(__always)
@@ -183,6 +194,7 @@ extension Arithmetic.DOT.DD: SparseVector {
     }
 }
 extension Arithmetic.DOT.MV: SparseVector {
+    public typealias Element = Element
     @inlinable@inline(__always)
     var count: Int {
         lhs.rows
@@ -218,6 +230,7 @@ extension Arithmetic.DOT.MV: SparseVector {
     }
 }
 extension Arithmetic.DOT.VM: SparseVector {
+    public typealias Element = Element
     @inlinable@inline(__always)
     var count: Int { rhs.cols }
     @inlinable@inline(__always)
@@ -251,9 +264,7 @@ extension Arithmetic.DOT.VM: SparseVector {
     }
 }
 extension Arithmetic.DOT.VV: SparseVector {
-    @usableFromInline typealias Storage = Array<Element>
-    @usableFromInline typealias S = Arithmetic.DOT.VV<X.S, Y.S>
-    @usableFromInline typealias U = Element
+    @usableFromInline typealias Element = Element
     @inlinable
     var count: Int {
         switch self {
@@ -300,6 +311,7 @@ extension Arithmetic.DOT.VV: SparseVector {
     }
 }
 extension Arithmetic.DOT.MM: SparseMatrix {
+    @usableFromInline typealias Element = Element
     @inlinable@inline(__always)
     var rows: Int { lhs.rows }
     @inlinable@inline(__always)
