@@ -2,18 +2,18 @@
 //  Protocol+Vector.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
-import typealias Layout.MemoryStrategy
-import protocol Dense.InstantTensor
 import protocol Dense.Vector
+import protocol Dense.MutableScalar
+import protocol Dense.InstantVector
 import protocol Dense.MutableVector
-public protocol SparseVector<Element>: Vector & InstantTensor where S: SparseVector<Element>, T: SparseVector<Element>, U: SparseScalar<U>, V: SparseVector<Element> {
+public protocol SparseVector<Element>: InstantVector where S: SparseVector<Element>, T: SparseVector<Element>, U: SparseScalar<Element>, V: SparseVector<Element>, U == Element {
     associatedtype COO: Sequence where COO.Element == (Int, Element)
     @inlinable var coo: COO { get }
     @inlinable var entry: Set<Int> { get }
 }
-public protocol MutableSparseVector<Element>: SparseVector & MutableVector where S: MutableSparseVector<Element>, T: MutableSparseVector<Element>, U: SparseScalar<U>, V: MutableSparseVector<Element> {
+public protocol MutableSparseVector<Element>: MutableVector & SparseVector where S: MutableSparseVector<Element>, T: MutableSparseVector<Element>, U: MutableSparseScalar<Element>, V: MutableSparseVector<Element> {
     @inlinable init(shape: (Int), _ nonzero: some Sequence<(Int, Element)>)
 }
 extension SparseVector where Element: Numeric {
@@ -35,7 +35,7 @@ extension SparseVector where Element == Bool {
     @inlinable@inline(__always)@_transparent
     public func evaluation(for strategy: MemoryStrategy) throws -> (Array<Int>, @Sendable () -> Array<Element>) {
         let store = entry.reduce(into: Array<Element>(repeating: false, count: count)) { $0[$1] = true }
-        return ([1], {store})
+        return (count != .zero ? [1] : [], {store})
     }
     @inlinable@inline(__always)@_transparent
     public var coo: LazyMapSequence<Set<Int>, (Int, Bool)> {
@@ -51,8 +51,9 @@ extension MutableSparseVector {
     public init(shape: (Int)) {
         self.init(shape: shape, [])
     }
-    @inlinable
+    @inlinable@inline(__always)@_transparent
     public init(_ source: some SparseVector<Element>) {
         self.init(shape: source.count, source.coo)
     }
 }
+public enum Vector<Element: SparseScalar<Element>> {}
