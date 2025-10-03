@@ -2,7 +2,7 @@
 //  Arithmetic.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import typealias Foundation.KeyPathComparator
 import protocol Accelerate.AccelerateBuffer
@@ -16,15 +16,15 @@ extension Arithmetic {
     @frozen enum Scale {
         @usableFromInline
         @frozen struct Vector<Source: SparseVector<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
             @usableFromInline typealias S = Vector<Source.S>
+            @usableFromInline typealias T = Self
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let factor: Element
             @usableFromInline let source: Source
         }
         @usableFromInline
         @frozen struct Matrix<Source: SparseMatrix<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
             @usableFromInline typealias S = Matrix<Source.S>
             @usableFromInline typealias T = Matrix<Source.T>
             @usableFromInline typealias U = Element
@@ -35,6 +35,7 @@ extension Arithmetic {
     }
 }
 extension Arithmetic.Scale.Vector: SparseVector {
+    @usableFromInline typealias Element = Element
     @inlinable@inline(__always)
     var count: Int { source.count }
     @inlinable@inline(__always)
@@ -51,6 +52,7 @@ extension Arithmetic.Scale.Vector: SparseVector {
     }
 }
 extension Arithmetic.Scale.Matrix: SparseMatrix {
+    @usableFromInline typealias Element = Element
     @inlinable@inline(__always)
     var rows: Int { source.rows }
     @inlinable@inline(__always)
@@ -59,10 +61,10 @@ extension Arithmetic.Scale.Matrix: SparseMatrix {
     var transpose: T {
         .init(factor: factor, source: source.transpose)
     }
-    @usableFromInline@inline(__always)
-    var diagonal: V {
-        .init(factor: factor, source: source.diagonal)
-    }
+//    @usableFromInline@inline(__always)
+//    var diagonal: V {
+//        .init(factor: factor, source: source.diagonal)
+//    }
     @inlinable@inline(__always)
     subscript(row: Int, col: Int) -> Element {
         factor * source[row, col]
