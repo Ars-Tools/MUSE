@@ -2,7 +2,7 @@
 //  Logical.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 @usableFromInline
 @frozen enum Logical {
