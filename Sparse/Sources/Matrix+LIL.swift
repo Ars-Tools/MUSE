@@ -2,19 +2,24 @@
 //  Matrix+LIL.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
 import protocol Dense.Matrix
 import typealias Layout.MemoryStrategy
-@dynamicMemberLookup
-@usableFromInline
-@frozen struct LIL<Element: SparseScalar<Element> & Numeric> {
-    @usableFromInline let major: MemoryStrategy
-    @usableFromInline
-    var store: Array<Dictionary<Int, Element>>
-    @usableFromInline let count: Int
+extension Matrix where Element: Numeric {
+    @dynamicMemberLookup
+    @usableFromInline@frozen struct LIL {
+        @usableFromInline typealias S = LIL
+        @usableFromInline typealias T = LIL
+        @usableFromInline typealias U = Element
+    //    @usableFromInline typealias V = COV<Element, LazyMapSequence<LazyFilterSequence<LazyMapSequence<EnumeratedSequence<ArraySlice<Dictionary<Int, Element>>>, Optional<(Int, Element)>>>, (Int, Element)>>
+        @usableFromInline typealias V = Vector<Element>.DOK
+        @usableFromInline let major: MemoryStrategy
+        @usableFromInline let count: Int
+        @usableFromInline var store: Array<Dictionary<Int, Element>>
+    }
 }
-extension LIL {
+extension Matrix.LIL {
     @inlinable
     subscript<Λ>(dynamicMember lookup: KeyPath<Array<Dictionary<Int, Element>>, Λ>) -> Λ {
         _read {
@@ -31,12 +36,7 @@ extension LIL {
         }
     }
 }
-extension LIL: MutableSparseMatrix {
-    @usableFromInline typealias S = LIL<Element>
-    @usableFromInline typealias T = LIL<Element>
-    @usableFromInline typealias U = Element
-//    @usableFromInline typealias V = COV<Element, LazyMapSequence<LazyFilterSequence<LazyMapSequence<EnumeratedSequence<ArraySlice<Dictionary<Int, Element>>>, Optional<(Int, Element)>>>, (Int, Element)>>
-    @usableFromInline typealias V = SPV<Element>
+extension Matrix.LIL: MutableSparseMatrix {
     @inlinable
     var rows: Int {
         switch major {
@@ -57,7 +57,7 @@ extension LIL: MutableSparseMatrix {
     }
     @usableFromInline
     var transpose: T {
-        .init(major: major.transpose, store: store, count: count)
+        .init(major: major.transpose, count: count, store: store)
     }
     @usableFromInline
     var diagonal: V {
@@ -190,19 +190,19 @@ extension LIL: MutableSparseMatrix {
             case.rowMajor:
                 let row = row.relative(to: store)
                 let col = col.relative(to: 0..<count)
-                return.init(major: major, store: store[row].map {
+                return.init(major: major, count: col.count, store: store[row].map {
                     .init(uniqueKeysWithValues: $0.lazy.compactMap {
                         col ~= $0 ? .some(($0 &- col.lowerBound, $1)) : .none
                     })
-                }, count: col.count)
+                })
             case.columnMajor:
                 let row = row.relative(to: 0..<count)
                 let col = col.relative(to: store)
-                return.init(major: major, store: store[col].map {
+                return.init(major: major, count: row.count, store: store[col].map {
                     .init(uniqueKeysWithValues: $0.lazy.compactMap {
                         row ~= $0 ? .some(($0 &- row.lowerBound, $1)) : .none
                     })
-                }, count: row.count)
+                })
             }
         }
         set {
@@ -264,17 +264,17 @@ extension LIL: MutableSparseMatrix {
         }
     }
 }
-extension LIL {
+extension Matrix.LIL {
     @inlinable
     init(shape: (Int, Int), _ nonzero: some Sequence<(SIMD2<Int>, Element)>) {
         count = shape.0
-        major = .columnMajor
+        major = .default
         store = nonzero.reduce(into: .init(repeating: .init(), count: shape.1)) {
             $0[$1.0.y].updateValue($1.1, forKey: $1.0.x)
         }
     }
 }
-extension LIL {
+extension Matrix.LIL {
     @inlinable
     init(diagonal vector: some SparseVector<Element>, for layout: MemoryStrategy) {
         count = vector.count
@@ -285,14 +285,14 @@ extension LIL {
     }
     @usableFromInline
     init(identity count: Int, for layout: MemoryStrategy) {
-        self.init(diagonal: COV(count: count, coo: repeatElement(1 as Element, count: count).enumerated().lazy.map(\.self)), for: layout)
+        self.init(diagonal: Vector<Element>.COV(count: count, coo: repeatElement(1 as Element, count: count).enumerated().lazy.map(\.self)), for: layout)
     }
     @inlinable
     init(identity count: Int) {
         self.init(identity: count, for: .columnMajor)
     }
 }
-extension LIL {
+extension Matrix.LIL {
     @inlinable
     init(_ source: some SparseMatrix<Element>, for layout: MemoryStrategy) {
         switch source.lil(for: layout) {
@@ -327,7 +327,7 @@ extension LIL {
     }
     @inlinable
     init(_ source: some SparseMatrix<Element>) {
-        switch source.lil(for: .columnMajor) {
+        switch source.lil(for: .default) {
         case (.rowMajor, let lil):
             major = .rowMajor
             count = source.cols
@@ -339,4 +339,5 @@ extension LIL {
         }
     }
 }
-extension LIL: CustomStringConvertible {}
+extension Matrix.LIL: CustomStringConvertible {}
+typealias LIL<Element: MutableSparseScalar<Element> & Numeric> = Matrix<Element>.LIL
