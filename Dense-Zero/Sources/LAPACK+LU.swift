@@ -17,7 +17,7 @@ extension LAPACK {
     }
 }
 extension LAPACK.LU {
-    public init<R>(factorize x: MatrixBuffer<R>) throws where R.Element == Element {
+    public init<R>(factorize x: Buffer<R>.Matrix) throws where R.Element == Element {
         m = x.rows
         n = x.cols
         let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [m, n], xs: [x.ldr, x.ldc], ys: [1, m])
@@ -59,7 +59,7 @@ extension LAPACK.LU {
     }
 }
 extension LAPACK.LU {
-    public var l: MatrixBuffer<Array<Element>> {
+    public var l: Buffer<Array<Element>>.Matrix {
         var system = system // COW
         system.withUnsafeMutableBufferPointer {
             assert($0.startIndex == 0)
@@ -70,7 +70,7 @@ extension LAPACK.LU {
         }
         return.init(shape: (m, min(m, n)), stride: (1, m), data: system)
     }
-    public var u: MatrixBuffer<Array<Element>> {
+    public var u: Buffer<Array<Element>>.Matrix {
         var system = system
         system.withUnsafeMutableBufferPointer {
             for c in 0..<min(m, n) {
@@ -81,7 +81,7 @@ extension LAPACK.LU {
     }
 }
 extension LAPACK.LU  {
-    public var inv: MatrixBuffer<Array<Element>> {
+    public var inv: Buffer<Array<Element>>.Matrix {
         precondition(m == n, "inv requires square matrix")
         var system = system
         let status = Element.GETRI(n: n,
@@ -91,49 +91,49 @@ extension LAPACK.LU  {
         return.init(shape: (m, n), stride: (1, m), data: system)
     }
 }
-extension LAPACK.LU {
-    public func solve<R>(y: VectorBuffer<R>) -> VectorBuffer<Array<Element>> where R.Element == Element {
-        precondition(y.count == m)
-        return.init(count: n, inc: 1, data: .init(unsafeUninitializedCapacity: max(m, n)) {
-            Element.Copy(x: y.data.withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped), ldx: y.inc,
-                         y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, length: y.count)
-            let status = Element.GETRS(n: n, nrhs: 1,
-                                       a: system, lda: m, opa: "N",
-                                       b: $0.baseAddress.unsafelyUnwrapped, ldb: n,
-                                       p: ipivot)
-            assert(status == 0)
-            $1 = $0.count
-        })
-    }
-    public func solve<R>(y: MatrixBuffer<R>) -> MatrixBuffer<Array<Element>> where R.Element == Element {
-        precondition(y.rows == m)
-        let rows = max(m, n)
-        let nrhs = y.cols
-        return.init(rows: m, cols: nrhs, ldr: 1, ldc: m, data: .init(unsafeUninitializedCapacity: capacity(alloc: [rows, nrhs], stride: [1, rows])) {
-            let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [y.rows, y.cols], xs: [y.ldr, y.ldc], ys: [1, rows])
-            for offset in offset {
-                Element.Copy(x: y.data.withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped).advanced(by: offset.x), ldx: stride.x,
-                             y: $0.baseAddress.unsafelyUnwrapped.advanced(by: offset.y), ldy: stride.y, length: length)
-            }
-            Element.GETRS(n: n, nrhs: nrhs,
-                          a: system, lda: m, opa: "N",
-                          b: $0.baseAddress.unsafelyUnwrapped, ldb: rows,
-                          p: ipivot)
-            $1 = $0.count
-        })
-    }
-}
-extension LAPACK.LU {
-    public func solve(y: some Matrix<Element>) async throws -> MatrixBuffer<Array<Element>> {
-        try await solve(y: MatrixBuffer<Array<Element>>(y, for: .columnMajor))
-    }
-    public func solve(y: some InstantMatrix<Element>) throws -> MatrixBuffer<Array<Element>> {
-        try solve(y: MatrixBuffer<Array<Element>>(y, for: .columnMajor))
-    }
-    public func solve(y: some Vector<Element>) async throws -> VectorBuffer<Array<Element>> {
-        try await solve(y: VectorBuffer<Array<Element>>(y, for: .columnMajor))
-    }
-    public func solve(y: some InstantVector<Element>) throws -> VectorBuffer<Array<Element>> {
-        try solve(y: VectorBuffer<Array<Element>>(y, for: .columnMajor))
-    }
-}
+//extension LAPACK.LU {
+//    public func solve<R>(y: VectorBuffer<R>) -> VectorBuffer<Array<Element>> where R.Element == Element {
+//        precondition(y.count == m)
+//        return.init(count: n, inc: 1, data: .init(unsafeUninitializedCapacity: max(m, n)) {
+//            Element.Copy(x: y.data.withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped), ldx: y.inc,
+//                         y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, length: y.count)
+//            let status = Element.GETRS(n: n, nrhs: 1,
+//                                       a: system, lda: m, opa: "N",
+//                                       b: $0.baseAddress.unsafelyUnwrapped, ldb: n,
+//                                       p: ipivot)
+//            assert(status == 0)
+//            $1 = $0.count
+//        })
+//    }
+//    public func solve<R>(y: MatrixBuffer<R>) -> MatrixBuffer<Array<Element>> where R.Element == Element {
+//        precondition(y.rows == m)
+//        let rows = max(m, n)
+//        let nrhs = y.cols
+//        return.init(rows: m, cols: nrhs, ldr: 1, ldc: m, data: .init(unsafeUninitializedCapacity: capacity(alloc: [rows, nrhs], stride: [1, rows])) {
+//            let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [y.rows, y.cols], xs: [y.ldr, y.ldc], ys: [1, rows])
+//            for offset in offset {
+//                Element.Copy(x: y.data.withUnsafeBufferPointer(\.baseAddress.unsafelyUnwrapped).advanced(by: offset.x), ldx: stride.x,
+//                             y: $0.baseAddress.unsafelyUnwrapped.advanced(by: offset.y), ldy: stride.y, length: length)
+//            }
+//            Element.GETRS(n: n, nrhs: nrhs,
+//                          a: system, lda: m, opa: "N",
+//                          b: $0.baseAddress.unsafelyUnwrapped, ldb: rows,
+//                          p: ipivot)
+//            $1 = $0.count
+//        })
+//    }
+//}
+//extension LAPACK.LU {
+//    public func solve(y: some Matrix<Element>) async throws -> MatrixBuffer<Array<Element>> {
+//        try await solve(y: MatrixBuffer<Array<Element>>(y, for: .columnMajor))
+//    }
+//    public func solve(y: some InstantMatrix<Element>) throws -> MatrixBuffer<Array<Element>> {
+//        try solve(y: MatrixBuffer<Array<Element>>(y, for: .columnMajor))
+//    }
+//    public func solve(y: some Vector<Element>) async throws -> VectorBuffer<Array<Element>> {
+//        try await solve(y: VectorBuffer<Array<Element>>(y, for: .columnMajor))
+//    }
+//    public func solve(y: some InstantVector<Element>) throws -> VectorBuffer<Array<Element>> {
+//        try solve(y: VectorBuffer<Array<Element>>(y, for: .columnMajor))
+//    }
+//}
