@@ -196,7 +196,7 @@ extension MemoryStrategy {
         let (length, stride) = layout.first ?? (1, (0))
         return layout.dropFirst().reduce((length, stride, [(0)]), flatten(result:source:))
     }
-//    @inlinable@inline(__always)@_transparent
+    @inlinable@inline(__always)@_transparent
     public func flatten(shape: some BidirectionalCollection<Int>,
                         xs: some BidirectionalCollection<Int>,
                         ys: some BidirectionalCollection<Int>) -> (Int, SIMD2<Int>, Array<SIMD2<Int>>) {
