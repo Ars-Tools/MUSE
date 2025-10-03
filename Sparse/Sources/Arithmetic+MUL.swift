@@ -1,8 +1,8 @@
 //
-//  Arithmetic+DIV.swift
+//  Arithmetic+MUL.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/28/25.
 //
 import protocol Dense.Tensor
 import typealias Layout.MemoryStrategy
@@ -13,15 +13,15 @@ extension Arithmetic {
     @frozen enum MUL {
         @usableFromInline
         @frozen struct Vector<LHS: SparseVector<Element>, RHS: SparseVector<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
             @usableFromInline typealias S = Vector<LHS.S, RHS.S>
+            @usableFromInline typealias T = Self
             @usableFromInline typealias U = Element
+            @usableFromInline typealias V = Self
             @usableFromInline let lhs: LHS
             @usableFromInline let rhs: RHS
         }
         @usableFromInline
         @frozen struct Matrix<LHS: SparseMatrix<Element>, RHS: SparseMatrix<Element>> {
-            @usableFromInline typealias Storage = Array<Element>
             @usableFromInline typealias S = Matrix<LHS.S, RHS.S>
             @usableFromInline typealias T = Matrix<LHS.T, RHS.T>
             @usableFromInline typealias U = Element
@@ -32,6 +32,7 @@ extension Arithmetic {
     }
 }
 extension Arithmetic.MUL.Vector: SparseVector {
+    public typealias Element = Element
     @inlinable
     var count: Int {
         broadcast(x: lhs.count, y: rhs.count)
@@ -52,6 +53,7 @@ extension Arithmetic.MUL.Vector: SparseVector {
     }
 }
 extension Arithmetic.MUL.Matrix: SparseMatrix {
+    public typealias Element = Element
     @inlinable
     var rows: Int {
         broadcast(x: lhs.rows, y: rhs.rows)
@@ -60,30 +62,30 @@ extension Arithmetic.MUL.Matrix: SparseMatrix {
     var cols: Int {
         broadcast(x: lhs.cols, y: rhs.cols)
     }
-    @usableFromInline
-    var diagonal: V {
-        let lhs = switch (rows / lhs.rows, cols / lhs.cols) {
-        case (1, 1):
-            lhs.diagonal
-        case (1, 2...):
-            lhs[0, 0...]
-        case (2..., 1):
-            lhs[0..., 0]
-        default:
-            lhs.diagonal
-        }
-        let rhs = switch (rows / rhs.rows, cols / rhs.cols) {
-        case (1, 1):
-            rhs.diagonal
-        case (1, 2...):
-            rhs[0, 0...]
-        case (2..., 1):
-            rhs[0..., 0]
-        default:
-            rhs.diagonal
-        }
-        return.init(lhs: lhs, rhs: rhs)
-    }
+//    @usableFromInline
+//    var diagonal: V {
+//        let lhs = switch (rows / lhs.rows, cols / lhs.cols) {
+//        case (1, 1):
+//            lhs.diagonal
+//        case (1, 2...):
+//            lhs[0, 0...]
+//        case (2..., 1):
+//            lhs[0..., 0]
+//        default:
+//            lhs.diagonal
+//        }
+//        let rhs = switch (rows / rhs.rows, cols / rhs.cols) {
+//        case (1, 1):
+//            rhs.diagonal
+//        case (1, 2...):
+//            rhs[0, 0...]
+//        case (2..., 1):
+//            rhs[0..., 0]
+//        default:
+//            rhs.diagonal
+//        }
+//        return.init(lhs: lhs, rhs: rhs)
+//    }
     @usableFromInline
     var transpose: T {
         .init(lhs: lhs.transpose, rhs: rhs.transpose)
