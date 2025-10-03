@@ -2,19 +2,26 @@
 //  Matrix+CCS.swift
 //  MUSE
 //
-//  Created by Kota on 9/26/25.
+//  Created by Kota on 9/27/25.
 //
-import protocol Dense.InstantTensor
+import typealias Foundation.KeyPathComparator
 import protocol Dense.Matrix
+import protocol Dense.InstantMatrix
 import typealias Layout.MemoryStrategy
-@frozen public struct CCS<Element: SparseScalar<Element> & Numeric> {
-    public let rows: Int
-    public let cols: Int
-    @usableFromInline private(set) var colStart: Array<Int>
-    @usableFromInline private(set) var rowIndex: Array<Int32>
-    @usableFromInline private(set) var valArray: Array<Element>
+extension Matrix where Element: Numeric {
+    @frozen public struct CCS {
+        public typealias S = CCS
+        public typealias T = CRS
+        public typealias U = Element
+        public typealias V = Vector<Element>.DOK
+        public let rows: Int
+        public let cols: Int
+        @usableFromInline private(set) var colStart: Array<Int>
+        @usableFromInline private(set) var rowIndex: Array<Int32>
+        @usableFromInline private(set) var valArray: Array<Element>
+    }
 }
-extension CCS {
+extension Matrix.CCS {
     @inlinable
     func coo(at col: Int) -> Zip2Sequence<LazyMapSequence<ArraySlice<Int32>, Int>, ArraySlice<Element>> {
         zip(rowIndex[colStart[col]..<colStart[col+1]].lazy.map(Int.init), valArray[colStart[col]..<colStart[col+1]])
@@ -35,11 +42,7 @@ extension CCS {
         }
     }
 }
-extension CCS: MutableSparseMatrix {
-    public typealias S = CCS<Element>
-    public typealias T = CRS<Element>
-    public typealias U = Element
-    public typealias V = SPV<Element>
+extension Matrix.CCS: MutableSparseMatrix {
     public var transpose: T {
         .init(rows: cols, cols: rows, rowStart: colStart, colIndex: rowIndex, valArray: valArray)
     }
@@ -71,6 +74,25 @@ extension CCS: MutableSparseMatrix {
             }
         }
     }
+    public subscript(row: some RangeExpression<Int>, col: Int) -> V {
+        get {
+            let row = row.relative(to: 0..<rows)
+            return.init(count: row.count, store: .init(uniqueKeysWithValues: coo(at: col).compactMap {
+                (row ~= $0 || row.lowerBound == $0) && $1 != .zero ? .some(($0 &- row.lowerBound, $1)) : .none
+            }))
+        }
+        set {
+            let row = row.relative(to: 0..<rows)
+            alt {
+                for row in row {
+                    $0[col].removeValue(forKey: .init(row))
+                }
+                for (idx, val) in newValue.store where val != .zero {
+                    $0[col].updateValue(val, forKey: .init(idx &- row.lowerBound))
+                }
+            }
+        }
+    }
     public subscript(row: Int, col: some RangeExpression<Int>) -> V {
         get {
             let col = col.relative(to: 0..<cols)
@@ -92,37 +114,14 @@ extension CCS: MutableSparseMatrix {
             }
         }
     }
-    public subscript(row: some RangeExpression<Int>, col: Int) -> V {
-        get {
-            let row = row.relative(to: 0..<rows)
-            return.init(count: row.count, store: .init(uniqueKeysWithValues: coo(at: col).compactMap {
-                switch ($0, $1) {
-                case (row, let v) where v != .zero:
-                    .some(($0 - row.lowerBound, v))
-                default:
-                    .none
-                }
-            }))
-        }
-        set {
-            let row = row.relative(to: 0..<rows)
-            alt {
-                for row in row {
-                    $0[col].removeValue(forKey: .init(row))
-                }
-                for (idx, val) in newValue.store where val != .zero {
-                    $0[col].updateValue(val, forKey: .init(idx &- row.lowerBound))
-                }
-            }
-        }
-    }
     public subscript(row: some RangeExpression<Int>, col: some RangeExpression<Int>) -> S {
         get {
             let row = row.relative(to: 0..<rows)
             let col = col.relative(to: 0..<cols)
-            return.init(shape: (row.count, col.count), col.enumerated().lazy.flatMap { idx, col in
+            let val = col.lowerBound..<max(col.lowerBound &+ 1, col.upperBound)
+            return.init(shape: (row.count, col.count), val.enumerated().lazy.flatMap { idx, col in
                 coo(at: col).lazy.compactMap {
-                    row ~= $0 && $1 != .zero ? .some((SIMD2($0 - row.lowerBound, idx), $1)) : .none
+                    (row ~= $0 || row.lowerBound == $0) && $1 != .zero ? .some((SIMD2($0 &- row.lowerBound, idx), $1)) : .none
                 }
             })
         }
@@ -143,16 +142,15 @@ extension CCS: MutableSparseMatrix {
         }
     }
 }
-extension CCS {
+extension Matrix.CCS {
     public typealias LIL = LazyMapSequence<Range<Int>, Zip2Sequence<LazyMapSequence<ArraySlice<Int32>, Int>, ArraySlice<Element>>>
     @inlinable
     public func lil(for layout: MemoryStrategy) -> (MemoryStrategy, LIL) {
-        (.columnMajor, (0..<cols).lazy.map(coo(at:)))
+        (.columnMajor, (0..<max(1, cols)).lazy.map(coo(at:)))
     }
     @inlinable
-    init(lil: some Collection<some Sequence<(Int, Element)>>, count: Int) {
-        rows = count
-        cols = lil.count
+    init(shape: (Int, Int), lil: some Sequence<some Sequence<(Int, Element)>>) {
+        (rows, cols) = shape
         (colStart, rowIndex, valArray) = lil.reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
             for (idx, val) in $1 where val != .zero {
                 $0.2.append(val)
@@ -162,19 +160,19 @@ extension CCS {
         }
     }
 }
-extension CCS {
+extension Matrix.CCS {
     @inlinable
     public init(shape: (Int, Int)) {
         (rows, cols) = shape
         precondition([rows, cols].allSatisfy { .zero < $0 }, "size should be greater than 0")
-        colStart = .init(repeating: .zero, count: cols + 1)
+        colStart = .init(repeating: .zero, count: cols &+ 1)
         rowIndex = .init()
         valArray = .init()
     }
     @inlinable
     public init(shape: (Int, Int), _ source: some Sequence<(SIMD2<Int>, Element)>) {
         (rows, cols) = shape
-        (colStart, rowIndex, valArray) = source.reduce(into: Array<Dictionary<Int, Element>>(repeating: .init(), count: cols)) {
+        (colStart, rowIndex, valArray) = source.reduce(into: Array<Dictionary<Int, Element>>(repeating: .init(), count: max(1, cols))) {
             $0[$1.0.y].updateValue($1.1, forKey: $1.0.x)
         }.reduce(into: (Array<Int>(arrayLiteral: 0), Array<Int32>(), Array<Element>())) {
             for (idx, val) in $1 where val != .zero {
@@ -222,16 +220,16 @@ extension CCS {
         }
     }
 }
-extension CCS: ExpressibleByArrayLiteral {
+extension Matrix.CCS: ExpressibleByArrayLiteral {
     @inlinable
     public init(arrayLiteral elements: Array<Element>...) {
         self.init(cols: elements)
     }
 }
-extension CCS {
+extension Matrix.CCS {
     @_disfavoredOverload
     @inlinable
-    public init(_ source: some Matrix<Element> & InstantTensor<Element>, ε: Element.Magnitude) async throws {
+    public init(_ source: some Dense.InstantMatrix<Element>, ε: Element.Magnitude) async throws {
         rows = source.rows
         cols = source.cols
         let (layout, source) = try source.evaluation(for: .columnMajor)
@@ -251,7 +249,7 @@ extension CCS {
     }
     @_disfavoredOverload
     @inlinable
-    public init(_ source: some Matrix<Element>, ε: Element.Magnitude) async throws {
+    public init(_ source: some Dense.Matrix<Element>, ε: Element.Magnitude) async throws {
         rows = source.rows
         cols = source.cols
         let (layout, source) = try source.evaluation(for: .columnMajor)
@@ -270,4 +268,5 @@ extension CCS {
         }
     }
 }
-extension CCS: CustomStringConvertible {}
+extension Matrix.CCS: CustomStringConvertible {}
+public typealias CCS<Element: MutableSparseScalar<Element> & Numeric> = Matrix<Element>.CCS
