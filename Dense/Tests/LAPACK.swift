@@ -24,7 +24,8 @@ struct LAPACKTestCases {
             [2.0, 3.0, 4.0],
             [2.0, 5.0, 8.0],
         ] as NDArray<Float64>
-        let x = try solver.solve(b: .init(b))
+        let x = solver.solve(b: b)
         print(x)
+        try print(NDArray(A • x))
     }
 }
