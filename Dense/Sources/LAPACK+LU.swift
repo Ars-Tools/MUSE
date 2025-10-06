@@ -17,20 +17,23 @@ extension LAPACK {
     }
 }
 extension LAPACK.LU {
-    public init<R>(factorize x: Buffer<R>.Matrix) throws where R.Element == Element {
+    public init(factorize x: some InstantMatrix<Element>) throws {
         m = x.rows
         n = x.cols
-        let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [m, n], xs: [x.ldr, x.ldc], ys: [1, m])
-        var a = Array<Element>(unsafeUninitializedCapacity: m * n) {
-            let y = $0.baseAddress.unsafelyUnwrapped
-            withUnsafePointer(x.store) { x in
+        let capacity = m * n
+        let (xs, xm) = try x.evaluation(for: .columnMajor)
+        assert(xs.count == 2)
+        let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [m, n], xs: xs, ys: [1, m])
+        var a = withUnsafePointer(xm()) { x in
+            Array<Element>(unsafeUninitializedCapacity: capacity) {
+                let y = $0.baseAddress.unsafelyUnwrapped
                 for offset in offset {
                     Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
                                  y: y.advanced(by: offset.y), ldy: stride.y,
                                  length: length)
                 }
+                $1 = $0.count
             }
-            $1 = $0.count
         }
         var p = Array<Int>(repeating: .zero, count: n)
         switch Element.GETRF(m: m, n: n,
@@ -44,13 +47,35 @@ extension LAPACK.LU {
         system = a
         ipivot = p
     }
-}
-extension LAPACK.LU where Element: MutableScalar<Element> {
-    public init(factorize x: some InstantMatrix<Element>) throws  {
-        try self.init(factorize: Buffer<Array<Element>>.Matrix(x))
-    }
     public init(factorize x: some Matrix<Element>) async throws {
-        try await self.init(factorize: Buffer<Array<Element>>.Matrix(x))
+        m = x.rows
+        n = x.cols
+        let capacity = m * n
+        let (xs, xm) = try x.evaluation(for: .columnMajor)
+        assert(xs.count == 2)
+        let (length, stride, offset) = MemoryStrategy.columnMajor.flatten(shape: [m, n], xs: xs, ys: [1, m])
+        var a = await withUnsafePointer(xm()) { x in
+            Array<Element>(unsafeUninitializedCapacity: capacity) {
+                let y = $0.baseAddress.unsafelyUnwrapped
+                for offset in offset {
+                    Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
+                                 y: y.advanced(by: offset.y), ldy: stride.y,
+                                 length: length)
+                }
+                $1 = $0.count
+            }
+        }
+        var p = Array<Int>(repeating: .zero, count: n)
+        switch Element.GETRF(m: m, n: n,
+                             a: &a, lda: m,
+                             p: &p) {
+        case.zero:
+            break
+        case let status:
+            throw Error.numericalError(tensor: x, status: status, operation: "GETRF@\(#function)")
+        }
+        system = a
+        ipivot = p
     }
 }
 extension LAPACK.LU where Element: SignedNumeric {
