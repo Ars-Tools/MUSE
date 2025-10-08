@@ -12,8 +12,7 @@ public enum RoundingToward {
 	case infinite
 }
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public func rounding(denominator: IntegerLiteralType, toward: RoundingToward = .zero) -> Self {
 		let (n, d) = factor
 		let v = n * denominator
@@ -36,8 +35,7 @@ extension RationalNumber {
 			return.init(numerator: div(p, d) + div(q, d) - div(v, d), denominator: denominator)
 		}
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public func roundingIfNeeded(denominator limit: IntegerLiteralType, toward: RoundingToward = .zero) -> Self {
 		denominator < limit ? self : rounding(denominator: limit, toward: toward)
 	}

@@ -6,14 +6,13 @@
 //
 import func Darwin.modf
 extension BinaryFloatingPoint {
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public init(_ value: some RationalNumber) {
 		self = Self(value.numerator) / Self(value.denominator)
 	}
 }
 extension RationalNumber {
-	@inline(__always) // farey sequence
-	@inlinable
+    @inlinable@inline(__always)@_transparent // farey seq
 	public init<Real: BinaryFloatingPoint>(_ χ: Real, error ε: Real = Real.ulpOfOne.squareRoot(), limit N: IntegerLiteralType = 1 << ( Real.significandBitCount / 2 )) {
 		let (i, f) = switch modf(χ) {
 		case ((let i, let f)) where f.isLess(than: .zero):
@@ -55,8 +54,7 @@ extension RationalNumber where IntegerLiteralType: SignedInteger {
 	 Use farey method (above one) or manually specify termination to expand continued fraction
 	 like SomeRational.init(continuedFraction: FLP_VALUE.continuedFractionSequence().prefix(LIMIT))
 	 */
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public init(floatLiteral value: FloatLiteralType) {
 		self = switch (value.sign, value.exponent) {
 		case (.plus, 0...):

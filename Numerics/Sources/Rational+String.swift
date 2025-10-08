@@ -6,8 +6,7 @@
 //
 import RegexBuilder
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public var description: String {
 		switch factor {
 		case (0, 0):
@@ -26,8 +25,7 @@ extension RationalNumber {
 	}
 }
 extension RationalNumber where IntegerLiteralType: FixedWidthInteger {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public init?(_ string: String) {
 		let parser = Regex {
 			Anchor.startOfLine

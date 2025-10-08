@@ -14,8 +14,7 @@ import protocol Synchronization.AtomicRepresentable
 }
 extension Rational: RationalNumber {
 	public typealias Magnitude = Rational<IntegerLiteralType.Magnitude>
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: Magnitude {
 		.init(numerator: numerator.magnitude, denominator: denominator.magnitude)
 	}
@@ -28,19 +27,23 @@ extension Rational: ExpressibleByFloatLiteral where IntegerLiteralType: SignedIn
 }
 extension Rational16: RationalNumber & CustomStringConvertible & ExpressibleByFloatLiteral {
 	public typealias Magnitude = Rational<IntegerLiteralType.Magnitude>
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: Rational<IntegerLiteralType.Magnitude> {
 		.init(numerator: rawValue.x.magnitude, denominator: rawValue.y.magnitude)
 	}
 	public var numerator: IntegerLiteralType { rawValue.x }
 	public var denominator: IntegerLiteralType { rawValue.y }
+    @inlinable@inline(__always)@_transparent
 	public init(numerator: IntegerLiteralType, denominator: IntegerLiteralType) {
 		rawValue = .init(numerator, denominator)
 	}
 }
 extension Rational16: AtomicRepresentable {
+    @inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> RawValue {
 		unsafeBitCast(self, to: RawValue.self)
 	}
+    @inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming RawValue) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -52,19 +55,23 @@ extension Rational16: AtomicRepresentable {
 }
 extension Rational32: RationalNumber & CustomStringConvertible & ExpressibleByFloatLiteral {
 	public typealias Magnitude = Rational<IntegerLiteralType.Magnitude>
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: Rational<IntegerLiteralType.Magnitude> {
 		.init(numerator: rawValue.x.magnitude, denominator: rawValue.y.magnitude)
 	}
 	public var numerator: IntegerLiteralType { rawValue.x }
 	public var denominator: IntegerLiteralType { rawValue.y }
+    @inlinable@inline(__always)@_transparent
 	public init(numerator: IntegerLiteralType, denominator: IntegerLiteralType) {
 		rawValue = .init(numerator, denominator)
 	}
 }
 extension Rational32: AtomicRepresentable {
+    @inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> RawValue {
 		unsafeBitCast(self, to: RawValue.self)
 	}
+    @inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming RawValue) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -76,19 +83,23 @@ extension Rational32: AtomicRepresentable {
 }
 extension Rational64: RationalNumber & CustomStringConvertible & ExpressibleByFloatLiteral {
 	public typealias Magnitude = Rational<IntegerLiteralType.Magnitude>
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: Rational<IntegerLiteralType.Magnitude> {
 		.init(numerator: rawValue.x.magnitude, denominator: rawValue.y.magnitude)
 	}
 	public var numerator: IntegerLiteralType { rawValue.x }
 	public var denominator: IntegerLiteralType { rawValue.y }
+    @inlinable@inline(__always)@_transparent
 	public init(numerator: IntegerLiteralType, denominator: IntegerLiteralType) {
 		rawValue = .init(numerator, denominator)
 	}
 }
 extension Rational64: AtomicRepresentable {
+    @inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> RawValue {
 		unsafeBitCast(self, to: RawValue.self)
 	}
+    @inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming RawValue) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -100,19 +111,23 @@ extension Rational64: AtomicRepresentable {
 }
 extension Rational128: RationalNumber & CustomStringConvertible & ExpressibleByFloatLiteral {
 	public typealias Magnitude = Rational<IntegerLiteralType.Magnitude>
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: Rational<IntegerLiteralType.Magnitude> {
 		.init(numerator: rawValue.x.magnitude, denominator: rawValue.y.magnitude)
 	}
 	public var numerator: IntegerLiteralType { rawValue.x }
 	public var denominator: IntegerLiteralType { rawValue.y }
+    @inlinable@inline(__always)@_transparent
 	public init(numerator: IntegerLiteralType, denominator: IntegerLiteralType) {
 		rawValue = .init(numerator, denominator)
 	}
 }
 extension Rational128: AtomicRepresentable {
+    @inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> RawValue {
 		unsafeBitCast(self, to: RawValue.self)
 	}
+    @inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming RawValue) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -121,9 +136,11 @@ extension Rational128: AtomicRepresentable {
 	public typealias IntegerLiteralType = Int128
 	public var numerator: IntegerLiteralType
 	public var denominator: IntegerLiteralType
+    @inlinable@inline(__always)@_transparent
 	public init(numerator n: IntegerLiteralType, denominator d: IntegerLiteralType) {
 		(numerator, denominator) = (n, d)
 	}
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: Rational<IntegerLiteralType.Magnitude> {
 		.init(numerator: numerator.magnitude, denominator: denominator.magnitude)
 	}
@@ -132,9 +149,11 @@ extension Rational256: RationalNumber & CustomStringConvertible & ExpressibleByF
 	public typealias Magnitude = Rational<IntegerLiteralType.Magnitude>
 }
 extension Rational256: AtomicRepresentable {
+    @inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> SIMD4<UInt64> {
 		unsafeBitCast(self, to: SIMD4<UInt64>.self)
 	}
+    @inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming SIMD4<UInt64>) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}

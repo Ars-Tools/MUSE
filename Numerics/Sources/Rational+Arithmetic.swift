@@ -5,8 +5,7 @@
 //  Created by Kota on 5/15/R7.
 //
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func+(lhs: Self, rhs: Self) -> Self {
 		let (ln, ld) = lhs.factor
 		let (rn, rd) = rhs.factor
@@ -16,8 +15,7 @@ extension RationalNumber {
 		let f = abs(gcd(n, d))
 		return.init(numerator: div(n, f), denominator: div(d, f))
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func-(lhs: Self, rhs: Self) -> Self {
 		let (ln, ld) = lhs.factor
 		let (rn, rd) = rhs.factor
@@ -27,8 +25,7 @@ extension RationalNumber {
 		let f = abs(gcd(n, d))
 		return.init(numerator: div(n, f), denominator: div(d, f))
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func*(lhs: Self, rhs: Self) -> Self {
 		let (ln, ld) = lhs.factor
 		let (rn, rd) = rhs.factor
@@ -36,8 +33,7 @@ extension RationalNumber {
 		let d = abs(gcd(ld, rn))
 		return.init(numerator: div(ln, n) * div(rn, d), denominator: div(ld, d) * div(rd, n))
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func/(lhs: Self, rhs: Self) -> Self {
 		let (ln, ld) = lhs.factor
 		let (rn, rd) = rhs.factor
@@ -47,30 +43,25 @@ extension RationalNumber {
 	}
 }
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func+=(lhs: inout Self, rhs: Self) {
 		lhs = lhs + rhs
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func-=(lhs: inout Self, rhs: Self) {
 		lhs = lhs - rhs
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func*=(lhs: inout Self, rhs: Self) {
 		lhs = lhs * rhs
 	}
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func/=(lhs: inout Self, rhs: Self) {
 		lhs = lhs / rhs
 	}
 }
 extension RationalNumber {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static func%(lhs: Self, rhs: Self) -> Self {
 		let (ln, ld) = lhs.factor
 		switch rhs.factor {
@@ -88,8 +79,7 @@ extension RationalNumber {
 	}
 }
 extension RationalNumber where IntegerLiteralType: SignedInteger {
-	@inline(__always)
-	@inlinable
+    @inlinable@inline(__always)@_transparent
 	public static prefix func-(_ χ: Self) -> Self {
 		switch χ.factor {
 		case let (numerator, denominator) where denominator < 0:
