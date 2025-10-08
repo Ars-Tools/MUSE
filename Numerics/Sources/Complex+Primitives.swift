@@ -91,7 +91,7 @@ extension DSPComplex {//}: ComplexNumber, @unchecked Sendable {
 	@inline(__always)
 	public static let i = Self(real: 0, imag: 1)
 }
-extension DSPComplex: AtomicRepresentable {
+extension DSPComplex: @retroactive AtomicRepresentable {
 	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
 	@inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
@@ -155,7 +155,7 @@ extension DSPDoubleComplex {//}: ComplexNumber, @unchecked Sendable {
 	@inline(__always)
 	public static let i = Self(real: 0, imag: 1)
 }
-extension DSPDoubleComplex: AtomicRepresentable {
+extension DSPDoubleComplex: @retroactive AtomicRepresentable {
 	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
 	@inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {

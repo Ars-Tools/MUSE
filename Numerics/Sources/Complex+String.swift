@@ -5,7 +5,7 @@
 //  Created by Kota on 5/15/R7.
 //
 extension ComplexNumber {
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public var description: String {
 		switch (real, imag) {
 		case (let r, 0):
@@ -18,7 +18,7 @@ extension ComplexNumber {
 	}
 }
 extension ComplexNumber where FloatLiteralType: BinaryFloatingPoint {
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public var description: String {
 		switch (real, imag) {
 		case (0, 0):
