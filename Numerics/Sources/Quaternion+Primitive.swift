@@ -38,31 +38,31 @@ extension Quaternion64: @retroactive ExpressibleByIntegerLiteral, @retroactive E
 	}
 }
 extension Quaternion64: @retroactive AtomicRepresentable {
-	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
+    public typealias AtomicRepresentation = FloatLiteralType.SIMD4Storage
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
-		value.vector
+        unsafeBitCast(value.vector, to: AtomicRepresentation.self)
 	}
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
-		.init(vector: storage)
+        .init(vector: unsafeBitCast(storage, to: SIMD4<FloatLiteralType>.self))
 	}
 }
 extension Quaternion128: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, @retroactive AtomicRepresentable, QuaternionNumber {
 	public typealias FloatLiteralType = Float32
-	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
+	public typealias AtomicRepresentation = FloatLiteralType.SIMD4Storage
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
-		value.vector
+        unsafeBitCast(value.vector, to: AtomicRepresentation.self)
 	}
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
-		.init(vector: storage)
+        .init(vector: unsafeBitCast(storage, to: SIMD4<FloatLiteralType>.self))
 	}
 }
 extension Quaternion256: @retroactive ExpressibleByIntegerLiteral, @retroactive ExpressibleByFloatLiteral, @retroactive AtomicRepresentable, QuaternionNumber {
 	public typealias FloatLiteralType = Float64
-	public typealias AtomicRepresentation = SIMD4<FloatLiteralType>
+    public typealias AtomicRepresentation = FloatLiteralType.SIMD4Storage
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
-		value.vector
+        unsafeBitCast(value.vector, to: AtomicRepresentation.self)
 	}
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
-		.init(vector: storage)
+        .init(vector: unsafeBitCast(storage, to: SIMD4<FloatLiteralType>.self))
 	}
 }
