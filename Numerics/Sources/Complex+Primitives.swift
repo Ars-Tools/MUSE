@@ -7,6 +7,7 @@
 import typealias Accelerate.vecLib.DSPComplex
 import typealias Accelerate.vecLib.DSPDoubleComplex
 import func simd.length
+import func simd.length_squared
 import func simd.atan2f
 import func simd.atan2l
 import protocol Synchronization.AtomicRepresentable
@@ -14,25 +15,25 @@ import protocol Synchronization.AtomicRepresentable
 	public typealias FloatLiteralType = Float16
 	public let real: FloatLiteralType
 	public let imag: FloatLiteralType
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
 		real = r
 		imag = i
 	}
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: FloatLiteralType.Magnitude {
 		(real * real + imag * imag).squareRoot()
 	}
-	@inline(__always)
+    @inline(__always)
 	public static let i = Self(real: 0, imag: 1)
 }
 extension Complex32: AtomicRepresentable {
 	public typealias AtomicRepresentation = FloatLiteralType.SIMD2Storage
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
 		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -41,26 +42,28 @@ extension Complex32: AtomicRepresentable {
 	public typealias FloatLiteralType = Float32
 	public let real: FloatLiteralType
 	public let imag: FloatLiteralType
-	@inlinable
-	@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
 		real = r
 		imag = i
 	}
-	@inlinable
-	@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: FloatLiteralType.Magnitude {
 		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
 	}
+    @inlinable@inline(__always)@_transparent
+    public var magnitudeSquared: FloatLiteralType.Magnitude {
+        length_squared(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
+    }
 	public static let i = Self(real: 0, imag: 1)
 }
 extension Complex64: AtomicRepresentable {
 	public typealias AtomicRepresentation = FloatLiteralType.SIMD2Storage
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
 		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -68,16 +71,20 @@ extension Complex64: AtomicRepresentable {
 //public typealias Complex64 = DSPComplex
 extension DSPComplex {//}: ComplexNumber, @unchecked Sendable {
 	public typealias FloatLiteralType = Float32
-	@inlinable @inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public func hash(into hasher: inout Hasher) {
 		real.hash(into: &hasher)
 		imag.hash(into: &hasher)
 	}
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
 	public var magnitude: FloatLiteralType.Magnitude {
 		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
 	}
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
+    public var magnitudeSquared: FloatLiteralType.Magnitude {
+        length_squared(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
+    }
+    @inlinable@inline(__always)@_transparent
 	public var argument: FloatLiteralType {
 		atan2f(imag, real)
 	}
@@ -86,11 +93,11 @@ extension DSPComplex {//}: ComplexNumber, @unchecked Sendable {
 }
 extension DSPComplex: AtomicRepresentable {
 	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
 		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -99,26 +106,28 @@ extension DSPComplex: AtomicRepresentable {
 	public typealias FloatLiteralType = Float64
 	public let real: FloatLiteralType
 	public let imag: FloatLiteralType
-	@inlinable
-	@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public init(real r: FloatLiteralType, imag i: FloatLiteralType) {
 		real = r
 		imag = i
 	}
-	@inlinable
-	@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public var magnitude: FloatLiteralType.Magnitude {
 		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
 	}
+    @inlinable@inline(__always)@_transparent
+    public var magnitudeSquared: FloatLiteralType.Magnitude {
+        length_squared(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
+    }
 	public static let i = Self(real: 0, imag: 1)
 }
 extension Complex128: AtomicRepresentable {
 	public typealias AtomicRepresentation = FloatLiteralType.SIMD2Storage
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
 		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
@@ -126,16 +135,20 @@ extension Complex128: AtomicRepresentable {
 //public typealias Complex128 = DSPDoubleComplex
 extension DSPDoubleComplex {//}: ComplexNumber, @unchecked Sendable {
 	public typealias FloatLiteralType = Float64
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public func hash(into hasher: inout Hasher) {
 		real.hash(into: &hasher)
 		imag.hash(into: &hasher)
 	}
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public var magnitude: FloatLiteralType.Magnitude {
 		length(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
 	}
-	@inlinable@inline(__always)
+    @inlinable@inline(__always)@_transparent
+    public var magnitudeSquared: FloatLiteralType.Magnitude {
+        length_squared(unsafeBitCast(self, to: SIMD2<FloatLiteralType>.self))
+    }
+	@inlinable@inline(__always)@_transparent
 	public var argument: FloatLiteralType {
 		atan2l(imag, real)
 	}
@@ -144,11 +157,11 @@ extension DSPDoubleComplex {//}: ComplexNumber, @unchecked Sendable {
 }
 extension DSPDoubleComplex: AtomicRepresentable {
 	public typealias AtomicRepresentation = SIMD2<FloatLiteralType>
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func encodeAtomicRepresentation(_ value: consuming Self) -> AtomicRepresentation {
 		unsafeBitCast(value, to: AtomicRepresentation.self)
 	}
-	@inlinable@inline(__always)
+	@inlinable@inline(__always)@_transparent
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
