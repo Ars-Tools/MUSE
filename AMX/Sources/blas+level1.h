@@ -170,63 +170,63 @@ complex128_t const dotc(__LAPACK_int const N,
 // MARK: 2-norm
 __attribute__((always_inline, __overloadable__)) inline static
 float32_t const nrm2(__LAPACK_int const n,
-                     float32_t const x, __LAPACK_int const incx) {
+                     float32_t const*__nonnull const x, __LAPACK_int const incx) {
     return snrm2(&n, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float64_t const nrm2(__LAPACK_int const n,
-                     float64_t const x, __LAPACK_int const incx) {
+                     float64_t const*__nonnull const x, __LAPACK_int const incx) {
     return dnrm2(&n, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float32_t const nrm2(__LAPACK_int const n,
-                     complex64_t const x, __LAPACK_int const incx) {
+                     complex64_t const*__nonnull const x, __LAPACK_int const incx) {
     return scnrm2(&n, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float64_t const nrm2(__LAPACK_int const n,
-                     complex128_t const x, __LAPACK_int const incx) {
+                     complex128_t const*__nonnull const x, __LAPACK_int const incx) {
     return dznrm2(&n, x, &incx);
 }
 // MARK: 1-norm
 __attribute__((always_inline, __overloadable__)) inline static
 float32_t const asum(__LAPACK_int const n,
-                     float32_t const x, __LAPACK_int const incx) {
+                     float32_t const*__nonnull const x, __LAPACK_int const incx) {
     return sasum(&n, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float64_t const asum(__LAPACK_int const n,
-                     float64_t const x, __LAPACK_int const incx) {
+                     float64_t const*__nonnull const x, __LAPACK_int const incx) {
     return dasum(&n, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float32_t const asum(__LAPACK_int const n,
-                     complex64_t const x, __LAPACK_int const incx) {
+                     complex64_t const*__nonnull const x, __LAPACK_int const incx) {
     return scasum(&n, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float64_t const asum(__LAPACK_int const n,
-                     complex128_t const x, __LAPACK_int const incx) {
+                     complex128_t const*__nonnull const x, __LAPACK_int const incx) {
     return dzasum(&n, x, &incx);
 }
 // MARK: ∞-norm
 __attribute__((always_inline, __overloadable__)) inline static
 float32_t const i_amax(__LAPACK_int const N,
-                       float32_t const x, __LAPACK_int const incx) {
+                       float32_t const*__nonnull const x, __LAPACK_int const incx) {
     return si_amax(&N, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float64_t const i_amax(__LAPACK_int const N,
-                       float64_t const x, __LAPACK_int const incx) {
+                       float64_t const*__nonnull const x, __LAPACK_int const incx) {
     return di_amax(&N, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float32_t const i_amax(__LAPACK_int const N,
-                       complex64_t const x, __LAPACK_int const incx) {
+                       complex64_t const*__nonnull const x, __LAPACK_int const incx) {
     return sci_amax(&N, x, &incx);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 float64_t const i_amax(__LAPACK_int const N,
-                       complex128_t const x, __LAPACK_int const incx) {
+                       complex128_t const*__nonnull const x, __LAPACK_int const incx) {
     return dzi_amax(&N, x, &incx);
 }
