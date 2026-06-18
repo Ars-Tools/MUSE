@@ -70,6 +70,34 @@ void vvcospi(float64_t const*__nonnull const x,
              intptr_t const length) {
     vvcospi(y, x, (int32_t const[]){(int32_t const)length});
 }
+// MARK: cosisin
+__attribute__((always_inline, __overloadable__)) inline static
+void vvcosisin(float32_t const*__nonnull const x,
+               complex64_t*__nonnull const y,
+               intptr_t const length) {
+    vvcosisinf(y, x, (int32_t const[]){(int32_t const)length});
+}
+__attribute__((always_inline, __overloadable__)) inline static
+void vvcosisin(float64_t const*__nonnull const x,
+               complex128_t*__nonnull const y,
+               intptr_t const length) {
+    vvcosisin(y, x, (int32_t const[]){(int32_t const)length});
+}
+// MARK: sincos
+__attribute__((always_inline, __overloadable__)) inline static
+void vvsincos(float32_t const*__nonnull const x,
+              float32_t      *__nonnull const s,
+              float32_t      *__nonnull const c,
+              intptr_t const length) {
+    vvsincosf(s, c, x, (int32_t const[]){(int32_t const)length});
+}
+__attribute__((always_inline, __overloadable__)) inline static
+void vvsincos(float64_t const*__nonnull const x,
+              float64_t      *__nonnull const s,
+              float64_t      *__nonnull const c,
+              intptr_t const length) {
+    vvsincos(s, c, x, (int32_t const[]){(int32_t const)length});
+}
 // MARK: tanπ
 __attribute__((always_inline, __overloadable__)) inline static
 void vvtanpi(float32_t const*__nonnull const x,
