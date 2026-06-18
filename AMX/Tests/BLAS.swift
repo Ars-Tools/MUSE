@@ -10,7 +10,7 @@ import Testing
 struct BLASTestCases {
     @Test
     func dgemm() {
-        let x = [1,2,3,4].map { complex128_t(.init(real: .init($0), imag: 0)) }
+        let x = [1,2,3,4].map { complex_new(Float64($0)) }
         let y = [1,2,3,4].map { complex128_t(.init(real: .init($0), imag: 0)) }
         var z = [1,2,3,4].map { complex128_t(.init(real: .init($0), imag: 0)) }
         
@@ -21,8 +21,9 @@ struct BLASTestCases {
                         complex128_t(.init(real: 0, imag: 0)),
                         &z, 2)
         print(info)
-        print(x.map(\.vector))
-        print(y.map(\.vector))
-        print(z.map(\.vector))
+        print(x.map(\.real))
+        print(y.map(\.real))
+        print(z.map(\.real))
+        
     }
 }
