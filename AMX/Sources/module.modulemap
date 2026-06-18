@@ -9,3 +9,9 @@ module LAPACK {
     header "lapack+eig.h"
     export *
 }
+module vFORCE {
+    header "vforce+trigonometric.h"
+    header "vforce+power.h"
+    header "vforce+misc.h"
+    export *
+}
