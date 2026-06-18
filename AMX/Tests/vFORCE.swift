@@ -27,7 +27,18 @@ struct vFORCETestCases {
             vFORCE.vvcospi(x, $0.baseAddress.unsafelyUnwrapped, $0.count)
             $1 = $0.count
         }
+        
         #expect(zip(z, w).lazy.map(-).map(\.magnitude).allSatisfy { $0 < .ulpOfOne.squareRoot() })
+    }
+    @Test
+    func exp() {
+        let x = repeatElement(0.0 ... 2.0, count: 4).map(Float32.random(in:))
+        let w = Array<complex64_t>(unsafeUninitializedCapacity: x.count) {
+            vFORCE.vvcosisin(x, $0.baseAddress.unsafelyUnwrapped, $0.count)
+            $1 = $0.count
+        }
+        print(w.map(\.vector))
+        print(x.map(__sincosf_stret))
     }
     @Test
     func pow() {
