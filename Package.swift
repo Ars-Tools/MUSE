@@ -61,6 +61,26 @@ let package = Package(
 			dependencies: ["Optimise"],
 			path: "Optimise/Tests"
 		),
+        .target(
+            name: "AMX",
+            path: "AMX/Sources",
+            publicHeadersPath: ".",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+        ),
+        .testTarget(
+            name: "AMXTests",
+            dependencies: [
+                "AMX"
+            ],
+            path: "AMX/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+        ),
 		.target(
 			name: "Numerics",
 			path: "Numerics/Sources",
