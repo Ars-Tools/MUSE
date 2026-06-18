@@ -87,6 +87,9 @@ let package = Package(
         ),
 		.target(
 			name: "Numerics",
+            dependencies: [
+                "AMX"
+            ],
 			path: "Numerics/Sources",
 			cSettings: [
 				.define("ACCELERATE_NEW_LAPACK"),
@@ -96,7 +99,11 @@ let package = Package(
 		.testTarget(
 			name: "NumericsTests",
 			dependencies: ["Numerics"],
-			path: "Numerics/Tests"
+			path: "Numerics/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
 		),
 		.target(
 			name: "Layout",
