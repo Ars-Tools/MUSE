@@ -38,7 +38,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                vl, &ldvl,
                vr, &ldvr,
                &size, (__LAPACK_int const[]){-1}, &info);
-        return info == 0 ? size : info;
+        return info ? info : size;
     }
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
@@ -74,7 +74,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                vl, &ldvl,
                vr, &ldvr,
                &size, (__LAPACK_int const[]){-1}, &info);
-        return info == 0 ? size : info;
+        return info ? info : size;
     }
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
@@ -109,7 +109,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                vr, &ldvr,
                &size, (__LAPACK_int const[]){-1}, rwork,
                &info);
-        return info == 0 ? size.scalar : info;
+        return info ? info : size.scalar;
     }
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
@@ -144,6 +144,6 @@ __LAPACK_int const geev(__LAPACK_int const n,
                vr, &ldvr,
                &size, (__LAPACK_int const[]){-1}, rwork,
                &info);
-        return info == 0 ? size.scalar : info;
+        return info ? info : size.scalar;
     }
 }
