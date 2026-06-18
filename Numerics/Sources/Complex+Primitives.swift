@@ -10,6 +10,8 @@ import func simd.length
 import func simd.length_squared
 import func simd.atan2f
 import func simd.atan2l
+import func simd.simd_length
+import typealias simd.simd_half2
 import protocol Synchronization.AtomicRepresentable
 @frozen public struct Complex32: ComplexNumber & BitwiseCopyable {
 	public typealias FloatLiteralType = Float16
@@ -22,7 +24,7 @@ import protocol Synchronization.AtomicRepresentable
 	}
     @inlinable@inline(__always)@_transparent
 	public var magnitude: FloatLiteralType.Magnitude {
-		(real * real + imag * imag).squareRoot()
+        simd_length(unsafeBitCast(self, to: simd_half2.self))
 	}
     @inline(__always)
 	public static let i = Self(real: 0, imag: 1)
