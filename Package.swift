@@ -18,6 +18,10 @@ let package = Package(
 			name: "MUSE.Essentials",
 			targets: ["Layout", "Optimise"]
 		),
+        .library(
+            name: "MUSE.Headers",
+            targets: ["AMX"]
+        ),
     ],
 	dependencies: [
 		.package(url: "https://github.com/ars-tools/MUCE", branch: "release")
