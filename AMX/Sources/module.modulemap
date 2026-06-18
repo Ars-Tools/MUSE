@@ -1,0 +1,11 @@
+module BLAS {
+    header "blas+level1.h"
+    header "blas+level2.h"
+    header "blas+level3.h"
+    export *
+}
+module LAPACK {
+    header "lapack+lu.h"
+    header "lapack+eig.h"
+    export *
+}
