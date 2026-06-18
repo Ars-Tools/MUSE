@@ -25,7 +25,7 @@ let package = Package(
     targets: [
 		.target(
 			name: "Dense",
-			dependencies: ["Layout", "Numerics"],
+			dependencies: ["Layout", "Numerics", "AMX"],
 			path: "Dense/Sources",
 			cSettings: [
 				.define("ACCELERATE_NEW_LAPACK"),
