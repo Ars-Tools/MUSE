@@ -283,10 +283,10 @@ extension vFORCE.Log1p: InstantTensor where X: InstantTensor {
         }
     }
 }
-public func log<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Log2<X> {
+public func log<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Log<X> {
     .init(x: x)
 }
-public func log2<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Exp2<X> {
+public func log2<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Log2<X> {
     .init(x: x)
 }
 public func log10<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Log10<X> {
