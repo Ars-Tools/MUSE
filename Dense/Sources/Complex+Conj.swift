@@ -48,8 +48,8 @@ extension Complex.Conj: Tensor & Operator.UnaryTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Conj(x: x.advanced(by: offset.x), ldx: stride.x,
-                                             y: y.advanced(by: offset.y), ldy: stride.y,
+                                Element.Conj(x: x.advanced(by: offset.x), inc: stride.x,
+                                             y: y.advanced(by: offset.y), inc: stride.y,
                                              length: length)
                             }
                             $1 = $0.count
@@ -76,8 +76,8 @@ extension Complex.Conj: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Conj(x: x.advanced(by: offset.x), ldx: stride.x,
-                                             y: y.advanced(by: offset.y), ldy: stride.y,
+                                Element.Conj(x: x.advanced(by: offset.x), inc: stride.x,
+                                             y: y.advanced(by: offset.y), inc: stride.y,
                                              length: length)
                             }
                             $1 = $0.count
@@ -105,8 +105,8 @@ extension Complex.Swap: Tensor & Operator.UnaryTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Swap(x: x.advanced(by: offset.x), ldx: stride.x,
-                                             y: y.advanced(by: offset.y), ldy: stride.y,
+                                Element.Swap(x: x.advanced(by: offset.x), inc: stride.x,
+                                             y: y.advanced(by: offset.y), inc: stride.y,
                                              length: length)
                             }
                             $1 = $0.count
@@ -133,8 +133,8 @@ extension Complex.Swap: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Swap(x: x.advanced(by: offset.x), ldx: stride.x,
-                                             y: y.advanced(by: offset.y), ldy: stride.y,
+                                Element.Swap(x: x.advanced(by: offset.x), inc: stride.x,
+                                             y: y.advanced(by: offset.y), inc: stride.y,
                                              length: length)
                             }
                             $1 = $0.count
