@@ -58,8 +58,8 @@ extension Complex.Realp: Tensor & Operator.UnaryTensor {
                     .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
-                            X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
-                                           r: y.advanced(by: offset.y), ldr: stride.y, length: length)
+                            X.Element.Copy(z: x.advanced(by: offset.x), inc: stride.x,
+                                           r: y.advanced(by: offset.y), inc: stride.y, length: length)
                         }
                         $1 = $0.count
                     }
@@ -82,8 +82,8 @@ extension Complex.Realp: InstantTensor where X: InstantTensor {
                     .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
-                            X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
-                                           r: y.advanced(by: offset.y), ldr: stride.y, length: length)
+                            X.Element.Copy(z: x.advanced(by: offset.x), inc: stride.x,
+                                           r: y.advanced(by: offset.y), inc: stride.y, length: length)
                         }
                         $1 = $0.count
                     }
@@ -117,8 +117,8 @@ extension Complex.Imagp: Tensor & Operator.UnaryTensor {
                     .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
-                            X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
-                                           i: y.advanced(by: offset.y), ldi: stride.y, length: length)
+                            X.Element.Copy(z: x.advanced(by: offset.x), inc: stride.x,
+                                           i: y.advanced(by: offset.y), inc: stride.y, length: length)
                         }
                         $1 = $0.count
                     }
@@ -141,8 +141,8 @@ extension Complex.Imagp: InstantTensor where X: InstantTensor {
                     .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
-                            X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
-                                           i: y.advanced(by: offset.y), ldi: stride.y, length: length)
+                            X.Element.Copy(z: x.advanced(by: offset.x), inc: stride.x,
+                                           i: y.advanced(by: offset.y), inc: stride.y, length: length)
                         }
                         $1 = $0.count
                     }
@@ -176,8 +176,8 @@ extension Complex.Phase: Tensor & Operator.UnaryTensor {
                     .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
-                            X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
-                                           θ: y.advanced(by: offset.y), ldθ: stride.y, length: length)
+                            X.Element.Copy(z: x.advanced(by: offset.x), inc: stride.x,
+                                           θ: y.advanced(by: offset.y), inc: stride.y, length: length)
                         }
                         $1 = $0.count
                     }
@@ -200,8 +200,8 @@ extension Complex.Phase: InstantTensor where X: InstantTensor {
                     .init(unsafeUninitializedCapacity: capacity) {
                         let y = $0.baseAddress.unsafelyUnwrapped
                         for offset in offset {
-                            X.Element.Copy(z: x.advanced(by: offset.x), ldz: stride.x,
-                                           θ: y.advanced(by: offset.y), ldθ: stride.y, length: length)
+                            X.Element.Copy(z: x.advanced(by: offset.x), inc: stride.x,
+                                           θ: y.advanced(by: offset.y), inc: stride.y, length: length)
                         }
                         $1 = $0.count
                     }
