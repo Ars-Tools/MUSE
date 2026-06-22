@@ -62,9 +62,9 @@ extension Complex.Ortho: Tensor & Operator.BinaryTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Merge(r: x.advanced(by: offset.x), ldr: stride.x,
-                                              i: y.advanced(by: offset.y), ldi: stride.y,
-                                              z: z.advanced(by: offset.z), ldz: stride.z, length: length)
+                                Element.Merge(r: x.advanced(by: offset.x), inc: stride.x,
+                                              i: y.advanced(by: offset.y), inc: stride.y,
+                                              z: z.advanced(by: offset.z), inc: stride.z, length: length)
                             }
                             $1 = $0.count
                         }
@@ -92,9 +92,9 @@ extension Complex.Ortho: InstantTensor where X: InstantTensor, Y: InstantTensor 
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Merge(r: x.advanced(by: offset.x), ldr: stride.x,
-                                              i: y.advanced(by: offset.y), ldi: stride.y,
-                                              z: z.advanced(by: offset.z), ldz: stride.z, length: length)
+                                Element.Merge(r: x.advanced(by: offset.x), inc: stride.x,
+                                              i: y.advanced(by: offset.y), inc: stride.y,
+                                              z: z.advanced(by: offset.z), inc: stride.z, length: length)
                             }
                             $1 = $0.count
                         }
@@ -127,9 +127,9 @@ extension Complex.Polar: Tensor & Operator.BinaryTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Merge(r: x.advanced(by: offset.x), ldr: stride.x,
-                                              θ: y.advanced(by: offset.y), ldθ: stride.y,
-                                              z: z.advanced(by: offset.z), ldz: stride.z, length: length)
+                                Element.Merge(r: x.advanced(by: offset.x), inc: stride.x,
+                                              θ: y.advanced(by: offset.y), inc: stride.y,
+                                              z: z.advanced(by: offset.z), inc: stride.z, length: length)
                             }
                             $1 = $0.count
                         }
@@ -157,9 +157,9 @@ extension Complex.Polar: InstantTensor where X: InstantTensor, Y: InstantTensor 
                         .init(unsafeUninitializedCapacity: capacity) {
                             let z = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.Merge(r: x.advanced(by: offset.x), ldr: stride.x,
-                                              θ: y.advanced(by: offset.y), ldθ: stride.y,
-                                              z: z.advanced(by: offset.z), ldz: stride.z, length: length)
+                                Element.Merge(r: x.advanced(by: offset.x), inc: stride.x,
+                                              θ: y.advanced(by: offset.y), inc: stride.y,
+                                              z: z.advanced(by: offset.z), inc: stride.z, length: length)
                             }
                             $1 = $0.count
                         }
