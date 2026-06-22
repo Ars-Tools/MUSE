@@ -100,7 +100,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
         return info;
     } else {
         __LAPACK_int info;
-        complex64_t size;
+        __complex float size;
         cgeev_(&jobvl, &jobvr,
                &n,
                A, &ldA,
@@ -109,7 +109,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                vr, &ldvr,
                &size, (__LAPACK_int const[]){-1}, rwork,
                &info);
-        return info ? info : size.scalar;
+        return info ? info : size;
     }
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
@@ -135,7 +135,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
         return info;
     } else {
         __LAPACK_int info;
-        complex128_t size;
+        __complex double size;
         zgeev_(&jobvl, &jobvr,
                &n,
                A, &ldA,
@@ -144,6 +144,6 @@ __LAPACK_int const geev(__LAPACK_int const n,
                vr, &ldvr,
                &size, (__LAPACK_int const[]){-1}, rwork,
                &info);
-        return info ? info : size.scalar;
+        return info ? info : size;
     }
 }
