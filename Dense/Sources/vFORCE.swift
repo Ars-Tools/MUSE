@@ -4,7 +4,8 @@
 //
 //  Created by Kota on 9/27/25.
 //
-import Accelerate.vecLib.vForce
+import AltVec
+import vFORCE
 public enum vFORCE<Element: vFORCEElement & ArithmeticElement & BitwiseCopyable & Sendable> {}
 public protocol vFORCEElement: Numeric {
     static func fabs(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int)
@@ -44,64 +45,64 @@ public protocol vFORCEElement: Numeric {
 extension vFORCEElement where Self: ArithmeticElement & ExpressibleByFloatLiteral, FloatLiteralType: BinaryFloatingPoint {
     @inlinable@inline(__always)@_transparent
     public static func sinπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .pi), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .pi), z: B, inc: IB, length: N)
         sin(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func cosπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .pi), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .pi), z: B, inc: IB, length: N)
         cos(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func tanπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .pi), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .pi), z: B, inc: IB, length: N)
         tan(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func pow(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafePointer<Self>, _ IB: Int, _ C: UnsafeMutablePointer<Self>, _ IC: Int, _ N: Int) {
         log(A, IA, C, IC, N)
-        Mul(x: B, ldx: IB, y: C, ldy: IC, z: C, ldz: IC, length: N)
+        Mul(x: B, inc: IB, y: C, inc: IC, z: C, inc: IC, length: N)
         exp(C, IC, C, IC, N)
     }
     public static func sqrt(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         log(A, IA, B, IB, N)
-        Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(floatLiteral: 1 / 2.0), \.self), z: B, ldz: IB, length: N)
+        Scale(x: B, inc: IB, y: .init(floatLiteral: 1 / 2.0), z: B, inc: IB, length: N)
         exp(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func cbrt(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         log(A, IA, B, IB, N)
-        Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(floatLiteral: 1 / 3.0), \.self), z: B, ldz: IB, length: N)
+        Scale(x: B, inc: IB, y: .init(floatLiteral: 1 / 3.0), z: B, inc: IB, length: N)
         exp(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func exp2(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .init(M_LOG2E)), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .init(M_LOG2E)), z: B, inc: IB, length: N)
         exp(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func log2(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .init(M_LN2)), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .init(M_LN2)), z: B, inc: IB, length: N)
         log(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func exp10(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .init(M_LOG10E)), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .init(M_LOG10E)), z: B, inc: IB, length: N)
         exp(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func log10(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: .init(M_LN10)), \.self), z: B, ldz: IB, length: N)
+        Scale(x: A, inc: IA, y: .init(floatLiteral: .init(M_LN10)), z: B, inc: IB, length: N)
         log(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func expm1(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         exp(A, IA, B, IB, N)
-        Sub(x: B, ldx: IB, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), ldy: 0, z: B, ldz: IB, length: N)
+        Sub(x: B, inc: IB, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), inc: 0, z: B, inc: IB, length: N)
     }
     @inlinable@inline(__always)@_transparent
     public static func log1p(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Add(x: B, ldx: IB, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), ldy: 0, z: B, ldz: IB, length: N)
+        Add(x: B, inc: IB, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), inc: 0, z: B, inc: IB, length: N)
         exp(A, IA, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
@@ -109,7 +110,7 @@ extension vFORCEElement where Self: ArithmeticElement & ExpressibleByFloatLitera
         withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
             sin(A, IA, B, IB, N)
             cos(A, IA, $0.baseAddress.unsafelyUnwrapped, 1, N)
-            Div(x: B, ldx: IB, y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, z: B, ldz: IB, length: N)
+            Div(x: B, inc: IB, y: $0.baseAddress.unsafelyUnwrapped, inc: 1, z: B, inc: IB, length: N)
         }
     }
     @inlinable@inline(__always)@_transparent
@@ -117,36 +118,36 @@ extension vFORCEElement where Self: ArithmeticElement & ExpressibleByFloatLitera
         withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
             sinh(A, IA, B, IB, N)
             cosh(A, IA, $0.baseAddress.unsafelyUnwrapped, 1, N)
-            Div(x: B, ldx: IB, y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, z: B, ldz: IB, length: N)
+            Div(x: B, inc: IB, y: $0.baseAddress.unsafelyUnwrapped, inc: 1, z: B, inc: IB, length: N)
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func atan2(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafePointer<Self>, _ IB: Int, _ C: UnsafeMutablePointer<Self>, _ IC: Int, _ N: Int) {
-        Div(x: A, ldx: IA, y: B, ldy: IB, z: C, ldz: IC, length: N)
+        Div(x: A, inc: IA, y: B, inc: IB, z: C, inc: IC, length: N)
         atan(C, IC, C, IC, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func asinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        FMA(x: A, ldx: IA, y: A, ldy: IA, z: withUnsafePointer(to: Self(floatLiteral:  1), \.self), ldz: 0, w: B, ldw: IB, length: N)
+        FMA(x: A, inc: IA, y: A, inc: IA, z: withUnsafePointer(to: Self(floatLiteral:  1), \.self), inc: 0, w: B, inc: IB, length: N)
         sqrt(B, IB, B, IB, N)
-        Add(x: B, ldx: IB, y: A, ldy: IA, z: B, ldz: IB, length: N)
+        Add(x: B, inc: IB, y: A, inc: IA, z: B, inc: IB, length: N)
         log(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func acosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        FMA(x: A, ldx: IA, y: A, ldy: IA, z: withUnsafePointer(to: Self(floatLiteral: -1), \.self), ldz: 0, w: B, ldw: IB, length: N)
+        FMA(x: A, inc: IA, y: A, inc: IA, z: withUnsafePointer(to: Self(floatLiteral: -1), \.self), inc: 0, w: B, inc: IB, length: N)
         sqrt(B, IB, B, IB, N)
-        Add(x: B, ldx: IB, y: A, ldy: IA, z: B, ldz: IB, length: N)
+        Add(x: B, inc: IB, y: A, inc: IA, z: B, inc: IB, length: N)
         log(B, IB, B, IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func atanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-            Add(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), ldy: 0, z: B, ldz: IB, length: N)
-            Sub(x: A, ldx: IA, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), ldy: 0, z: $0.baseAddress.unsafelyUnwrapped, ldz: 0, length: N)
-            Div(x: B, ldx: IB, y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, z: B, ldz: IB, length: N)
+            Add(x: A, inc: IA, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), inc: 0, z: B, inc: IB, length: N)
+            Sub(x: A, inc: IA, y: withUnsafePointer(to: Self(floatLiteral: 1), \.self), inc: 0, z: $0.baseAddress.unsafelyUnwrapped, inc: 0, length: N)
+            Div(x: B, inc: IB, y: $0.baseAddress.unsafelyUnwrapped, inc: 1, z: B, inc: IB, length: N)
             log(B, IB, B, IB, N)
-            Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(floatLiteral: 0.5), \.self), z: B, ldz: IB, length: N)
+            Scale(x: B, inc: IB, y: .init(floatLiteral: 0.5), z: B, inc: IB, length: N)
         }
     }
 }
@@ -155,27 +156,25 @@ extension Float32: vFORCEElement {
     static func `do`(_ A: UnsafePointer<Self>, _ IA: Int,
                      _ B: UnsafeMutablePointer<Self>, _ IB: Int,
                      _ N: Int,
-                     _ function: @convention(c) (UnsafeMutablePointer<Self>, UnsafePointer<Self>, UnsafePointer<Int32>) -> Void) {
+                     _ function: @convention(c) (UnsafePointer<Self>, UnsafeMutablePointer<Self>, Int) -> Void) {
         switch (IA, IB) {
         case (0, 0):
-            function(B, A, withUnsafePointer(to: 1 as Int32, \.self))
+            function(A, B, 1)
         case (1, 1):
-            function(B, A, withUnsafePointer(to: Int32(N), \.self))
-        case (var incx, 1):
-            scopy_(withUnsafePointer(to: N, \.self), A, &incx, B, withUnsafePointer(to: 1, \.self))
-            function(B, B, withUnsafePointer(to: Int32(N), \.self))
-        case (1, var incy):
+            function(A, B, N)
+        case (let incx, 1):
+            Copy(x: A, inc: incx, y: B, inc: 1, length: N)
+            function(B, B, N)
+        case (1, let incy):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-                let w = $0.baseAddress.unsafelyUnwrapped
-                function(w, A, withUnsafePointer(to: Int32(N), \.self))
-                scopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), B, &incy)
+                function(A, $0.baseAddress.unsafelyUnwrapped, N)
+                Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1, y: B, inc: incy, length: N)
             }
-        case (var incx, var incy):
+        case (let incx, let incy):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-                let w = $0.baseAddress.unsafelyUnwrapped
-                scopy_(withUnsafePointer(to: N, \.self), A, &incx, w, withUnsafePointer(to: 1, \.self))
-                function(w, w, withUnsafePointer(to: Int32(N), \.self))
-                scopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), B, &incy)
+                Copy(x: A, inc: incx, y: $0.baseAddress.unsafelyUnwrapped, inc: 1, length: N)
+                function($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, N)
+                Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1, y: B, inc: incy, length: N)
             }
         }
     }
@@ -184,55 +183,54 @@ extension Float32: vFORCEElement {
                      _ B: UnsafePointer<Self>, _ IB: Int,
                      _ C: UnsafeMutablePointer<Self>, _ IC: Int,
                      _ N: Int,
-                     _ function: @convention(c) (UnsafeMutablePointer<Self>, UnsafePointer<Self>, UnsafePointer<Self>, UnsafePointer<Int32>) -> Void) {
+                     _ function: @convention(c) (UnsafePointer<Self>, UnsafePointer<Self>, UnsafeMutablePointer<Self>, Int) -> Void) {
         switch (IA, IB, IC) {
         case (0, 0, 0):
-            function(C, A, B, withUnsafePointer(to: 1 as Int32, \.self))
+            function(A, B, C, 1)
         case (1, 1, 1):
-            function(C, A, B, withUnsafePointer(to: Int32(N), \.self))
-        case (var incx, 1, 1):
-            scopy_(withUnsafePointer(to: N, \.self), A, &incx, C,  withUnsafePointer(to: 1, \.self))
-            function(C, C, B, withUnsafePointer(to: Int32(N), \.self))
-        case (1, var incy, 1):
-            scopy_(withUnsafePointer(to: N, \.self), B, &incy, C,  withUnsafePointer(to: 1, \.self))
-            function(C, A, C, withUnsafePointer(to: Int32(N), \.self))
-        case (1, 1, var incz):
+            function(A, B, C, N)
+        case (let incx, 1, 1):
+            Copy(x: A, inc: incx, y: C, inc: 1, length: N)
+            function(C, B, C, N)
+        case (1, let incy, 1):
+            Copy(x: B, inc: incy, y: C, inc: 1, length: N)
+            function(A, C, C, N)
+        case (1, 1, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-                let w = $0.baseAddress.unsafelyUnwrapped
-                function(w, A, B, withUnsafePointer(to: Int32(N), \.self))
-                scopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                function(A, B, $0.baseAddress.unsafelyUnwrapped, N)
+                Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1, y: C, inc: incz, length: N)
             }
-        case (var incx, 1, var incz):
+        case (let incx, 1, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: 2 * N) {
                 let w = $0.baseAddress.unsafelyUnwrapped
                 let x = w.advanced(by: N)
-                scopy_(withUnsafePointer(to: N, \.self), A, &incx, x, withUnsafePointer(to: 1, \.self))
-                function(w, x, B, withUnsafePointer(to: Int32(N), \.self))
-                scopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                Copy(x: A, inc: incx, y: x, inc: 1, length: N)
+                function(x, B, w, N)
+                Copy(x: w, inc: 1, y: C, inc: incz, length: N)
             }
-        case (1, var incy, var incz):
+        case (1, let incy, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: 2 * N) {
                 let w = $0.baseAddress.unsafelyUnwrapped
                 let y = w.advanced(by: N)
-                scopy_(withUnsafePointer(to: N, \.self), B, &incy, y, withUnsafePointer(to: 1, \.self))
-                function(w, A, y, withUnsafePointer(to: Int32(N), \.self))
-                scopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                Copy(x: B, inc: incy, y: y, inc: 1, length: N)
+                function(A, y, w, N)
+                Copy(x: w, inc: 1, y: C, inc: incz, length: N)
             }
-        case (var incx, var incy, var incz):
+        case (let incx, let incy, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: 3 * N) {
                 let w = $0.baseAddress.unsafelyUnwrapped
                 let x = w.advanced(by: 1 * N)
                 let y = w.advanced(by: 2 * N)
-                scopy_(withUnsafePointer(to: N, \.self), A, &incx, x, withUnsafePointer(to: 1, \.self))
-                scopy_(withUnsafePointer(to: N, \.self), B, &incy, y, withUnsafePointer(to: 1, \.self))
-                function(w, x, y, withUnsafePointer(to: Int32(N), \.self))
-                scopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                Copy(x: A, inc: incx, y: x, inc: 1, length: N)
+                Copy(x: B, inc: incy, y: y, inc: 1, length: N)
+                function(x, y, w, N)
+                Copy(x: w, inc: 1, y: C, inc: incz, length: N)
             }
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func fabs(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvfabsf)
+        `do`(A, IA, B, IB, N, vvfabs)
     }
     @inlinable@inline(__always)@_transparent
     public static func mags(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Magnitude>, _ IB: Int, _ N: Int) {
@@ -240,127 +238,127 @@ extension Float32: vFORCEElement {
     }
     @inlinable@inline(__always)@_transparent
     public static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvfloorf)
+        `do`(A, IA, B, IB, N, vvfloor)
     }
     @inlinable@inline(__always)@_transparent
     public static func round(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvnintf)
+        `do`(A, IA, B, IB, N, vvnint)
     }
     @inlinable@inline(__always)@_transparent
     public static func ceil(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvceilf)
+        `do`(A, IA, B, IB, N, vvceil)
     }
     @inlinable@inline(__always)@_transparent
     public static func sqrt(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvsqrtf)
+        `do`(A, IA, B, IB, N, vvsqrt)
     }
     @inlinable@inline(__always)@_transparent
     public static func cbrt(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvcbrtf)
+        `do`(A, IA, B, IB, N, vvcbrt)
     }
     @inlinable@inline(__always)@_transparent
     public static func exp(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvexpf)
+        `do`(A, IA, B, IB, N, vvexp)
     }
     @inlinable@inline(__always)@_transparent
     public static func log(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvlogf)
+        `do`(A, IA, B, IB, N, vvlog)
     }
     @inlinable@inline(__always)@_transparent
     public static func exp2(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvexp2f)
+        `do`(A, IA, B, IB, N, vvexp2)
     }
     @inlinable@inline(__always)@_transparent
     public static func log2(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvlog2f)
+        `do`(A, IA, B, IB, N, vvlog2)
     }
 //    @inlinable@inline(__always)@_transparent
 //    public static func exp10(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-//        `do`(A, IA, B, IB, N, vvexp10f)
+//        `do`(A, IA, B, IB, N, vvexp10)
 //    }
     @inlinable@inline(__always)@_transparent
     public static func log10(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvlog10f)
+        `do`(A, IA, B, IB, N, vvlog10)
     }
     @inlinable@inline(__always)@_transparent
     public static func expm1(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvexpm1f)
+        `do`(A, IA, B, IB, N, vvexpm1)
     }
     @inlinable@inline(__always)@_transparent
     public static func log1p(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvlog1pf)
+        `do`(A, IA, B, IB, N, vvlog1p)
     }
     @inlinable@inline(__always)@_transparent
     public static func sinπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvsinpif)
+        `do`(A, IA, B, IB, N, vvsinpi)
     }
     @inlinable @inline(__always)
     public static func cosπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvcospif)
+        `do`(A, IA, B, IB, N, vvcospi)
     }
     @inlinable@inline(__always)@_transparent
     public static func tanπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvtanpif)
+        `do`(A, IA, B, IB, N, vvtanpi)
     }
     @inlinable@inline(__always)@_transparent
     public static func sin(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvsinf)
+        `do`(A, IA, B, IB, N, vvsin)
     }
     @inlinable@inline(__always)@_transparent
     public static func cos(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvcosf)
+        `do`(A, IA, B, IB, N, vvcos)
     }
     @inlinable@inline(__always)@_transparent
     public static func tan(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvtanf)
+        `do`(A, IA, B, IB, N, vvtan)
     }
     @inlinable@inline(__always)@_transparent
     public static func sinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvsinhf)
+        `do`(A, IA, B, IB, N, vvsinh)
     }
     @inlinable @inline(__always)
     public static func cosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvcoshf)
+        `do`(A, IA, B, IB, N, vvcosh)
     }
     @inlinable @inline(__always)
     public static func tanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvtanhf)
+        `do`(A, IA, B, IB, N, vvtanh)
     }
     @inlinable@inline(__always)@_transparent
     public static func asin(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvasinf)
+        `do`(A, IA, B, IB, N, vvasin)
     }
     @inlinable@inline(__always)@_transparent
     public static func acos(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvacosf)
+        `do`(A, IA, B, IB, N, vvacos)
     }
     @inlinable@inline(__always)@_transparent
     public static func atan(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvatanf)
+        `do`(A, IA, B, IB, N, vvatan)
     }
     @inlinable@inline(__always)@_transparent
     public static func asinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvasinhf)
+        `do`(A, IA, B, IB, N, vvasinh)
     }
     @inlinable@inline(__always)@_transparent
     public static func acosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvacoshf)
+        `do`(A, IA, B, IB, N, vvacosh)
     }
     @inlinable@inline(__always)@_transparent
     public static func atanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        `do`(A, IA, B, IB, N, vvatanhf)
+        `do`(A, IA, B, IB, N, vvatanh)
     }
     @inlinable@inline(__always)@_transparent
     public static func atan2(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafePointer<Self>, _ IB: Int, _ C: UnsafeMutablePointer<Self>, _ IC: Int, _ N: Int) {
-        `do`(A, IA, B, IB, C, IC, N, vvatan2f)
+        `do`(A, IA, B, IB, C, IC, N, vvatan2)
     }
     @inlinable@inline(__always)@_transparent
     public static func fmod(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafePointer<Self>, _ IB: Int, _ C: UnsafeMutablePointer<Self>, _ IC: Int, _ N: Int) {
-        `do`(A, IA, B, IB, C, IC, N, vvfmodf)
+        `do`(A, IA, B, IB, C, IC, N, vvfmod)
     }
     @inlinable@inline(__always)@_transparent
     public static func pow(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafePointer<Self>, _ IB: Int, _ C: UnsafeMutablePointer<Self>, _ IC: Int, _ N: Int) {
-        `do`(A, IA, B, IB, C, IC, N, vvpowf)
+        `do`(A, IA, B, IB, C, IC, N, vvpow)
     }
 }
 extension Float64: vFORCEElement {
@@ -368,27 +366,25 @@ extension Float64: vFORCEElement {
     static func `do`(_ A: UnsafePointer<Self>, _ IA: Int,
                      _ B: UnsafeMutablePointer<Self>, _ IB: Int,
                      _ N: Int,
-                     _ function: @convention(c) (UnsafeMutablePointer<Self>, UnsafePointer<Self>, UnsafePointer<Int32>) -> Void) {
+                     _ function: @convention(c) (UnsafePointer<Self>, UnsafeMutablePointer<Self>, Int) -> Void) {
         switch (IA, IB) {
         case (0, 0):
-            function(B, A, withUnsafePointer(to: 1 as Int32, \.self))
+            function(A, B, 1)
         case (1, 1):
-            function(B, A, withUnsafePointer(to: Int32(N), \.self))
-        case (var incx, 1):
-            dcopy_(withUnsafePointer(to: N, \.self), A, &incx, B, withUnsafePointer(to: 1, \.self))
-            function(B, B, withUnsafePointer(to: Int32(N), \.self))
-        case (1, var incy):
+            function(A, B, N)
+        case (let incx, 1):
+            Copy(x: A, inc: incx, y: B, inc: 1, length: N)
+            function(B, B, N)
+        case (1, let incy):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-                let w = $0.baseAddress.unsafelyUnwrapped
-                function(w, A, withUnsafePointer(to: Int32(N), \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), B, &incy)
+                function(A, $0.baseAddress.unsafelyUnwrapped, N)
+                Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1, y: B, inc: incy, length: N)
             }
-        case (var incx, var incy):
+        case (let incx, let incy):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-                let w = $0.baseAddress.unsafelyUnwrapped
-                dcopy_(withUnsafePointer(to: N, \.self), A, &incx, w, withUnsafePointer(to: 1, \.self))
-                function(w, w, withUnsafePointer(to: Int32(N), \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), B, &incy)
+                Copy(x: A, inc: incx, y: $0.baseAddress.unsafelyUnwrapped, inc: 1, length: N)
+                function($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, N)
+                Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1, y: B, inc: incy, length: N)
             }
         }
     }
@@ -397,49 +393,48 @@ extension Float64: vFORCEElement {
                      _ B: UnsafePointer<Self>, _ IB: Int,
                      _ C: UnsafeMutablePointer<Self>, _ IC: Int,
                      _ N: Int,
-                     _ function: @convention(c) (UnsafeMutablePointer<Self>, UnsafePointer<Self>, UnsafePointer<Self>, UnsafePointer<Int32>) -> Void) {
+                     _ function: @convention(c) (UnsafePointer<Self>, UnsafePointer<Self>, UnsafeMutablePointer<Self>, Int) -> Void) {
         switch (IA, IB, IC) {
         case (0, 0, 0):
-            function(C, A, B, withUnsafePointer(to: 1 as Int32, \.self))
+            function(A, B, C, 1)
         case (1, 1, 1):
-            function(C, A, B, withUnsafePointer(to: Int32(N), \.self))
-        case (var incx, 1, 1):
-            dcopy_(withUnsafePointer(to: N, \.self), A, &incx, C,  withUnsafePointer(to: 1, \.self))
-            function(C, C, B, withUnsafePointer(to: Int32(N), \.self))
-        case (1, var incy, 1):
-            dcopy_(withUnsafePointer(to: N, \.self), B, &incy, C,  withUnsafePointer(to: 1, \.self))
-            function(C, A, C, withUnsafePointer(to: Int32(N), \.self))
-        case (1, 1, var incz):
+            function(A, B, C, N)
+        case (let incx, 1, 1):
+            Copy(x: A, inc: incx, y: C, inc: 1, length: N)
+            function(C, B, C, N)
+        case (1, let incy, 1):
+            Copy(x: B, inc: incy, y: C, inc: 1, length: N)
+            function(A, C, C, N)
+        case (1, 1, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-                let w = $0.baseAddress.unsafelyUnwrapped
-                function(w, A, B, withUnsafePointer(to: Int32(N), \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                function(A, B, $0.baseAddress.unsafelyUnwrapped, N)
+                Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1, y: C, inc: incz, length: N)
             }
-        case (var incx, 1, var incz):
+        case (let incx, 1, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: 2 * N) {
                 let w = $0.baseAddress.unsafelyUnwrapped
                 let x = w.advanced(by: N)
-                dcopy_(withUnsafePointer(to: N, \.self), A, &incx, x, withUnsafePointer(to: 1, \.self))
-                function(w, x, B, withUnsafePointer(to: Int32(N), \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                Copy(x: A, inc: incx, y: x, inc: 1, length: N)
+                function(x, B, w, N)
+                Copy(x: w, inc: 1, y: C, inc: incz, length: N)
             }
-        case (1, var incy, var incz):
+        case (1, let incy, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: 2 * N) {
                 let w = $0.baseAddress.unsafelyUnwrapped
                 let y = w.advanced(by: N)
-                dcopy_(withUnsafePointer(to: N, \.self), B, &incy, y, withUnsafePointer(to: 1, \.self))
-                function(w, A, y, withUnsafePointer(to: Int32(N), \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                Copy(x: B, inc: incy, y: y, inc: 1, length: N)
+                function(A, y, w, N)
+                Copy(x: w, inc: 1, y: C, inc: incz, length: N)
             }
-        case (var incx, var incy, var incz):
+        case (let incx, let incy, let incz):
             withUnsafeTemporaryAllocation(of: Self.self, capacity: 3 * N) {
                 let w = $0.baseAddress.unsafelyUnwrapped
                 let x = w.advanced(by: 1 * N)
                 let y = w.advanced(by: 2 * N)
-                dcopy_(withUnsafePointer(to: N, \.self), A, &incx, x, withUnsafePointer(to: 1, \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), B, &incy, y, withUnsafePointer(to: 1, \.self))
-                function(w, x, y, withUnsafePointer(to: Int32(N), \.self))
-                dcopy_(withUnsafePointer(to: N, \.self), w, withUnsafePointer(to: 1, \.self), C, &incz)
+                Copy(x: A, inc: incx, y: x, inc: 1, length: N)
+                Copy(x: B, inc: incy, y: y, inc: 1, length: N)
+                function(x, y, w, N)
+                Copy(x: w, inc: 1, y: C, inc: incz, length: N)
             }
         }
     }
@@ -507,7 +502,7 @@ extension Float64: vFORCEElement {
     public static func sinπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvsinpi)
     }
-    @inlinable@inline(__always)@_transparent
+    @inlinable @inline(__always)
     public static func cosπ(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvcospi)
     }
@@ -531,11 +526,11 @@ extension Float64: vFORCEElement {
     public static func sinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvsinh)
     }
-    @inlinable@inline(__always)@_transparent
+    @inlinable @inline(__always)
     public static func cosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvcosh)
     }
-    @inlinable@inline(__always)@_transparent
+    @inlinable @inline(__always)
     public static func tanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         `do`(A, IA, B, IB, N, vvtanh)
     }
@@ -591,192 +586,270 @@ extension Complex64: vFORCEElement {
     }
     @inlinable@inline(__always)@_transparent
     public static func floor(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        if (IA, IB) == (1, 1) {
-            vvfloorf(.init(.init(B)), .init(.init(A)), withUnsafePointer(to: Int32(2 * N), \.self))
-        } else if IB == 1 {
-            ccopy_(withUnsafePointer(to: N, \.self),
-                   .init(.init(A)), withUnsafePointer(to: IA, \.self),
-                   .init(.init(B)), withUnsafePointer(to: IB, \.self))
-            vvfloorf(.init(.init(B)), .init(.init(A)), withUnsafePointer(to: Int32(2 * N), \.self))
-        } else {
-            withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 2 * N) {
-                var z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                                     imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N))
-                vDSP_ctoz(.init(.init(A)), 2 * IA, &z, 1, .init(N))
-                vvfloorf($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(2 * N), \.self))
-                vDSP_ztoc(&z, 1, .init(.init(B)), 2 * IB, .init(N))
-            }
-        }
+        FloatLiteralType.floor(.init(.init(A)).advanced(by: 0), 2 * IA, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+        FloatLiteralType.floor(.init(.init(A)).advanced(by: 1), 2 * IA, .init(.init(B)).advanced(by: 1), 2 * IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func round(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        if (IA, IB) == (1, 1) {
-            vvnintf(.init(.init(B)), .init(.init(A)), withUnsafePointer(to: Int32(2 * N), \.self))
-        } else if IB == 1 {
-            ccopy_(withUnsafePointer(to: N, \.self),
-                   .init(.init(A)), withUnsafePointer(to: IA, \.self),
-                   .init(.init(B)), withUnsafePointer(to: IB, \.self))
-            vvnintf(.init(.init(B)), .init(.init(A)), withUnsafePointer(to: Int32(2 * N), \.self))
-        } else {
-            withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 2 * N) {
-                var z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                                     imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N))
-                vDSP_ctoz(.init(.init(A)), 2 * IA, &z, 1, .init(N))
-                vvnintf($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(2 * N), \.self))
-                vDSP_ztoc(&z, 1, .init(.init(B)), 2 * IB, .init(N))
-            }
-        }
+        FloatLiteralType.round(.init(.init(A)).advanced(by: 0), 2 * IA, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+        FloatLiteralType.round(.init(.init(A)).advanced(by: 1), 2 * IA, .init(.init(B)).advanced(by: 1), 2 * IB, N)
     }
     @inlinable@inline(__always)@_transparent
     public static func ceil(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        if (IA, IB) == (1, 1) {
-            vvceilf(.init(.init(B)), .init(.init(A)), withUnsafePointer(to: Int32(2 * N), \.self))
-        } else if IB == 1 {
-            ccopy_(withUnsafePointer(to: N, \.self),
-                   .init(.init(A)), withUnsafePointer(to: IA, \.self),
-                   .init(.init(B)), withUnsafePointer(to: IB, \.self))
-            vvceilf(.init(.init(B)), .init(.init(A)), withUnsafePointer(to: Int32(2 * N), \.self))
-        } else {
-            withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 2 * N) {
-                var z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                                     imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N))
-                vDSP_ctoz(.init(.init(A)), 2 * IA, &z, 1, .init(N))
-                vvceilf($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(2 * N), \.self))
-                vDSP_ztoc(&z, 1, .init(.init(B)), 2 * IB, .init(N))
-            }
+        FloatLiteralType.ceil(.init(.init(A)).advanced(by: 0), 2 * IA, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+        FloatLiteralType.ceil(.init(.init(A)).advanced(by: 1), 2 * IA, .init(.init(B)).advanced(by: 1), 2 * IB, N)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func sqrt(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 6 * N) {
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            let edr = $0.baseAddress.unsafelyUnwrapped.advanced(by: 4 * N)
+            let edi = $0.baseAddress.unsafelyUnwrapped.advanced(by: 5 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edr, edi, 1, N)
+            vDSP_hypot(edr, 1, edi, 1, edx, 1, N)
+            vDSP_abs(edr, 1, edy, 1, N)
+            vDSP_addsub(edx, 1, edy, 1, edx, 1, edy, 1, N)
+            vDSP_mul(edx, 1, 0.5, edx, 1, 2 * N)
+            vvsqrt(edx, edx, 2 * N)
+            vDSP_fill(0.5, edz, 1, N)
+            vvcopysign(edz, edr, edz, N)
+            vDSP_add(edz, 1, 0.5, edz, 1, N)
+            vDSP_fma(edz, 1, -1, 1, edw, 1, N)
+            vDSP_vmma(edx, 1, edw, 1, edy, 1, edz, 1, edr, 1, .init(N))
+            vvcopysign(edr, edi, edr, N)
+            vDSP_vmma(edy, 1, edw, 1, edx, 1, edz, 1, edi, 1, .init(N))
+            vDSP_ztoc(edi, edr, 1, .init(.init(B)), IB, N)
         }
     }
-    @inlinable//@inline(__always)@_transparent // crash swiftc
+    @inlinable@inline(__always)@_transparent
     public static func exp(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: N) {
-            cblas_scopy(N, .init(.init(A)), 2 * IA, $0.baseAddress, 1)
-            vvexpf($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(N), \.self))
-            cblas_scopy(N, $0.baseAddress, 1, .init(.init(B)), 2 * IB)
-            cblas_scopy(N, .init(.init(A)).advanced(by: 1), 2 * IA, .init(.init(B)).advanced(by: 1), 2 * IB)
-            vDSP_rect(.init(.init(B)), 2 * IB, .init(.init(B)), 2 * IB, .init(N))
+        FloatLiteralType.exp(.init(.init(A)), 2 * IA, .init(.init(B)), 2 * IB, N)
+        if A != B {
+            FloatLiteralType.Copy(x: .init(.init(A)).advanced(by: 1) as UnsafePointer<Magnitude>, inc: 2 * IA,
+                                  y: .init(.init(B)).advanced(by: 1) as UnsafeMutablePointer<Magnitude>, inc: 2 * IB,
+                                  length: N)
         }
+        vDSP_rect(.init(.init(B)) as UnsafePointer<RawValue>, IB,
+                  .init(.init(B)) as UnsafeMutablePointer<RawValue>, IB,
+                  N)
     }
-    @inlinable//@inline(__always)@_transparent // crash swiftc
+    @inlinable@inline(__always)@_transparent
     public static func log(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: N) {
-            vDSP_polar(.init(.init(A)), 2 * IA, .init(.init(B)), 2 * IB, .init(N))
-            cblas_scopy(N, B.withMemoryRebound(to: Magnitude.self, capacity: 2 * IB * N, \.self), 2 * IB, $0.baseAddress, 1)
-            vvlogf($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(N), \.self))
-            cblas_scopy(N, $0.baseAddress, 1, B.withMemoryRebound(to: Magnitude.self, capacity: 2 * IB * N, \.self), 2 * IB)
-        }
+        vDSP_polar(.init(.init(A)) as UnsafePointer<RawValue>, IA,
+                   .init(.init(B)) as UnsafeMutablePointer<RawValue>, IB,
+                   N)
+        FloatLiteralType.log(.init(.init(B)), 2 * IB,
+                             .init(.init(B)), 2 * IB,
+                             N)
     }
     @inlinable@inline(__always)@_transparent
     public static func sin(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N))
-            vDSP_ctoz(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vvsincosf($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcoshf($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinhf($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                      .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                      .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N) // sin(x)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N) // cosh(y)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N) // cos(x)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N) // sinh(y)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vvsincos(edx, edx, edz, N)
+            vvsinh(edy, edw, N)
+            vvcosh(edy, edy, N)
+            vDSP_mul(edx, 1, edy, 1, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(edz, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func cos(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N))
-            vDSP_ctoz(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vDSP_vneg($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1, .init(N))
-            vvsincosf($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcoshf($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinhf($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                      .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                      .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N) // cos(x)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N) // cosh(y)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N) // sin(x)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N) // sinh(y)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vDSP_neg(edx, 1, edx, 1, N)
+            vvsincos(edx, edz, edx, N)
+            vvsinh(edy, edw, N)
+            vvcosh(edy, edy, N)
+            vDSP_mul(edx, 1, edy, 1, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(edz, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func tan(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vDSP_mul(edx, 1, 2, edx, 1, 2 * N)
+            vvsincos(edx, edz, edw, N)
+            vvcosh(edy, edx, N)
+            vvsinh(edy, edy, N)
+            vDSP_add(edx, 1, edw, 1, edw, 1, N) // cos(2r) + cosh(2i)
+            vDSP_div(edz, 1, edw, 1, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_div(edy, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func sinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N))
-            vDSP_ctoz(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vvsincosf($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinhf($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcoshf($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                      .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                      .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vvsincos(edy, edw, edz, N)
+            vvcosh(edx, edy, N)
+            vvsinh(edx, edx, N)
+            vDSP_mul(edx, 1, edz, 1, .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
+            vDSP_mul(edy, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func cosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N))
-            vDSP_ctoz(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vvsincosf($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcoshf($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinhf($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                    $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                      .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmul($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                      $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                      .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vvsincos(edy, edw, edz, N)
+            vvsinh(edx, edy, N)
+            vvcosh(edx, edx, N)
+            vDSP_mul(edx, 1, edz, 1, .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
+            vDSP_mul(edy, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
         }
     }
     @inlinable@inline(__always)@_transparent
+    public static func tanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vDSP_mul(edx, 1, 2, edx, 1, 2 * N)
+            vvsincos(edy, edw, edz, N)
+            vvsinh(edx, edy, N)
+            vvcosh(edx, edx, N)
+            vDSP_add(edx, 1, edz, 1, edz, 1, N)
+            vDSP_div(edy, 1, edz, 1, .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
+            vDSP_div(edw, 1, edz, 1, .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+        }
+    }
+    
+    @inlinable@inline(__always)@_transparent
     public static func asin(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: -1 as Self, \.self), z: B, ldz: IB, length: N)
-        FMA(x: A, ldx: IA, y: B, ldy: IB, z: withUnsafePointer(to: 1 as Self, \.self), ldz: 0, w: B, ldw: IB, length: N)
-        sqrt(B, IB, B, IB, N)
-        FMA(x: withUnsafePointer(to: Self(real: 0, imag: 1), \.self), ldx: 0, y: A, ldy: IA, z: B, ldz: IB, w: B, ldw: IB, length: N)
-        log(B, IB, B, IB, N)
-        Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(real: 0, imag: -1), \.self), z: B, ldz: IB, length: N)
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, z, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, y, 1, x, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvasin(x, x, N)
+            vvacosh(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_ztoc(x, y, 1, .init(.init(B)), IB, N)
+        }
     }
     @inlinable@inline(__always)@_transparent
     public static func acos(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: -1 as Self, \.self), z: B, ldz: IB, length: N)
-        FMA(x: A, ldx: IA, y: B, ldy: IB, z: withUnsafePointer(to: 1 as Self, \.self), ldz: 0, w: B, ldw: IB, length: N)
-        sqrt(B, IB, B, IB, N)
-        FMA(x: withUnsafePointer(to: Self(real: 0, imag: 1), \.self), ldx: 0, y: B, ldy: IB, z: A, ldz: IA, w: B, ldw: IB, length: N)
-        log(B, IB, B, IB, N)
-        Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(real: 0, imag: -1), \.self), z: B, ldz: IB, length: N)
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, z, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, y, 1, x, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvacos(x, x, N)
+            vvacosh(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_neg(y, 1, y, 1, N)
+            vDSP_ztoc(x, y, 1, .init(.init(B)), IB, N)
+        }
     }
     @inlinable@inline(__always)@_transparent
     public static func atan(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-            Add(x: withUnsafePointer(to: Self.i, \.self), ldx: 0, y: A, ldy: IA, z: B, ldz: IB, length: N)
-            Sub(x: withUnsafePointer(to: Self.i, \.self), ldx: 0, y: A, ldy: IA, z: $0.baseAddress.unsafelyUnwrapped, ldz: 1, length: N)
-            Div(x: B, ldx: IB, y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, z: B, ldz: IB, length: N)
-            log(B, IB, B, IB, N)
-            Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(real: 0, imag: 0.5), \.self), z: B, ldz: IB, length: N)
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 4 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, y, 1, N)
+            vDSP_hypot_zsq(x, y, 1, z, 1, N)
+            vDSP_fma(z, 1,  0.5, 0.5, z, 1, N)
+            vDSP_div(y, 1, z, 1, y, 1, N)
+            vvatanh(y, y, N)
+            vDSP_fma(z, 1, -1.0, 1.0, z, 1, N)
+            vvatan2(x, z, x, N)
+            vDSP_mul(x, 1, 0.5, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(y, 1, 0.5, .init(.init(B)).advanced(by: 1), 2 * IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func asinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, z, x, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, y, 1, x, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvasin(x, x, N)
+            vvacosh(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_ztoc(y, x, 1, .init(.init(B)), IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func acosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, z, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, x, 1, y, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvacosh(x, x, N)
+            vvacos(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_ztoc(x, y, 1, .init(.init(B)), IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func atanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 4 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, y, x, 1, N)
+            vDSP_hypot_zsq(x, y, 1, z, 1, N)
+            vDSP_fma(z, 1,  0.5, 0.5, z, 1, N)
+            vDSP_div(y, 1, z, 1, y, 1, N)
+            vvatanh(y, y, N)
+            vDSP_fma(z, 1, -1.0, 1.0, z, 1, N)
+            vvatan2(x, z, x, N)
+            vDSP_mul(y, 1, 0.5, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(x, 1, 0.5, .init(.init(B)).advanced(by: 1), 2 * IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
@@ -871,156 +944,265 @@ extension Complex128: vFORCEElement {
         }
     }
     @inlinable@inline(__always)@_transparent
-    public static func exp(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: N) {
-            cblas_dcopy(N, .init(.init(A)), 2 * IA, $0.baseAddress, 1)
-            vvexp($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(N), \.self))
-            cblas_dcopy(N, $0.baseAddress, 1, .init(.init(B)), 2 * IB)
-            cblas_dcopy(N, .init(.init(A)).advanced(by: 1), 2 * IA, .init(.init(B)).advanced(by: 1), 2 * IB)
-            vDSP_rectD(.init(.init(B)), 2 * IB, .init(.init(B)), 2 * IB, .init(N))
+    public static func sqrt(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 6 * N) {
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            let edr = $0.baseAddress.unsafelyUnwrapped.advanced(by: 4 * N)
+            let edi = $0.baseAddress.unsafelyUnwrapped.advanced(by: 5 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edr, edi, 1, N)
+            vDSP_hypot(edr, 1, edi, 1, edx, 1, N)
+            vDSP_abs(edr, 1, edy, 1, N)
+            vDSP_addsub(edx, 1, edy, 1, edx, 1, edy, 1, N)
+            vDSP_mul(edx, 1, 0.5, edx, 1, 2 * N)
+            vvsqrt(edx, edx, 2 * N)
+            vDSP_fill(0.5, edz, 1, N)
+            vvcopysign(edz, edr, edz, N)
+            vDSP_add(edz, 1, 0.5, edz, 1, N)
+            vDSP_fma(edz, 1, -1, 1, edw, 1, N)
+            vDSP_vmmaD(edx, 1, edw, 1, edy, 1, edz, 1, edr, 1, .init(N))
+            vvcopysign(edr, edi, edr, N)
+            vDSP_vmmaD(edy, 1, edw, 1, edx, 1, edz, 1, edi, 1, .init(N))
+            vDSP_ztoc(edi, edr, 1, .init(.init(B)), IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
-    public static func log(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: N) {
-            vDSP_polarD(.init(.init(A)), 2 * IA, .init(.init(B)), 2 * IB, .init(N))
-            cblas_dcopy(N, B.withMemoryRebound(to: Magnitude.self, capacity: 2 * IB * N, \.self), 2 * IB, $0.baseAddress, 1)
-            vvlog($0.baseAddress.unsafelyUnwrapped, $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: Int32(N), \.self))
-            cblas_dcopy(N, $0.baseAddress, 1, B.withMemoryRebound(to: Magnitude.self, capacity: 2 * IB * N, \.self), 2 * IB)
+    public static func exp(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        FloatLiteralType.exp(.init(.init(A)), 2 * IA, .init(.init(B)), 2 * IB, N)
+        if A != B {
+            FloatLiteralType.Copy(x: .init(.init(A)).advanced(by: 1) as UnsafePointer<Magnitude>, inc: 2 * IA,
+                                  y: .init(.init(B)).advanced(by: 1) as UnsafeMutablePointer<Magnitude>, inc: 2 * IB,
+                                  length: N)
         }
+        vDSP_rect(.init(.init(B)) as UnsafePointer<RawValue>, IB,
+                  .init(.init(B)) as UnsafeMutablePointer<RawValue>, IB,
+                  N)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func log(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        vDSP_polar(.init(.init(A)) as UnsafePointer<RawValue>, IA,
+                   .init(.init(B)) as UnsafeMutablePointer<RawValue>, IB,
+                   N)
+        FloatLiteralType.log(.init(.init(B)), 2 * IB,
+                             .init(.init(B)), 2 * IB,
+                             N)
     }
     @inlinable@inline(__always)@_transparent
     public static func sin(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N))
-            vDSP_ctozD(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vvsincos($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcosh($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinh($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                       .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                       .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N) // sin(x)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N) // cosh(y)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N) // cos(x)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N) // sinh(y)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vvsincos(edx, edx, edz, N)
+            vvsinh(edy, edw, N)
+            vvcosh(edy, edy, N)
+            vDSP_mul(edx, 1, edy, 1, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(edz, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func cos(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N))
-            vDSP_ctozD(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vDSP_vnegD($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1, .init(N))
-            vvsincos($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcosh($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinh($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                       .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                       .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N) // cos(x)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N) // cosh(y)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N) // sin(x)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N) // sinh(y)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vDSP_neg(edx, 1, edx, 1, N)
+            vvsincos(edx, edz, edx, N)
+            vvsinh(edy, edw, N)
+            vvcosh(edy, edy, N)
+            vDSP_mul(edx, 1, edy, 1, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(edz, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func tan(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vDSP_mul(edx, 1, 2, edx, 1, 2 * N)
+            vvsincos(edx, edz, edw, N)
+            vvcosh(edy, edx, N)
+            vvsinh(edy, edy, N)
+            vDSP_add(edx, 1, edw, 1, edw, 1, N) // cos(2r) + cosh(2i)
+            vDSP_div(edz, 1, edw, 1, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_div(edy, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func sinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N))
-            vDSP_ctozD(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vvsincos($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinh($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcosh($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                       .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                       .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vvsincos(edy, edw, edz, N)
+            vvcosh(edx, edy, N)
+            vvsinh(edx, edx, N)
+            vDSP_mul(edx, 1, edz, 1, .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
+            vDSP_mul(edy, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func cosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
         withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-            var Z = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                                 imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N))
-            vDSP_ctozD(.init(.init(A)), 2 * IA, &Z, 1, .init(N))
-            vvsincos($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                     $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvcosh($0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vvsinh($0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N),
-                   $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), withUnsafePointer(to: Int32(N), \.self))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N), 1,
-                       .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
-            vDSP_vmulD($0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N), 1,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N), 1,
-                       .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vvsincos(edy, edw, edz, N)
+            vvsinh(edx, edy, N)
+            vvcosh(edx, edx, N)
+            vDSP_mul(edx, 1, edz, 1, .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
+            vDSP_mul(edy, 1, edw, 1, .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func tanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
+            let edx = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let edy = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let edz = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            let edw = $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N)
+            vDSP_ctoz(.init(.init(A)), IA, edx, edy, 1, N)
+            vDSP_mul(edx, 1, 2, edx, 1, 2 * N)
+            vvsincos(edy, edw, edz, N)
+            vvsinh(edx, edy, N)
+            vvcosh(edx, edx, N)
+            vDSP_add(edx, 1, edz, 1, edz, 1, N)
+            vDSP_div(edy, 1, edz, 1, .init(.init(B)).advanced(by: 0), 2 * IB, .init(N))
+            vDSP_div(edw, 1, edz, 1, .init(.init(B)).advanced(by: 1), 2 * IB, .init(N))
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func asin(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: -1 as Self, \.self), z: B, ldz: IB, length: N)
-        FMA(x: A, ldx: IA, y: B, ldy: IB, z: withUnsafePointer(to: 1 as Self, \.self), ldz: 0, w: B, ldw: IB, length: N)
-        sqrt(B, IB, B, IB, N)
-        FMA(x: withUnsafePointer(to: Self(real: 0, imag: 1), \.self), ldx: 0, y: A, ldy: IA, z: B, ldz: IB, w: B, ldw: IB, length: N)
-        log(B, IB, B, IB, N)
-        Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(real: 0, imag: -1), \.self), z: B, ldz: IB, length: N)
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, z, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, y, 1, x, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvasin(x, x, N)
+            vvacosh(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_ztoc(x, y, 1, .init(.init(B)), IB, N)
+        }
     }
     @inlinable@inline(__always)@_transparent
     public static func acos(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        Scale(x: A, ldx: IA, y: withUnsafePointer(to: -1 as Self, \.self), z: B, ldz: IB, length: N)
-        FMA(x: A, ldx: IA, y: B, ldy: IB, z: withUnsafePointer(to: 1 as Self, \.self), ldz: 0, w: B, ldw: IB, length: N)
-        sqrt(B, IB, B, IB, N)
-        FMA(x: withUnsafePointer(to: Self(real: 0, imag: 1), \.self), ldx: 0, y: B, ldy: IB, z: A, ldz: IA, w: B, ldw: IB, length: N)
-        log(B, IB, B, IB, N)
-        Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(real: 0, imag: -1), \.self), z: B, ldz: IB, length: N)
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, z, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, y, 1, x, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvacos(x, x, N)
+            vvacosh(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_neg(y, 1, y, 1, N)
+            vDSP_ztoc(x, y, 1, .init(.init(B)), IB, N)
+        }
     }
     @inlinable@inline(__always)@_transparent
     public static func atan(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
-        withUnsafeTemporaryAllocation(of: Self.self, capacity: N) {
-            Add(x: withUnsafePointer(to: Self.i, \.self), ldx: 0, y: A, ldy: IA, z: B, ldz: IB, length: N)
-            Sub(x: withUnsafePointer(to: Self.i, \.self), ldx: 0, y: A, ldy: IA, z: $0.baseAddress.unsafelyUnwrapped, ldz: 1, length: N)
-            Div(x: B, ldx: IB, y: $0.baseAddress.unsafelyUnwrapped, ldy: 1, z: B, ldz: IB, length: N)
-            log(B, IB, B, IB, N)
-            Scale(x: B, ldx: IB, y: withUnsafePointer(to: Self(real: 0, imag: 0.5), \.self), z: B, ldz: IB, length: N)
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 4 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, y, 1, N)
+            vDSP_hypot_zsq(x, y, 1, z, 1, N)
+            vDSP_fma(z, 1,  0.5, 0.5, z, 1, N)
+            vDSP_div(y, 1, z, 1, y, 1, N)
+            vvatanh(y, y, N)
+            vDSP_fma(z, 1, -1.0, 1.0, z, 1, N)
+            vvatan2(x, z, x, N)
+            vDSP_mul(x, 1, 0.5, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(y, 1, 0.5, .init(.init(B)).advanced(by: 1), 2 * IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func asinh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, z, x, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, y, 1, x, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvasin(x, x, N)
+            vvacosh(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_ztoc(y, x, 1, .init(.init(B)), IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func acosh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 3 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, x, z, 1, N)
+            vDSP_add(x, 1, -1, y, 1, N)
+            vDSP_add(x, 1,  1, x, 1, N)
+            vDSP_hypot(x, 1, z, 1, x, 1, N)
+            vDSP_hypot(y, 1, z, 1, y, 1, N)
+            vDSP_addsub(x, 1, y, 1, x, 1, y, 1, N)
+            vDSP_mul(x, 1, 0.5, x, 1, 2 * N)
+            vvacosh(x, x, N)
+            vvacos(y, y, N)
+            vvcopysign(y, z, y, N)
+            vDSP_ztoc(x, y, 1, .init(.init(B)), IB, N)
+        }
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func atanh(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafeMutablePointer<Self>, _ IB: Int, _ N: Int) {
+        withUnsafeTemporaryAllocation(of: FloatLiteralType.self, capacity: 4 * N) {
+            let x = $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N)
+            let y = $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N)
+            let z = $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N)
+            vDSP_ctoz(.init(.init(A)), IA, y, x, 1, N)
+            vDSP_hypot_zsq(x, y, 1, z, 1, N)
+            vDSP_fma(z, 1,  0.5, 0.5, z, 1, N)
+            vDSP_div(y, 1, z, 1, y, 1, N)
+            vvatanh(y, y, N)
+            vDSP_fma(z, 1, -1.0, 1.0, z, 1, N)
+            vvatan2(x, z, x, N)
+            vDSP_mul(y, 1, 0.5, .init(.init(B)).advanced(by: 0), 2 * IB, N)
+            vDSP_mul(x, 1, 0.5, .init(.init(B)).advanced(by: 1), 2 * IB, N)
         }
     }
     @inlinable@inline(__always)@_transparent
     public static func fmod(_ A: UnsafePointer<Self>, _ IA: Int, _ B: UnsafePointer<Self>, _ IB: Int, _ C: UnsafeMutablePointer<Self>, _ IC: Int, _ N: Int) {
-        if (IA, IB, IC) == (1, 1, 1) {
-            vvfmodf(.init(.init(C)), .init(.init(A)), .init(.init(B)), withUnsafePointer(to: Int32(N), \.self))
-        } else {
-            withUnsafeTemporaryAllocation(of: Magnitude.self, capacity: 4 * N) {
-                var x = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 0 * N),
-                                     imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 1 * N))
-                var y = SplitComplex(realp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                                     imagp: $0.baseAddress.unsafelyUnwrapped.advanced(by: 3 * N))
-                vDSP_ctozD(.init(.init(A)), 2 * IA, &x, 1, .init(N))
-                vDSP_ctozD(.init(.init(B)), 2 * IB, &y, 1, .init(N))
-                vvfmod($0.baseAddress.unsafelyUnwrapped,
-                       $0.baseAddress.unsafelyUnwrapped,
-                       $0.baseAddress.unsafelyUnwrapped.advanced(by: 2 * N),
-                       withUnsafePointer(to: Int32(2 * N), \.self))
-                vDSP_ztocD(&x, 1, .init(.init(C)), 2 * IC, .init(N))
-            }
-        }
+        FloatLiteralType.fmod(.init(.init(A)).advanced(by: 0), 2 * IA,
+                              .init(.init(B)).advanced(by: 0), 2 * IB,
+                              .init(.init(C)).advanced(by: 0), 2 * IC,
+                              N)
+        FloatLiteralType.fmod(.init(.init(A)).advanced(by: 1), 2 * IA,
+                              .init(.init(B)).advanced(by: 1), 2 * IB,
+                              .init(.init(C)).advanced(by: 1), 2 * IC, N)
     }
 }
