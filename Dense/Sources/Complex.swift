@@ -4,121 +4,91 @@
 //
 //  Created by Kota on 9/27/25.
 //
-import Accelerate.vecLib
+import AltVec
 import protocol Numerics.ComplexNumber
 public enum Complex<Element: ComplexElement> {}
 public protocol ComplexElement: ArithmeticElement & ComplexNumber {
-    static func Copy(z: UnsafePointer<Self>, ldz: Int, r: UnsafeMutablePointer<Magnitude>, ldr: Int, length: Int)
-    static func Copy(z: UnsafePointer<Self>, ldz: Int, i: UnsafeMutablePointer<Magnitude>, ldi: Int, length: Int)
-    static func Copy(z: UnsafePointer<Self>, ldz: Int, θ: UnsafeMutablePointer<Magnitude>, ldθ: Int, length: Int)
-    static func Swap(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int)
-    static func Conj(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int)
-    static func Merge(r: UnsafePointer<Magnitude>, ldr: Int, i: UnsafePointer<Magnitude>, ldi: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int)
-    static func Merge(r: UnsafePointer<Magnitude>, ldr: Int, θ: UnsafePointer<Magnitude>, ldθ: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int)
+    static func Copy(z: UnsafePointer<Self>, inc: Int, r: UnsafeMutablePointer<Magnitude>, inc: Int, length: Int)
+    static func Copy(z: UnsafePointer<Self>, inc: Int, i: UnsafeMutablePointer<Magnitude>, inc: Int, length: Int)
+    static func Copy(z: UnsafePointer<Self>, inc: Int, θ: UnsafeMutablePointer<Magnitude>, inc: Int, length: Int)
+    static func Swap(x: UnsafePointer<Self>, inc: Int, y: UnsafeMutablePointer<Self>, inc: Int, length: Int)
+    static func Conj(x: UnsafePointer<Self>, inc: Int, y: UnsafeMutablePointer<Self>, inc: Int, length: Int)
+    static func Merge(r: UnsafePointer<Magnitude>, inc: Int, i: UnsafePointer<Magnitude>, inc: Int, z: UnsafeMutablePointer<Self>, inc: Int, length: Int)
+    static func Merge(r: UnsafePointer<Magnitude>, inc: Int, θ: UnsafePointer<Magnitude>, inc: Int, z: UnsafeMutablePointer<Self>, inc: Int, length: Int)
 }
 extension Complex64: ComplexElement {
     @usableFromInline typealias SplitComplex = DSPSplitComplex
     @inlinable@_transparent
-    public static func Copy(z: UnsafePointer<Self>, ldz: Int, r: UnsafeMutablePointer<Magnitude>, ldr: Int, length: Int) {
-        scopy_(withUnsafePointer(to: length, \.self),
-               .init(.init(z)).advanced(by: 0), withUnsafePointer(to: 2 * ldz, \.self),
-               r, withUnsafePointer(to: ldr, \.self))
+    public static func Copy(z: UnsafePointer<Self>, inc incz: Int, r: UnsafeMutablePointer<Magnitude>, inc incr: Int, length: Int) {
+        Magnitude.Copy(x: .init(.init(z)).advanced(by: 0) as UnsafePointer<Magnitude>, inc: 2 * incz, y: r, inc: incr, length: length)
     }
     @inlinable@_transparent
-    public static func Copy(z: UnsafePointer<Self>, ldz: Int, i: UnsafeMutablePointer<Magnitude>, ldi: Int, length: Int) {
-        scopy_(withUnsafePointer(to: length, \.self),
-               .init(.init(z)).advanced(by: 1), withUnsafePointer(to: 2 * ldz, \.self),
-               i, withUnsafePointer(to: ldi, \.self))
+    public static func Copy(z: UnsafePointer<Self>, inc incz: Int, i: UnsafeMutablePointer<Magnitude>, inc inci: Int, length: Int) {
+        Magnitude.Copy(x: .init(.init(z)).advanced(by: 1) as UnsafePointer<Magnitude>, inc: 2 * incz, y: i, inc: inci, length: length)
     }
     @inlinable@_transparent
-    public static func Copy(z: UnsafePointer<Self>, ldz: Int, θ: UnsafeMutablePointer<Magnitude>, ldθ: Int, length: Int) {
-        var z = SplitComplex(realp: .init(.init(z)).advanced(by: 0),
-                             imagp: .init(.init(z)).advanced(by: 1))
-        vDSP_zvphas(&z, 2 * ldz, θ, ldθ, .init(length))
+    public static func Copy(z: UnsafePointer<Self>, inc incz: Int, θ: UnsafeMutablePointer<Magnitude>, inc incθ: Int, length: Int) {
+        vDSP_phas(.init(.init(z)) as UnsafePointer<RawValue>, 2 * incz, θ, incθ, length)
     }
     @inlinable@_transparent
-    public static func Swap(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int) {
-        if x != y {
-            scopy_(withUnsafePointer(to: length, \.self),
-                   .init(.init(x)).advanced(by: 0), withUnsafePointer(to: 2 * ldx, \.self),
-                   .init(.init(y)).advanced(by: 1), withUnsafePointer(to: 2 * ldy, \.self))
-            scopy_(withUnsafePointer(to: length, \.self),
-                   .init(.init(x)).advanced(by: 1), withUnsafePointer(to: 2 * ldx, \.self),
-                   .init(.init(y)).advanced(by: 0), withUnsafePointer(to: 2 * ldy, \.self))
-        } else {
-            vDSP_vswap(.init(.init(y)).advanced(by: 0), 2 * ldx,
-                       .init(.init(y)).advanced(by: 1), 2 * ldx, .init(length))
-        }
+    public static func Conj(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
+        vDSP_conj(.init(.init(x)) as UnsafePointer<RawValue>, incx,
+                  .init(.init(y)) as UnsafeMutablePointer<RawValue>, incy,
+                  length)
     }
     @inlinable@_transparent
-    public static func Conj(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int) {
-        var z = SplitComplex(realp: .init(.init(x)).advanced(by: 0),
-                             imagp: .init(.init(x)).advanced(by: 1))
-        var w = SplitComplex(realp: .init(.init(y)).advanced(by: 0),
-                             imagp: .init(.init(y)).advanced(by: 1))
-        vDSP_zvconj(&z, 2 * ldx, &w, 2 * ldy, .init(length))
+    public static func Swap(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
+        Magnitude.Copy(x: .init(.init(x)).advanced(by: 0), inc: 2 * incx, y: .init(.init(y)).advanced(by: 1), inc: 2 * incy, length: length)
+        Magnitude.Copy(x: .init(.init(x)).advanced(by: 1), inc: 2 * incx, y: .init(.init(y)).advanced(by: 0), inc: 2 * incy, length: length)
     }
     @inlinable@_transparent
-    public static func Merge(r: UnsafePointer<Magnitude>, ldr: Int, i: UnsafePointer<Magnitude>, ldi: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-        cblas_scopy(length, r, ldr, .init(.init(z)).advanced(by: 0), 2 * ldz)
-        cblas_scopy(length, i, ldi, .init(.init(z)).advanced(by: 1), 2 * ldz)
+    public static func Merge(r: UnsafePointer<Magnitude>, inc incr: Int, i: UnsafePointer<Magnitude>, inc inci: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        Magnitude.Copy(x: r, inc: incr, y: .init(.init(z)).advanced(by: 0), inc: 2 * incz, length: length)
+        Magnitude.Copy(x: i, inc: inci, y: .init(.init(z)).advanced(by: 1), inc: 2 * incz, length: length)
     }
     @inlinable@_transparent
-    public static func Merge(r: UnsafePointer<Magnitude>, ldr: Int, θ: UnsafePointer<Magnitude>, ldθ: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-        Merge(r: r, ldr: ldr, i: θ, ldi: ldθ, z: z, ldz: ldz, length: length)
-        vDSP_rect(.init(.init(z)), 2 * ldz, .init(.init(z)), 2 * ldz, .init(length))
+    public static func Merge(r: UnsafePointer<Magnitude>, inc incr: Int, θ: UnsafePointer<Magnitude>, inc incθ: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        Merge(r: r, inc: incr, i: θ, inc: incθ, z: z, inc: incz, length: length)
+        vDSP_rect(.init(.init(z)) as UnsafePointer<RawValue>, incz,
+                  .init(.init(z)) as UnsafeMutablePointer<RawValue>, incz,
+                  length)
     }
 }
 extension Complex128: ComplexElement {
     @usableFromInline typealias SplitComplex = DSPDoubleSplitComplex
     @inlinable@_transparent
-    public static func Copy(z: UnsafePointer<Self>, ldz: Int, r: UnsafeMutablePointer<Magnitude>, ldr: Int, length: Int) {
-        dcopy_(withUnsafePointer(to: length, \.self),
-               .init(.init(z)).advanced(by: 0), withUnsafePointer(to: 2 * ldz, \.self),
-               r, withUnsafePointer(to: ldr, \.self))
+    public static func Copy(z: UnsafePointer<Self>, inc incz: Int, r: UnsafeMutablePointer<Magnitude>, inc incr: Int, length: Int) {
+        Magnitude.Copy(x: .init(.init(z)).advanced(by: 0) as UnsafePointer<Magnitude>, inc: 2 * incz, y: r, inc: incr, length: length)
     }
     @inlinable@_transparent
-    public static func Copy(z: UnsafePointer<Self>, ldz: Int, i: UnsafeMutablePointer<Magnitude>, ldi: Int, length: Int) {
-        dcopy_(withUnsafePointer(to: length, \.self),
-               .init(.init(z)).advanced(by: 1), withUnsafePointer(to: 2 * ldz, \.self),
-               i, withUnsafePointer(to: ldi, \.self))
+    public static func Copy(z: UnsafePointer<Self>, inc incz: Int, i: UnsafeMutablePointer<Magnitude>, inc inci: Int, length: Int) {
+        Magnitude.Copy(x: .init(.init(z)).advanced(by: 1) as UnsafePointer<Magnitude>, inc: 2 * incz, y: i, inc: inci, length: length)
     }
     @inlinable@_transparent
-    public static func Copy(z: UnsafePointer<Self>, ldz: Int, θ: UnsafeMutablePointer<Magnitude>, ldθ: Int, length: Int) {
-        var z = SplitComplex(realp: .init(.init(z)).advanced(by: 0),
-                             imagp: .init(.init(z)).advanced(by: 1))
-        vDSP_zvphasD(&z, 2 * ldz, θ, ldθ, .init(length))
+    public static func Copy(z: UnsafePointer<Self>, inc incz: Int, θ: UnsafeMutablePointer<Magnitude>, inc incθ: Int, length: Int) {
+        vDSP_phas(.init(.init(z)) as UnsafePointer<RawValue>, 2 * incz, θ, incθ, length)
     }
     @inlinable@_transparent
-    public static func Swap(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int) {
-        if x != y {
-            dcopy_(withUnsafePointer(to: length, \.self),
-                   .init(.init(x)).advanced(by: 0), withUnsafePointer(to: 2 * ldx, \.self),
-                   .init(.init(y)).advanced(by: 1), withUnsafePointer(to: 2 * ldy, \.self))
-            dcopy_(withUnsafePointer(to: length, \.self),
-                   .init(.init(x)).advanced(by: 1), withUnsafePointer(to: 2 * ldx, \.self),
-                   .init(.init(y)).advanced(by: 0), withUnsafePointer(to: 2 * ldy, \.self))
-        } else {
-            vDSP_vswapD(.init(.init(y)).advanced(by: 0), 2 * ldx,
-                        .init(.init(y)).advanced(by: 1), 2 * ldx, .init(length))
-        }
+    public static func Conj(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
+        vDSP_conj(.init(.init(x)) as UnsafePointer<RawValue>, incx,
+                  .init(.init(y)) as UnsafeMutablePointer<RawValue>, incy,
+                  length)
     }
     @inlinable@_transparent
-    public static func Conj(x: UnsafePointer<Self>, ldx: Int, y: UnsafeMutablePointer<Self>, ldy: Int, length: Int) {
-        var z = SplitComplex(realp: .init(.init(x)).advanced(by: 0),
-                             imagp: .init(.init(x)).advanced(by: 1))
-        var w = SplitComplex(realp: .init(.init(y)).advanced(by: 0),
-                             imagp: .init(.init(y)).advanced(by: 1))
-        vDSP_zvconjD(&z, 2 * ldx, &w, 2 * ldy, .init(length))
+    public static func Swap(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
+        Magnitude.Copy(x: .init(.init(x)).advanced(by: 0), inc: 2 * incx, y: .init(.init(y)).advanced(by: 1), inc: 2 * incy, length: length)
+        Magnitude.Copy(x: .init(.init(x)).advanced(by: 1), inc: 2 * incx, y: .init(.init(y)).advanced(by: 0), inc: 2 * incy, length: length)
     }
     @inlinable@_transparent
-    public static func Merge(r: UnsafePointer<Magnitude>, ldr: Int, i: UnsafePointer<Magnitude>, ldi: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-        cblas_dcopy(length, r, ldr, .init(.init(z)).advanced(by: 0), 2 * ldz)
-        cblas_dcopy(length, i, ldi, .init(.init(z)).advanced(by: 1), 2 * ldz)
+    public static func Merge(r: UnsafePointer<Magnitude>, inc incr: Int, i: UnsafePointer<Magnitude>, inc inci: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        Magnitude.Copy(x: r, inc: incr, y: .init(.init(z)).advanced(by: 0) as UnsafeMutablePointer<Magnitude>, inc: 2 * incz, length: length)
+        Magnitude.Copy(x: i, inc: inci, y: .init(.init(z)).advanced(by: 1) as UnsafeMutablePointer<Magnitude>, inc: 2 * incz, length: length)
     }
     @inlinable@_transparent
-    public static func Merge(r: UnsafePointer<Magnitude>, ldr: Int, θ: UnsafePointer<Magnitude>, ldθ: Int, z: UnsafeMutablePointer<Self>, ldz: Int, length: Int) {
-        Merge(r: r, ldr: ldr, i: θ, ldi: ldθ, z: z, ldz: ldz, length: length)
-        vDSP_rectD(.init(.init(z)), 2 * ldz, .init(.init(z)), 2 * ldz, .init(length))
+    public static func Merge(r: UnsafePointer<Magnitude>, inc incr: Int, θ: UnsafePointer<Magnitude>, inc incθ: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        Merge(r: r, inc: incr, i: θ, inc: incθ, z: z, inc: incz, length: length)
+        vDSP_rect(.init(.init(z)) as UnsafePointer<RawValue>, incz,
+                  .init(.init(z)) as UnsafeMutablePointer<RawValue>, incz,
+                  length)
     }
 }
