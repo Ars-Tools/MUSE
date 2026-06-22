@@ -45,9 +45,9 @@ extension Arithmetic.Add: Operator.BinaryTensor {
                 .init(unsafeUninitializedCapacity: zm) {
                     let z = $0.baseAddress.unsafelyUnwrapped
                     for offset in offset {
-                        Element.Add(x: x.advanced(by: offset.x), ldx: stride.x,
-                                    y: y.advanced(by: offset.y), ldy: stride.y,
-                                    z: z.advanced(by: offset.z), ldz: stride.z, length: length)
+                        Element.Add(x: x.advanced(by: offset.x), inc: stride.x,
+                                    y: y.advanced(by: offset.y), inc: stride.y,
+                                    z: z.advanced(by: offset.z), inc: stride.z, length: length)
                     }
                     $1 = $0.count
                 }
@@ -77,9 +77,9 @@ extension Arithmetic.Add: InstantTensor where X: InstantTensor, Y: InstantTensor
                 .init(unsafeUninitializedCapacity: zm) {
                     let z = $0.baseAddress.unsafelyUnwrapped
                     for offset in offset {
-                        Element.Add(x: x.advanced(by: offset.x), ldx: stride.x,
-                                    y: y.advanced(by: offset.y), ldy: stride.y,
-                                    z: z.advanced(by: offset.z), ldz: stride.z, length: length)
+                        Element.Add(x: x.advanced(by: offset.x), inc: stride.x,
+                                    y: y.advanced(by: offset.y), inc: stride.y,
+                                    z: z.advanced(by: offset.z), inc: stride.z, length: length)
                     }
                     $1 = $0.count
                 }
