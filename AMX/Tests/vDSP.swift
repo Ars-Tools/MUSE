@@ -13,7 +13,7 @@ struct vDSPTestCases {
     @Test
     func fill() {
         let x = Array<Float32>(unsafeUninitializedCapacity: 32) {
-            AltVec.fill(.pi, $0.baseAddress.unsafelyUnwrapped, 1, $0.count)
+            AltVec.vDSP_fill(.pi, $0.baseAddress.unsafelyUnwrapped, 1, $0.count)
             $1 = $0.count
         }
         #expect(x.allSatisfy { $0 == .pi })
