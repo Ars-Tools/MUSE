@@ -30,7 +30,7 @@ struct ComplexTests {
 	])
 	func mul(lhs: Complex64, rhs: Complex64) {
 		let result = lhs * rhs
-		let real = dot(unsafeBitCast(lhs, to: SIMD2<Complex64.FloatLiteralType>.self), unsafeBitCast(rhs.conjugate, to: SIMD2<Complex64.FloatLiteralType>.self))
+		let real = dot(unsafeBitCast(lhs, to: SIMD2<Complex64.FloatLiteralType>.self), unsafeBitCast(rhs.conj, to: SIMD2<Complex64.FloatLiteralType>.self))
 		let imag = dot(SIMD2(lhs.real, rhs.real), SIMD2(rhs.imag, lhs.imag))
 		#expect(result.real == real)
 		#expect(result.imag == imag)
