@@ -12,11 +12,11 @@ let package = Package(
     products: [
 		.library(
 			name: "MUSE.Primitives",
-			targets: ["Numerics", "Dense", "Sparse"]
+			targets: ["Numerics", "Dense"]
 		),
 		.library(
 			name: "MUSE.Essentials",
-			targets: ["Layout", "Optimise"]
+			targets: ["Layout"]
 		),
         .library(
             name: "MUSE.Headers",
@@ -29,7 +29,7 @@ let package = Package(
     targets: [
 		.target(
 			name: "Dense",
-			dependencies: ["Layout", "Numerics", "AMX"],
+			dependencies: ["AMX", "Numerics", "Layout"],
 			path: "Dense/Sources",
 			cSettings: [
 				.define("ACCELERATE_NEW_LAPACK"),
@@ -39,32 +39,36 @@ let package = Package(
 		.testTarget(
 			name: "DenseTests",
 			dependencies: ["Dense"],
-			path: "Dense/Tests"
+			path: "Dense/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
 		),
-		.target(
-			name: "Sparse",
-			dependencies: ["Dense", .productItem(name: "MUCE.Auxiliary", package: "MUCE", moduleAliases: .none, condition: .none)],
-			path: "Sparse/Sources",
-			cSettings: [
-				.define("ACCELERATE_NEW_LAPACK"),
-				.define("ACCELERATE_LAPACK_ILP64")
-			]
-		),
-		.testTarget(
-			name: "SparseTests",
-			dependencies: ["Sparse"],
-			path: "Sparse/Tests"
-		),
-		.target(
-			name: "Optimise",
-			dependencies: ["Dense", "Sparse"],
-			path: "Optimise/Sources"
-		),
-		.testTarget(
-			name: "OptimiseTests",
-			dependencies: ["Optimise"],
-			path: "Optimise/Tests"
-		),
+//		.target(
+//			name: "Sparse",
+//			dependencies: ["Dense", .productItem(name: "MUCE.Auxiliary", package: "MUCE", moduleAliases: .none, condition: .none)],
+//			path: "Sparse/Sources",
+//			cSettings: [
+//				.define("ACCELERATE_NEW_LAPACK"),
+//				.define("ACCELERATE_LAPACK_ILP64")
+//			]
+//		),
+//		.testTarget(
+//			name: "SparseTests",
+//			dependencies: ["Sparse"],
+//			path: "Sparse/Tests"
+//		),
+//		.target(
+//			name: "Optimise",
+//			dependencies: ["Dense", "Sparse"],
+//			path: "Optimise/Sources"
+//		),
+//		.testTarget(
+//			name: "OptimiseTests",
+//			dependencies: ["Optimise"],
+//			path: "Optimise/Tests"
+//		),
         .target(
             name: "AMX",
             path: "AMX/Sources",
