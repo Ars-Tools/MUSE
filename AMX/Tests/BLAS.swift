@@ -10,20 +10,18 @@ import Testing
 struct BLASTestCases {
     @Test
     func dgemm() {
-        let x = [1,2,3,4].map { complex_new(Float64($0)) }
-        let y = [1,2,3,4].map { complex128_t(.init(real: .init($0), imag: 0)) }
-        var z = [1,2,3,4].map { complex128_t(.init(real: .init($0), imag: 0)) }
-        
-        let info = gemm(2, 2, 2,
-                        complex128_t(.init(real: 1, imag: 0)),
-                        x, 2, .N,
-                        y, 2, .N,
-                        complex128_t(.init(real: 0, imag: 0)),
-                        &z, 2)
-        print(info)
-        print(x.map(\.real))
-        print(y.map(\.real))
-        print(z.map(\.real))
+        let x = [1,2,3,4].map(Float32.init)
+        let y = [1,2,3,4].map(Float32.init)
+        var z = [1,2,3,4].map(Float32.init)
+        gemm(2, 2, 2,
+             1.0,
+             x, 2, .N,
+             y, 2, .N,
+             0.0,
+             &z, 2)
+//        print(x.map(\.r))
+//        print(y.map(\.r))
+//        print(z.map(\.r))
         
     }
 }
