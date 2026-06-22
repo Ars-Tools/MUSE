@@ -45,30 +45,45 @@ let package = Package(
                 .define("ACCELERATE_LAPACK_ILP64")
             ]
 		),
-//		.target(
-//			name: "Sparse",
-//			dependencies: ["Dense", .productItem(name: "MUCE.Auxiliary", package: "MUCE", moduleAliases: .none, condition: .none)],
-//			path: "Sparse/Sources",
-//			cSettings: [
-//				.define("ACCELERATE_NEW_LAPACK"),
-//				.define("ACCELERATE_LAPACK_ILP64")
-//			]
-//		),
-//		.testTarget(
-//			name: "SparseTests",
-//			dependencies: ["Sparse"],
-//			path: "Sparse/Tests"
-//		),
-//		.target(
-//			name: "Optimise",
-//			dependencies: ["Dense", "Sparse"],
-//			path: "Optimise/Sources"
-//		),
-//		.testTarget(
-//			name: "OptimiseTests",
-//			dependencies: ["Optimise"],
-//			path: "Optimise/Tests"
-//		),
+		.target(
+			name: "Sparse",
+			dependencies: [
+                "Dense",
+                .productItem(name: "MUCE.Auxiliary", package: "MUCE", moduleAliases: .none, condition: .none)
+            ],
+			path: "Sparse/Sources",
+			cSettings: [
+				.define("ACCELERATE_NEW_LAPACK"),
+				.define("ACCELERATE_LAPACK_ILP64")
+			]
+		),
+		.testTarget(
+			name: "SparseTests",
+			dependencies: ["Sparse"],
+			path: "Sparse/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+		),
+		.target(
+			name: "Optimise",
+			dependencies: ["Dense", "Sparse"],
+			path: "Optimise/Sources",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+		),
+		.testTarget(
+			name: "OptimiseTests",
+			dependencies: ["Optimise"],
+			path: "Optimise/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+		),
         .target(
             name: "AMX",
             path: "AMX/Sources",
@@ -120,7 +135,11 @@ let package = Package(
 		.testTarget(
 			name: "LayoutTests",
 			dependencies: ["Layout"],
-			path: "Layout/Tests"
+			path: "Layout/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
 		),
     ]
 )
