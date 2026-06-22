@@ -195,14 +195,14 @@ void vvatan2(float32_t const*__nonnull const x,
              float32_t const*__nonnull const y,
              float32_t      *__nonnull const z,
              intptr_t const length) {
-    vvatan2f(z, y, x, (int32_t const[]){(int32_t const)length});
+    vvatan2f(z, x, y, (int32_t const[]){(int32_t const)length});
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void vvatan2(float64_t const*__nonnull const x,
              float64_t const*__nonnull const y,
              float64_t      *__nonnull const z,
              intptr_t const length) {
-    vvatan2(z, y, x, (int32_t const[]){(int32_t const)length});
+    vvatan2(z, x, y, (int32_t const[]){(int32_t const)length});
 }
 // MARK: asinh
 __attribute__((always_inline, __overloadable__)) inline static
@@ -212,9 +212,9 @@ void vvasinh(float32_t const*__nonnull const x,
     vvasinhf(y, x, (int32_t const[]){(int32_t const)length});
 }
 __attribute__((always_inline, __overloadable__)) inline static
-void vvasinh(intptr_t const length,
-             float64_t const*__nonnull const x,
-             float64_t      *__nonnull const y) {
+void vvasinh(float64_t const*__nonnull const x,
+             float64_t      *__nonnull const y,
+             intptr_t const length) {
     vvasinh(y, x, (int32_t const[]){(int32_t const)length});
 }
 // MARK: acosh
