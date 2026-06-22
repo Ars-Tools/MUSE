@@ -4,324 +4,288 @@
 //
 //  Created by Kota on 9/27/25.
 //
-import Accelerate.vecLib
+import BLAS
 public enum BLAS<Element: BLASElement & ArithmeticElement> {
     public typealias Storage = Array<Element>
 }
 public protocol BLASElement: Numeric {
     @inlinable@inline(__always)
-    static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude
+    static func Norm(n: Int, x: UnsafePointer<Self>, inc: Int) -> Magnitude
     @inlinable@inline(__always)
     static func Inner(n: Int,
-                      x: UnsafePointer<Self>, ldx: Int,
-                      y: UnsafePointer<Self>, ldy: Int) -> Self
+                      x: UnsafePointer<Self>, inc: Int,
+                      y: UnsafePointer<Self>, inc: Int) -> Self
     @inlinable@inline(__always)
     static func Outer(m: Int, n: Int,
                       α: Self,
-                      x: UnsafePointer<Self>, ldx: Int,
-                      y: UnsafePointer<Self>, ldy: Int,
+                      x: UnsafePointer<Self>, inc: Int,
+                      y: UnsafePointer<Self>, inc: Int,
                       β: Self,
-                      a: UnsafeMutablePointer<Self>, lda: Int)
+                      a: UnsafeMutablePointer<Self>, ld: Int)
     @inlinable@inline(__always)
     static func GEMM(m: Int, n: Int, k: Int,
                      α: Self,
-                     a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                     b: UnsafePointer<Self>, ldb: Int, opb: UnsafePointer<CChar>,
+                     a: UnsafePointer<Self>, ld: Int, op: op_t,
+                     b: UnsafePointer<Self>, ld: Int, op: op_t,
                      β: Self,
-                     c: UnsafeMutablePointer<Self>, ldc: Int)
+                     c: UnsafeMutablePointer<Self>, ld: Int)
     @inlinable@inline(__always)
     static func GEMV(m: Int, n: Int,
                      α: Self,
-                     a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                     x: UnsafePointer<Self>, ldx: Int,
+                     a: UnsafePointer<Self>, ld: Int, op: op_t,
+                     x: UnsafePointer<Self>, inc: Int,
                      β: Self,
-                     y: UnsafeMutablePointer<Self>, ldy: Int)
+                     y: UnsafeMutablePointer<Self>, inc: Int)
 }
 extension Float32: BLASElement {
+    @inlinable@inline(__always)@_transparent
+    public static func Norm(n: Int, x: UnsafePointer<Self>, inc: Int) -> Magnitude {
+        nrm2(n, x, inc)
+    }
     @inlinable@inline(__always)
-    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
-        snrm2_(withUnsafePointer(to: n, \.self), x, withUnsafePointer(to: ldx, \.self))
+    public static func Scale(n: Int,
+                             α: Self,
+                             x: UnsafeMutablePointer<Self>, inc: Int) {
+        scal(n, α, x, inc)
+    }
+    @inlinable@inline(__always)
+    public static func Inner(n: Int,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int) -> Self {
+        dot(n, x, incx, y, incy)
+    }
+    @inlinable@inline(__always)
+    public static func Outer(m: Int, n: Int,
+                             α: Self,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int,
+                             β: Self,
+                             a: UnsafeMutablePointer<Self>, ld: Int) {
+        switch β {
+        case 1:
+            break
+        default:
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)) {
+                scal(m, β, r, 1)
+            }
+        }
+        ger(m, n, α, x, incx, y, incy, a, ld)
+    }
+    @inlinable@inline(__always)
+    public static func GEMM(m: Int, n: Int, k: Int,
+                            α: Self,
+                            a: UnsafePointer<Self>, ld lda: Int, op opa: op_t,
+                            b: UnsafePointer<Self>, ld ldb: Int, op opb: op_t,
+                            β: Self,
+                            c: UnsafeMutablePointer<Self>, ld ldc: Int) {
+        gemm(m, n, k,
+             α,
+             a, lda, opa,
+             b, ldb, opb,
+             β,
+             c, ldc)
+    }
+    @inlinable@inline(__always)
+    public static func GEMV(m: Int, n: Int,
+                            α: Self,
+                            a: UnsafePointer<Self>, ld: Int, op: op_t,
+                            x: UnsafePointer<Self>, inc incx: Int,
+                            β: Self,
+                            y: UnsafeMutablePointer<Self>, inc incy: Int) {
+        gemv(m, n,
+             α,
+             a, ld, op,
+             x, incx,
+             β,
+             y, incy)
+    }
+}
+extension Float64: BLASElement {
+    @inlinable@inline(__always)@_transparent
+    public static func Norm(n: Int, x: UnsafePointer<Self>, inc: Int) -> Magnitude {
+        nrm2(n, x, inc)
     }
     @inlinable@inline(__always)
     public static func Scale(n: Int,
                              α: Self,
                              x: UnsafeMutablePointer<Self>, ldx: Int) {
-        sscal_(withUnsafePointer(to: n, \.self),
-               withUnsafePointer(to: α, \.self),
-               x, withUnsafePointer(to: ldx, \.self))
+        scal(n, α, x, ldx)
     }
     @inlinable@inline(__always)
     public static func Inner(n: Int,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int) -> Self {
-        sdot_(withUnsafePointer(to: n, \.self),
-              x, withUnsafePointer(to: ldx, \.self),
-              y, withUnsafePointer(to: ldy, \.self))
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int) -> Self {
+        dot(n, x, incx, y, incy)
     }
     @inlinable@inline(__always)
     public static func Outer(m: Int, n: Int,
                              α: Self,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int,
                              β: Self,
-                             a: UnsafeMutablePointer<Self>, lda: Int) {
+                             a: UnsafeMutablePointer<Self>, ld: Int) {
         switch β {
         case 1:
             break
         default:
-            for r in stride(from: 0, to: n * lda, by: lda).lazy.map(a.advanced(by:)) {
-                sscal_(withUnsafePointer(to: m, \.self),
-                       withUnsafePointer(to: β, \.self),
-                       r,
-                       withUnsafePointer(to: 1, \.self))
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)) {
+                scal(m, β, r, 1)
             }
         }
-        sger_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-              withUnsafePointer(to: α, \.self),
-              x, withUnsafePointer(to: ldx, \.self),
-              y, withUnsafePointer(to: ldy, \.self),
-              a, withUnsafePointer(to: lda, \.self))
+        ger(m, n, α, x, incx, y, incy, a, ld)
     }
     @inlinable@inline(__always)
     public static func GEMM(m: Int, n: Int, k: Int,
                             α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            b: UnsafePointer<Self>, ldb: Int, opb: UnsafePointer<CChar>,
+                            a: UnsafePointer<Self>, ld lda: Int, op opa: op_t,
+                            b: UnsafePointer<Self>, ld ldb: Int, op opb: op_t,
                             β: Self,
-                            c: UnsafeMutablePointer<Self>, ldc: Int) {
-        sgemm_(opa, opb,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self), withUnsafePointer(to: k, \.self),
-               withUnsafePointer(to: α, \.self),
-               a, withUnsafePointer(to: lda, \.self),
-               b, withUnsafePointer(to: ldb, \.self),
-               withUnsafePointer(to: β, \.self),
-               c, withUnsafePointer(to: ldc, \.self))
+                            c: UnsafeMutablePointer<Self>, ld ldc: Int) {
+        gemm(m, n, k,
+             α,
+             a, lda, opa,
+             b, ldb, opb,
+             β,
+             c, ldc)
     }
     @inlinable@inline(__always)
     public static func GEMV(m: Int, n: Int,
                             α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            x: UnsafePointer<Self>, ldx: Int,
+                            a: UnsafePointer<Self>, ld: Int, op: op_t,
+                            x: UnsafePointer<Self>, inc incx: Int,
                             β: Self,
-                            y: UnsafeMutablePointer<Self>, ldy: Int) {
-        sgemv_(opa,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-               withUnsafePointer(to: α, \.self),
-               a, withUnsafePointer(to: lda, \.self),
-               x, withUnsafePointer(to: ldx, \.self),
-               withUnsafePointer(to: β, \.self),
-               y, withUnsafePointer(to: ldy, \.self))
-    }
-}
-extension Float64: BLASElement {
-    @inlinable@inline(__always)
-    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
-        dnrm2_(withUnsafePointer(to: n, \.self), x, withUnsafePointer(to: ldx, \.self))
-    }
-    @inlinable@inline(__always)
-    public static func Inner(n: Int,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int) -> Self {
-        ddot_(withUnsafePointer(to: n, \.self),
-              x, withUnsafePointer(to: ldx, \.self),
-              y, withUnsafePointer(to: ldy, \.self))
-    }
-    @inlinable@inline(__always)
-    public static func Outer(m: Int, n: Int,
-                             α: Self,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int,
-                             β: Self,
-                             a: UnsafeMutablePointer<Self>, lda: Int) {
-        switch β {
-        case 1:
-            break
-        default:
-            for r in stride(from: 0, to: n * lda, by: lda).lazy.map(a.advanced(by:)) {
-                dscal_(withUnsafePointer(to: m, \.self),
-                       withUnsafePointer(to: β, \.self),
-                       r,
-                       withUnsafePointer(to: 1, \.self))
-            }
-        }
-        dger_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-              withUnsafePointer(to: α, \.self),
-              x, withUnsafePointer(to: ldx, \.self),
-              y, withUnsafePointer(to: ldy, \.self),
-              a, withUnsafePointer(to: lda, \.self))
-    }
-    @inlinable@inline(__always)
-    public static func GEMM(m: Int, n: Int, k: Int,
-                            α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            b: UnsafePointer<Self>, ldb: Int, opb: UnsafePointer<CChar>,
-                            β: Self,
-                            c: UnsafeMutablePointer<Self>, ldc: Int) {
-        dgemm_(opa, opb,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self), withUnsafePointer(to: k, \.self),
-               withUnsafePointer(to: α, \.self),
-               a, withUnsafePointer(to: lda, \.self),
-               b, withUnsafePointer(to: ldb, \.self),
-               withUnsafePointer(to: β, \.self),
-               c, withUnsafePointer(to: ldc, \.self))
-    }
-    @inlinable@inline(__always)
-    public static func GEMV(m: Int, n: Int,
-                            α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            x: UnsafePointer<Self>, ldx: Int,
-                            β: Self,
-                            y: UnsafeMutablePointer<Self>, ldy: Int) {
-        dgemv_(opa,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-               withUnsafePointer(to: α, \.self),
-               a, withUnsafePointer(to: lda, \.self),
-               x, withUnsafePointer(to: ldx, \.self),
-               withUnsafePointer(to: β, \.self),
-               y, withUnsafePointer(to: ldy, \.self))
+                            y: UnsafeMutablePointer<Self>, inc incy: Int) {
+        gemv(m, n,
+             α,
+             a, ld, op,
+             x, incx,
+             β,
+             y, incy)
     }
 }
 extension Complex64: BLASElement {
     @inlinable@inline(__always)
-    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
-        scnrm2_(withUnsafePointer(to: n, \.self), .init(.init(x)), withUnsafePointer(to: ldx, \.self))
+    public static func Norm(n: Int, x: UnsafePointer<Self>, inc: Int) -> Magnitude {
+        nrm2(n, .init(.init(x)) as UnsafePointer<RawValue>, inc)
     }
     @inlinable@inline(__always)
     public static func Inner(n: Int,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int) -> Self {
-        withUnsafeTemporaryAllocation(byteCount: MemoryLayout<Self>.size, alignment: MemoryLayout<Self>.alignment) {
-            cdotu_(.init($0.baseAddress.unsafelyUnwrapped),
-                   withUnsafePointer(to: n, \.self),
-                   .init(x), withUnsafePointer(to: ldx, \.self),
-                   .init(y), withUnsafePointer(to: ldy, \.self))
-            return $0.withMemoryRebound(to: Self.self, \.baseAddress.unsafelyUnwrapped.pointee)
-        }
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int) -> Self {
+        .init(rawValue: dot(n,
+                            .init(.init(x)), incx,
+                            .init(.init(y)), incy))
     }
     @inlinable@inline(__always)
     public static func Outer(m: Int, n: Int,
                              α: Self,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int,
                              β: Self,
-                             a: UnsafeMutablePointer<Self>, lda: Int) {
+                             a: UnsafeMutablePointer<Self>, ld: Int) {
         switch β {
         case 1:
             break
         default:
-            for r in stride(from: 0, to: n * lda, by: lda).lazy.map(a.advanced(by:)) {
-                cscal_(withUnsafePointer(to: m, \.self),
-                       .init(withUnsafePointer(to: β, \.self)),
-                       .init(r),
-                       withUnsafePointer(to: 1, \.self))
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)) {
+                scal(m, β.rawValue, .init(.init(r)), 1)
             }
         }
-        cgeru_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-               .init(withUnsafePointer(to: α, \.self)),
-               .init(x), withUnsafePointer(to: ldx, \.self),
-               .init(y), withUnsafePointer(to: ldy, \.self),
-               .init(a), withUnsafePointer(to: lda, \.self))
+        ger(m, n,
+            α.rawValue,
+            .init(.init(x)), incx,
+            .init(.init(y)), incy,
+            .init(.init(a)), ld)
     }
     @inlinable@inline(__always)
     public static func GEMM(m: Int, n: Int, k: Int,
                             α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            b: UnsafePointer<Self>, ldb: Int, opb: UnsafePointer<CChar>,
+                            a: UnsafePointer<Self>, ld lda: Int, op opa: op_t,
+                            b: UnsafePointer<Self>, ld ldb: Int, op opb: op_t,
                             β: Self,
-                            c: UnsafeMutablePointer<Self>, ldc: Int) {
-        cgemm_(opa, opb,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self), withUnsafePointer(to: k, \.self),
-               .init(withUnsafePointer(to: α, \.self)),
-               .init(a), withUnsafePointer(to: lda, \.self),
-               .init(b), withUnsafePointer(to: ldb, \.self),
-               .init(withUnsafePointer(to: β, \.self)),
-               .init(c), withUnsafePointer(to: ldc, \.self))
+                            c: UnsafeMutablePointer<Self>, ld ldc: Int) {
+        gemm(m, n, k,
+             α.rawValue,
+             .init(.init(a)), lda, opa,
+             .init(.init(b)), ldb, opb,
+             β.rawValue,
+             .init(.init(c)), ldc)
     }
     @inlinable@inline(__always)
     public static func GEMV(m: Int, n: Int,
                             α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            x: UnsafePointer<Self>, ldx: Int,
+                            a: UnsafePointer<Self>, ld: Int, op: op_t,
+                            x: UnsafePointer<Self>, inc incx: Int,
                             β: Self,
-                            y: UnsafeMutablePointer<Self>, ldy: Int) {
-        cgemv_(opa,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-               .init(withUnsafePointer(to: α, \.self)),
-               .init(a), withUnsafePointer(to: lda, \.self),
-               .init(x), withUnsafePointer(to: ldx, \.self),
-               .init(withUnsafePointer(to: β, \.self)),
-               .init(y), withUnsafePointer(to: ldy, \.self))
+                            y: UnsafeMutablePointer<Self>, inc incy: Int) {
+        gemv(m, n,
+             α.rawValue,
+             .init(.init(a)), ld, op,
+             .init(.init(x)), incx,
+             β.rawValue,
+             .init(.init(y)), incy)
     }
 }
 extension Complex128: BLASElement {
     @inlinable@inline(__always)
-    public static func Norm(n: Int, x: UnsafePointer<Self>, ldx: Int) -> Magnitude {
-        dznrm2_(withUnsafePointer(to: n, \.self), .init(.init(x)), withUnsafePointer(to: ldx, \.self))
+    public static func Norm(n: Int, x: UnsafePointer<Self>, inc: Int) -> Magnitude {
+        nrm2(n, .init(.init(x)) as UnsafePointer<RawValue>, inc)
     }
     @inlinable@inline(__always)
     public static func Inner(n: Int,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int) -> Self {
-        withUnsafeTemporaryAllocation(byteCount: MemoryLayout<Self>.size, alignment: MemoryLayout<Self>.alignment) {
-            zdotu_(.init($0.baseAddress.unsafelyUnwrapped),
-                   withUnsafePointer(to: n, \.self),
-                   .init(x), withUnsafePointer(to: ldx, \.self),
-                   .init(y), withUnsafePointer(to: ldy, \.self))
-            return $0.withMemoryRebound(to: Self.self, \.baseAddress.unsafelyUnwrapped.pointee)
-        }
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int) -> Self {
+        .init(rawValue: dot(n,
+                            .init(.init(x)), incx,
+                            .init(.init(y)), incy))
     }
     @inlinable@inline(__always)
     public static func Outer(m: Int, n: Int,
                              α: Self,
-                             x: UnsafePointer<Self>, ldx: Int,
-                             y: UnsafePointer<Self>, ldy: Int,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int,
                              β: Self,
-                             a: UnsafeMutablePointer<Self>, lda: Int) {
+                             a: UnsafeMutablePointer<Self>, ld: Int) {
         switch β {
         case 1:
             break
         default:
-            for r in stride(from: 0, to: n * lda, by: lda).lazy.map(a.advanced(by:)) {
-                zscal_(withUnsafePointer(to: m, \.self),
-                       .init(withUnsafePointer(to: β, \.self)),
-                       .init(r),
-                       withUnsafePointer(to: 1, \.self))
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)) {
+                scal(m, β.rawValue, .init(.init(r)), 1)
             }
         }
-        zgeru_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-               .init(withUnsafePointer(to: α, \.self)),
-               .init(x), withUnsafePointer(to: ldx, \.self),
-               .init(y), withUnsafePointer(to: ldy, \.self),
-               .init(a), withUnsafePointer(to: lda, \.self))
+        ger(m, n,
+            α.rawValue,
+            .init(.init(x)), incx,
+            .init(.init(y)), incy,
+            .init(.init(a)), ld)
     }
     @inlinable@inline(__always)
     public static func GEMM(m: Int, n: Int, k: Int,
                             α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            b: UnsafePointer<Self>, ldb: Int, opb: UnsafePointer<CChar>,
+                            a: UnsafePointer<Self>, ld lda: Int, op opa: op_t,
+                            b: UnsafePointer<Self>, ld ldb: Int, op opb: op_t,
                             β: Self,
-                            c: UnsafeMutablePointer<Self>, ldc: Int) {
-        zgemm_(opa, opb,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self), withUnsafePointer(to: k, \.self),
-               .init(withUnsafePointer(to: α, \.self)),
-               .init(a), withUnsafePointer(to: lda, \.self),
-               .init(b), withUnsafePointer(to: ldb, \.self),
-               .init(withUnsafePointer(to: β, \.self)),
-               .init(c), withUnsafePointer(to: ldc, \.self))
+                            c: UnsafeMutablePointer<Self>, ld ldc: Int) {
+        gemm(m, n, k,
+             α.rawValue,
+             .init(.init(a)), lda, opa,
+             .init(.init(b)), ldb, opb,
+             β.rawValue,
+             .init(.init(c)), ldc)
     }
     @inlinable@inline(__always)
     public static func GEMV(m: Int, n: Int,
                             α: Self,
-                            a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                            x: UnsafePointer<Self>, ldx: Int,
+                            a: UnsafePointer<Self>, ld: Int, op: op_t,
+                            x: UnsafePointer<Self>, inc incx: Int,
                             β: Self,
-                            y: UnsafeMutablePointer<Self>, ldy: Int) {
-        zgemv_(opa,
-               withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-               .init(withUnsafePointer(to: α, \.self)),
-               .init(a), withUnsafePointer(to: lda, \.self),
-               .init(x), withUnsafePointer(to: ldx, \.self),
-               .init(withUnsafePointer(to: β, \.self)),
-               .init(y), withUnsafePointer(to: ldy, \.self))
+                            y: UnsafeMutablePointer<Self>, inc incy: Int) {
+        gemv(m, n,
+             α.rawValue,
+             .init(.init(a)), ld, op,
+             .init(.init(x)), incx,
+             β.rawValue,
+             .init(.init(y)), incy)
     }
 }

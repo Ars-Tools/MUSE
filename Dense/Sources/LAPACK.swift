@@ -4,7 +4,7 @@
 //
 //  Created by Kota on 10/1/25.
 //
-import Accelerate.vecLib
+import LAPACK
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
 public enum LAPACK<Element: LAPACKElement & ArithmeticElement> {}
@@ -12,217 +12,161 @@ public protocol LAPACKElement: BLASElement {
     @inlinable@inline(__always)
     @discardableResult
     static func GETRF(m: Int, n: Int,
-                      a: UnsafeMutablePointer<Self>, lda: Int,
+                      a: UnsafeMutablePointer<Self>, ld: Int,
                       p: UnsafeMutablePointer<Int>) -> Int
     @discardableResult
     @inlinable@inline(__always)
     static func GETRI(n: Int,
-                      a: UnsafeMutablePointer<Self>, lda: Int,
+                      a: UnsafeMutablePointer<Self>, ld: Int,
                       p: UnsafePointer<Int>) -> Int
     @discardableResult
     @inlinable@inline(__always)
     static func GETRS(n: Int, nrhs: Int,
-                      a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                      b: UnsafeMutablePointer<Self>, ldb: Int,
-                      p: UnsafePointer<Int>) -> Int
+                      a: UnsafePointer<Self>, ld: Int, op: op_t,
+                      p: UnsafePointer<Int>,
+                      b: UnsafeMutablePointer<Self>, ld: Int) -> Int
 }
 extension Float32: LAPACKElement {
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRF(m: Int, n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafeMutablePointer<Int>) -> Int {
-        var info = 0
-        sgetrf_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-                a, withUnsafePointer(to: lda, \.self),
-                p, &info)
-        return info
+        getrf(m, n, a, ld, p)
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRI(n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        var size = 0 as Self
-        sgetri_(withUnsafePointer(to: n, \.self),
-                a, withUnsafePointer(to: lda, \.self),
-                p,
-                &size, withUnsafePointer(to: -1, \.self),
-                &info)
-        assert(info == 0)
-        withUnsafeTemporaryAllocation(of: Self.self, capacity: .init(size)) {
-            sgetri_(withUnsafePointer(to: n, \.self),
-                    a, withUnsafePointer(to: lda, \.self),
-                    p,
-                    $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: $0.count, \.self),
-                    &info)
+        switch getri(n, a, ld, p, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                getri(n,
+                      a, ld,
+                      p,
+                      $0.baseAddress, $0.count)
+            }
         }
-        return info
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRS(n: Int, nrhs: Int,
-                             a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                             b: UnsafeMutablePointer<Self>, ldb: Int,
-                             p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        sgetrs_(opa,
-                withUnsafePointer(to: n, \.self), withUnsafePointer(to: nrhs, \.self),
-                a, withUnsafePointer(to: lda, \.self),
-                p,
-                b, withUnsafePointer(to: ldb, \.self),
-                &info)
-        return info
+                             a: UnsafePointer<Self>, ld lda: Int, op: op_t,
+                             p: UnsafePointer<Int>,
+                             b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        getrs(n, nrhs,
+              a, lda, op,
+              p,
+              b, ldb)
     }
 }
 extension Float64: LAPACKElement {
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRF(m: Int, n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafeMutablePointer<Int>) -> Int {
-        var info = 0
-        dgetrf_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-                a, withUnsafePointer(to: lda, \.self),
-                p, &info)
-        return info
+        getrf(m, n, a, ld, p)
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRI(n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        var size = 0 as Self
-        dgetri_(withUnsafePointer(to: n, \.self),
-                a, withUnsafePointer(to: lda, \.self),
-                p,
-                &size, withUnsafePointer(to: -1, \.self),
-                &info)
-        assert(info == 0)
-        withUnsafeTemporaryAllocation(of: Self.self, capacity: .init(size)) {
-            dgetri_(withUnsafePointer(to: n, \.self),
-                    a, withUnsafePointer(to: lda, \.self),
-                    p,
-                    $0.baseAddress.unsafelyUnwrapped, withUnsafePointer(to: $0.count, \.self),
-                    &info)
+        switch getri(n, a, ld, p, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                getri(n,
+                      a, ld,
+                      p,
+                      $0.baseAddress, $0.count)
+            }
         }
-        return info
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRS(n: Int, nrhs: Int,
-                             a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                             b: UnsafeMutablePointer<Self>, ldb: Int,
-                             p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        dgetrs_(opa,
-                withUnsafePointer(to: n, \.self), withUnsafePointer(to: nrhs, \.self),
-                a, withUnsafePointer(to: lda, \.self),
-                p,
-                b, withUnsafePointer(to: ldb, \.self),
-                &info)
-        return info
+                             a: UnsafePointer<Self>, ld lda: Int, op: op_t,
+                             p: UnsafePointer<Int>,
+                             b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        getrs(n, nrhs,
+              a, lda, op,
+              p,
+              b, ldb)
     }
 }
 extension Complex64: LAPACKElement {
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRF(m: Int, n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafeMutablePointer<Int>) -> Int {
-        var info = 0
-        cgetrf_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-                .init(a), withUnsafePointer(to: lda, \.self),
-                p, &info)
-        return info
+        getrf(m, n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p)
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRI(n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        var size = 0 as Self
-        cgetri_(withUnsafePointer(to: n, \.self),
-                .init(a), withUnsafePointer(to: lda, \.self),
-                p,
-                .init(withUnsafePointer(to: &size, \.self)), withUnsafePointer(to: -1, \.self),
-                &info)
-        assert(info == 0)
-        withUnsafeTemporaryAllocation(of: Self.self, capacity: .init(size.real)) {
-            cgetri_(withUnsafePointer(to: n, \.self),
-                    .init(a), withUnsafePointer(to: lda, \.self),
-                    p,
-                    .init($0.baseAddress.unsafelyUnwrapped), withUnsafePointer(to: $0.count, \.self),
-                    &info)
+        switch getri(n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                getri(n,
+                      .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld,
+                      p,
+                      .init(.init($0.baseAddress)) as Optional<UnsafeMutablePointer<RawValue>>, $0.count)
+            }
         }
-        return info
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRS(n: Int, nrhs: Int,
-                             a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                             b: UnsafeMutablePointer<Self>, ldb: Int,
-                             p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        cgetrs_(opa,
-                withUnsafePointer(to: n, \.self), withUnsafePointer(to: nrhs, \.self),
-                .init(a), withUnsafePointer(to: lda, \.self),
-                p,
-                .init(b), withUnsafePointer(to: ldb, \.self),
-                &info)
-        return info
+                             a: UnsafePointer<Self>, ld lda: Int, op: op_t,
+                             p: UnsafePointer<Int>,
+                             b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        getrs(n, nrhs,
+              .init(.init(a)) as UnsafePointer<RawValue>, lda, op,
+              p,
+              .init(.init(b)) as UnsafeMutablePointer<RawValue>, ldb)
     }
 }
 extension Complex128: LAPACKElement {
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRF(m: Int, n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafeMutablePointer<Int>) -> Int {
-        var info = 0
-        zgetrf_(withUnsafePointer(to: m, \.self), withUnsafePointer(to: n, \.self),
-                .init(a), withUnsafePointer(to: lda, \.self),
-                p, &info)
-        return info
+        getrf(m, n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p)
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRI(n: Int,
-                             a: UnsafeMutablePointer<Self>, lda: Int,
+                             a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        var size = 0 as Self
-        zgetri_(withUnsafePointer(to: n, \.self),
-                .init(a), withUnsafePointer(to: lda, \.self),
-                p,
-                .init(withUnsafePointer(to: &size, \.self)), withUnsafePointer(to: -1, \.self),
-                &info)
-        assert(info == 0)
-        withUnsafeTemporaryAllocation(of: Self.self, capacity: .init(size.real)) {
-            zgetri_(withUnsafePointer(to: n, \.self),
-                    .init(a), withUnsafePointer(to: lda, \.self),
-                    p,
-                    .init($0.baseAddress.unsafelyUnwrapped), withUnsafePointer(to: $0.count, \.self),
-                    &info)
+        switch getri(n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                getri(n,
+                      .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld,
+                      p,
+                      .init(.init($0.baseAddress)) as Optional<UnsafeMutablePointer<RawValue>>, $0.count)
+            }
         }
-        return info
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRS(n: Int, nrhs: Int,
-                             a: UnsafePointer<Self>, lda: Int, opa: UnsafePointer<CChar>,
-                             b: UnsafeMutablePointer<Self>, ldb: Int,
-                             p: UnsafePointer<Int>) -> Int {
-        var info = 0
-        zgetrs_(opa,
-                withUnsafePointer(to: n, \.self), withUnsafePointer(to: nrhs, \.self),
-                .init(a), withUnsafePointer(to: lda, \.self),
-                p,
-                .init(b), withUnsafePointer(to: ldb, \.self),
-                &info)
-        return info
+                             a: UnsafePointer<Self>, ld lda: Int, op: op_t,
+                             p: UnsafePointer<Int>,
+                             b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        getrs(n, nrhs,
+              .init(.init(a)) as UnsafePointer<RawValue>, lda, op,
+              p,
+              .init(.init(b)) as UnsafeMutablePointer<RawValue>, ldb)
     }
 }
