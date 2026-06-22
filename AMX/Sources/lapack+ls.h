@@ -74,13 +74,13 @@ __LAPACK_int const gels(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int
         return info;
     } else {
         __LAPACK_int info;
-        complex64_t size;
+        __complex float size;
         cgels_(&opA,
                &m, &n, &nrhs,
                A, &ldA,
                B, &ldB,
                &size, (__LAPACK_int const[]){-1}, &info);
-        return info ? info : size.scalar;
+        return info ? info : size;
     }
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
@@ -99,13 +99,13 @@ __LAPACK_int const gels(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int
         return info;
     } else {
         __LAPACK_int info;
-        complex128_t size;
+        __complex double size;
         zgels_(&opA,
                &m, &n, &nrhs,
                A, &ldA,
                B, &ldB,
                &size, (__LAPACK_int const[]){-1},
                &info);
-        return info ? info : size.scalar;
+        return info ? info : size;
     }
 }
