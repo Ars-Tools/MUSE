@@ -295,9 +295,9 @@ extension vFORCE.ArcSinh: InstantTensor where X: InstantTensor {
                         .init(unsafeUninitializedCapacity: capacity) {
                             let y = $0.baseAddress.unsafelyUnwrapped
                             for offset in offset {
-                                Element.sinh(x.advanced(by: offset.x), stride.x,
-                                             y.advanced(by: offset.y), stride.y,
-                                             length)
+                                Element.asinh(x.advanced(by: offset.x), stride.x,
+                                              y.advanced(by: offset.y), stride.y,
+                                              length)
                             }
                             $1 = $0.count
                         }
@@ -423,26 +423,26 @@ extension vFORCE.ArcTanh: InstantTensor where X: InstantTensor {
     }
 }
 @_disfavoredOverload
-public func asin<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Sin<X> {
+public func asin<X: Tensor>(_ x: X) -> vFORCE<X.Element>.ArcSin<X> {
     .init(x: x)
 }
 @_disfavoredOverload
-public func acos<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Cos<X> {
+public func acos<X: Tensor>(_ x: X) -> vFORCE<X.Element>.ArcCos<X> {
     .init(x: x)
 }
 @_disfavoredOverload
-public func atan<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Tan<X> {
+public func atan<X: Tensor>(_ x: X) -> vFORCE<X.Element>.ArcTan<X> {
     .init(x: x)
 }
 @_disfavoredOverload
-public func asinh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Sinh<X> {
+public func asinh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.ArcSinh<X> {
     .init(x: x)
 }
 @_disfavoredOverload
-public func acosh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Cosh<X> {
+public func acosh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.ArcCosh<X> {
     .init(x: x)
 }
 @_disfavoredOverload
-public func atanh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.Tanh<X> {
+public func atanh<X: Tensor>(_ x: X) -> vFORCE<X.Element>.ArcTanh<X> {
     .init(x: x)
 }
