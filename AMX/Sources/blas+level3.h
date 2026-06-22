@@ -6,14 +6,13 @@
 //
 #include"module.h"
 // MARK: gemm
-__attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
-                        float32_t const alpha,
-                        float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        float32_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
-                        float32_t const beta,
-                        float32_t      *__nonnull const C, __LAPACK_int const ldC) {
-    __LAPACK_int info;
+__attribute__((always_inline, __overloadable__)) inline static
+void gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+          float32_t const alpha,
+          float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          float32_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
+          float32_t const beta,
+          float32_t      *__nonnull const C, __LAPACK_int const ldC) {
     sgemm_(&opA, &opB,
            &m, &n, &k,
            &alpha,
@@ -21,16 +20,14 @@ __LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int
            B, &ldB,
            &beta,
            C, &ldC);
-    return info;
 }
-__attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
-                        float64_t const alpha,
-                        float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        float64_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
-                        float64_t const beta,
-                        float64_t      *__nonnull const C, __LAPACK_int const ldC) {
-    __LAPACK_int info;
+__attribute__((always_inline, __overloadable__)) inline static
+void gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+          float64_t const alpha,
+          float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          float64_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
+          float64_t const beta,
+          float64_t      *__nonnull const C, __LAPACK_int const ldC) {
     dgemm_(&opA, &opB,
            &m, &n, &k,
            &alpha,
@@ -38,16 +35,14 @@ __LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int
            B, &ldB,
            &beta,
            C, &ldC);
-    return info;
 }
-__attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
-                        complex64_t const alpha,
-                        complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        complex64_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
-                        complex64_t const beta,
-                        complex64_t      *__nonnull const C, __LAPACK_int const ldC) {
-    __LAPACK_int info;
+__attribute__((always_inline, __overloadable__)) inline static
+void gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+          complex64_t const alpha,
+          complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          complex64_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
+          complex64_t const beta,
+          complex64_t      *__nonnull const C, __LAPACK_int const ldC) {
     cgemm_(&opA, &opB,
            &m, &n, &k,
            &alpha,
@@ -55,16 +50,14 @@ __LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int
            B, &ldB,
            &beta,
            C, &ldC);
-    return info;
 }
-__attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
-                        complex128_t const alpha,
-                        complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        complex128_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
-                        complex128_t const beta,
-                        complex128_t      *__nonnull const C, __LAPACK_int const ldC) {
-    __LAPACK_int info;
+__attribute__((always_inline, __overloadable__)) inline static
+void gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+          complex128_t const alpha,
+          complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          complex128_t const*__nonnull const B, __LAPACK_int const ldB, op_t const opB,
+          complex128_t const beta,
+          complex128_t      *__nonnull const C, __LAPACK_int const ldC) {
     zgemm_(&opA, &opB,
            &m, &n, &k,
            &alpha,
@@ -72,7 +65,6 @@ __LAPACK_int const gemm(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int
            B, &ldB,
            &beta,
            C, &ldC);
-    return info;
 }
 // MARK: symm
 __attribute__((always_inline, __overloadable__)) inline static

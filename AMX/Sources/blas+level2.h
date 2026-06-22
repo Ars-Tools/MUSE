@@ -7,13 +7,12 @@
 #include"module.h"
 // MARK: gemv
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
-                        float32_t const alpha,
-                        float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        float32_t const*__nonnull const x, __LAPACK_int const incx,
-                        float32_t const beta,
-                        float32_t      *__nonnull const y, __LAPACK_int const incy) {
-    __LAPACK_int info;
+void gemv(__LAPACK_int const m, __LAPACK_int const n,
+          float32_t const alpha,
+          float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          float32_t const*__nonnull const x, __LAPACK_int const incx,
+          float32_t const beta,
+          float32_t      *__nonnull const y, __LAPACK_int const incy) {
     sgemv_(&opA,
            &m, &n,
            &alpha,
@@ -21,16 +20,14 @@ __LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
            x, &incx,
            &beta,
            y, &incy);
-    return info;
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
-                        float64_t const alpha,
-                        float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        float64_t const*__nonnull const x, __LAPACK_int const incx,
-                        float64_t const beta,
-                        float64_t      *__nonnull const y, __LAPACK_int const incy) {
-    __LAPACK_int info;
+void gemv(__LAPACK_int const m, __LAPACK_int const n,
+          float64_t const alpha,
+          float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          float64_t const*__nonnull const x, __LAPACK_int const incx,
+          float64_t const beta,
+          float64_t      *__nonnull const y, __LAPACK_int const incy) {
     dgemv_(&opA,
            &m, &n,
            &alpha,
@@ -38,16 +35,14 @@ __LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
            x, &incx,
            &beta,
            y, &incy);
-    return info;
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
-                        complex64_t const alpha,
-                        complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        complex64_t const*__nonnull const x, __LAPACK_int const incx,
-                        complex64_t const beta,
-                        complex64_t      *__nonnull const y, __LAPACK_int const incy) {
-    __LAPACK_int info;
+void gemv(__LAPACK_int const m, __LAPACK_int const n,
+          complex64_t const alpha,
+          complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          complex64_t const*__nonnull const x, __LAPACK_int const incx,
+          complex64_t const beta,
+          complex64_t      *__nonnull const y, __LAPACK_int const incy) {
     cgemv_(&opA,
            &m, &n,
            &alpha,
@@ -55,16 +50,14 @@ __LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
            x, &incx,
            &beta,
            y, &incy);
-    return info;
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
-__LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
-                        complex128_t const alpha,
-                        complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
-                        complex128_t const*__nonnull const x, __LAPACK_int const incx,
-                        complex128_t const beta,
-                        complex128_t      *__nonnull const y, __LAPACK_int const incy) {
-    __LAPACK_int info;
+void gemv(__LAPACK_int const m, __LAPACK_int const n,
+          complex128_t const alpha,
+          complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
+          complex128_t const*__nonnull const x, __LAPACK_int const incx,
+          complex128_t const beta,
+          complex128_t      *__nonnull const y, __LAPACK_int const incy) {
     zgemv_(&opA,
            &m, &n,
            &alpha,
@@ -72,7 +65,6 @@ __LAPACK_int const gemv(__LAPACK_int const m, __LAPACK_int const n,
            x, &incx,
            &beta,
            y, &incy);
-    return info;
 }
 // MARK: symv
 __attribute__((always_inline, __overloadable__)) inline static

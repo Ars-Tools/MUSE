@@ -76,50 +76,50 @@ __attribute__((always_inline, __overloadable__)) inline static
 void copy(__LAPACK_int const N,
           float32_t const*__nonnull const x, __LAPACK_int const incx,
           float32_t      *__nonnull const y, __LAPACK_int const incy) {
-    scopy_(&N, x, &incx, &y, &incy);
+    scopy_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void copy(__LAPACK_int const N,
           float64_t const*__nonnull const x, __LAPACK_int const incx,
           float64_t      *__nonnull const y, __LAPACK_int const incy) {
-    dcopy_(&N, x, &incx, &y, &incy);
+    dcopy_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void copy(__LAPACK_int const N,
           complex64_t const*__nonnull const x, __LAPACK_int const incx,
           complex64_t      *__nonnull const y, __LAPACK_int const incy) {
-    ccopy_(&N, x, &incx, &y, &incy);
+    ccopy_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void copy(__LAPACK_int const N,
           complex128_t const*__nonnull const x, __LAPACK_int const incx,
           complex128_t      *__nonnull const y, __LAPACK_int const incy) {
-    zcopy_(&N, x, &incx, &y, &incy);
+    zcopy_(&N, x, &incx, y, &incy);
 }
 // MARK: swap
 __attribute__((always_inline, __overloadable__)) inline static
 void swap(__LAPACK_int const N,
           float32_t const*__nonnull const x, __LAPACK_int const incx,
           float32_t      *__nonnull const y, __LAPACK_int const incy) {
-    sswap_(&N, x, &incx, &y, &incy);
+    sswap_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void swap(__LAPACK_int const N,
           float64_t const*__nonnull const x, __LAPACK_int const incx,
           float64_t      *__nonnull const y, __LAPACK_int const incy) {
-    dswap_(&N, x, &incx, &y, &incy);
+    dswap_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void swap(__LAPACK_int const N,
           complex64_t const*__nonnull const x, __LAPACK_int const incx,
           complex64_t      *__nonnull const y, __LAPACK_int const incy) {
-    cswap_(&N, x, &incx, &y, &incy);
+    cswap_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void swap(__LAPACK_int const N,
           complex128_t const*__nonnull const x, __LAPACK_int const incx,
           complex128_t      *__nonnull const y, __LAPACK_int const incy) {
-    zswap_(&N, x, &incx, &y, &incy);
+    zswap_(&N, x, &incx, y, &incy);
 }
 // MARK: dot
 __attribute__((always_inline, __overloadable__)) inline static
@@ -132,7 +132,7 @@ __attribute__((always_inline, __overloadable__)) inline static
 float64_t const dot(__LAPACK_int const N,
                     float64_t const*__nonnull const x, __LAPACK_int const incx,
                     float64_t const*__nonnull const y, __LAPACK_int const incy) {
-    return sdot_(&N, x, &incx, y, &incy);
+    return ddot_(&N, x, &incx, y, &incy);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 complex64_t const dot(__LAPACK_int const N,
