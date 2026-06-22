@@ -99,7 +99,7 @@ void vvexpm1(float64_t const*__nonnull const x,
              intptr_t const length) {
     vvexpm1(y, x, (int32_t const[]){(int32_t const)length});
 }
-// MARK: logp1
+// MARK: log1p
 __attribute__((always_inline, __overloadable__)) inline static
 void vvlog1p(float32_t const*__nonnull const x,
              float32_t      *__nonnull const y,
