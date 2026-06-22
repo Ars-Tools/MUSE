@@ -28,8 +28,8 @@ extension LAPACK.LU {
             Array<Element>(unsafeUninitializedCapacity: capacity) {
                 let y = $0.baseAddress.unsafelyUnwrapped
                 for offset in offset {
-                    Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
-                                 y: y.advanced(by: offset.y), ldy: stride.y,
+                    Element.Copy(x: x.advanced(by: offset.x), inc: stride.x,
+                                 y: y.advanced(by: offset.y), inc: stride.y,
                                  length: length)
                 }
                 $1 = $0.count
@@ -37,7 +37,7 @@ extension LAPACK.LU {
         }
         var p = Array<Int>(repeating: .zero, count: n)
         switch Element.GETRF(m: m, n: n,
-                             a: &a, lda: m,
+                             a: &a, ld: m,
                              p: &p) {
         case.zero:
             break
@@ -58,8 +58,8 @@ extension LAPACK.LU {
             Array<Element>(unsafeUninitializedCapacity: capacity) {
                 let y = $0.baseAddress.unsafelyUnwrapped
                 for offset in offset {
-                    Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
-                                 y: y.advanced(by: offset.y), ldy: stride.y,
+                    Element.Copy(x: x.advanced(by: offset.x), inc: stride.x,
+                                 y: y.advanced(by: offset.y), inc: stride.y,
                                  length: length)
                 }
                 $1 = $0.count
@@ -67,7 +67,7 @@ extension LAPACK.LU {
         }
         var p = Array<Int>(repeating: .zero, count: n)
         switch Element.GETRF(m: m, n: n,
-                             a: &a, lda: m,
+                             a: &a, ld: m,
                              p: &p) {
         case.zero:
             break
@@ -112,7 +112,7 @@ extension LAPACK.LU where Element: MutableScalar<Element> {
         precondition(m == n, "inv requires square matrix")
         var store = system
         let status = Element.GETRI(n: n,
-                                   a: &store, lda: m,
+                                   a: &store, ld: m,
                                    p: ipivot)
         assert(status == 0)
         return.init(rows: m, cols: n, ldr: 1, ldc: m, store: store)
@@ -133,13 +133,13 @@ extension LAPACK.LU where Element: MutableScalar<Element> {
                     let x = x.advanced(by: chunks.x)
                     let y = y.advanced(by: chunks.y)
                     for offset in offset {
-                        Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
-                                     y: y.advanced(by: offset.y), ldy: stride.y, length: length)
+                        Element.Copy(x: x.advanced(by: offset.x), inc: stride.x,
+                                     y: y.advanced(by: offset.y), inc: stride.y, length: length)
                     }
                     Element.GETRS(n: k, nrhs: nrhs,
-                                  a: system, lda: m, opa: "N",
-                                  b: y, ldb: ldc.1,
-                                  p: ipivot)
+                                  a: system, ld: m, op: .N,
+                                  p: ipivot,
+                                  b: y, ld: ldc.1)
                 }
             }
             $1 = $0.count
@@ -161,13 +161,13 @@ extension LAPACK.LU where Element: MutableScalar<Element> {
                     let x = x.advanced(by: chunks.x)
                     let y = y.advanced(by: chunks.y)
                     for offset in offset {
-                        Element.Copy(x: x.advanced(by: offset.x), ldx: stride.x,
-                                     y: y.advanced(by: offset.y), ldy: stride.y, length: length)
+                        Element.Copy(x: x.advanced(by: offset.x), inc: stride.x,
+                                     y: y.advanced(by: offset.y), inc: stride.y, length: length)
                     }
                     Element.GETRS(n: k, nrhs: nrhs,
-                                  a: system, lda: m, opa: "N",
-                                  b: y, ldb: ldc.1,
-                                  p: ipivot)
+                                  a: system, ld: m, op: .N,
+                                  p: ipivot,
+                                  b: y, ld: ldc.1)
                 }
             }
             $1 = $0.count

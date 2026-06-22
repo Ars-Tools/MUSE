@@ -10,6 +10,7 @@ import func Layout.concat
 import func Layout.capacity
 import func Layout.broadcast
 import os.log
+import BLAS
 extension BLAS {
     @frozen public struct DOT<X: Tensor<Element>, Y: Tensor<Element>> {
         public typealias S = DOT<X.S, Y.S>
@@ -43,8 +44,8 @@ extension BLAS.DOT: Tensor {
                 await withUnsafePointer(xm(), ym()) { x, y in
                         .init(arrayLiteral: length.reduce(0 as Element) {
                             $0 + Element.Inner(n: n,
-                                               x: x.advanced(by: $1.x), ldx: max(1, incx),
-                                               y: y.advanced(by: $1.y), ldy: max(1, incy))
+                                               x: x.advanced(by: $1.x), inc: max(1, incx),
+                                               y: y.advanced(by: $1.y), inc: max(1, incy))
                         })
                 }
             })
@@ -61,17 +62,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.Outer(m: m, n: n,
                                               α: 1,
-                                              x: x, ldx: max(1, incx),
-                                              y: y, ldy: max(1, incy),
+                                              x: x, inc: max(1, incx),
+                                              y: y, inc: max(1, incy),
                                               β: 0,
-                                              a: z, lda: ldc)
+                                              a: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.Outer(m: m, n: n,
                                                   α: 1,
-                                                  x: x.advanced(by: offset.x), ldx: max(1, incx),
-                                                  y: y.advanced(by: offset.y), ldy: max(1, incy),
+                                                  x: x.advanced(by: offset.x), inc: max(1, incx),
+                                                  y: y.advanced(by: offset.y), inc: max(1, incy),
                                                   β: 1,
-                                                  a: z, lda: ldc)
+                                                  a: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -90,17 +91,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.Outer(m: n, n: m,
                                               α: 1,
-                                              x: y, ldx: max(1, incy),
-                                              y: x, ldy: max(1, incx),
+                                              x: y, inc: max(1, incy),
+                                              y: x, inc: max(1, incx),
                                               β: 0,
-                                              a: z, lda: ldc)
+                                              a: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.Outer(m: n, n: m,
                                                   α: 1,
-                                                  x: y.advanced(by: offset.y), ldx: max(1, incy),
-                                                  y: x.advanced(by: offset.x), ldy: max(1, incx),
+                                                  x: y.advanced(by: offset.y), inc: max(1, incy),
+                                                  y: x.advanced(by: offset.x), inc: max(1, incx),
                                                   β: 1,
-                                                  a: z, lda: ldc)
+                                                  a: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -121,17 +122,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: m, n: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "N",
-                                             x: y, ldx: max(1, incx),
+                                             a: x, ld: lda, op: .N,
+                                             x: y, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: m, n: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
-                                                 x: y.advanced(by: offset.y), ldx: max(1, incx),
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .N,
+                                                 x: y.advanced(by: offset.y), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -151,17 +152,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: k, n: m,
                                              α: 1,
-                                             a: x, lda: lda, opa: "T",
-                                             x: y, ldx: max(1, incx),
+                                             a: x, ld: lda, op: .T,
+                                             x: y, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: k, n: m,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "T",
-                                                 x: y.advanced(by: offset.y), ldx: max(1, incx),
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .T,
+                                                 x: y.advanced(by: offset.y), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -182,17 +183,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: k, n: n,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "T",
-                                             x: x, ldx: max(1, incx),
+                                             a: y, ld: ldb, op: .T,
+                                             x: x, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: k, n: n,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "T",
-                                                 x: x.advanced(by: offset.x), ldx: max(1, incx),
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .T,
+                                                 x: x.advanced(by: offset.x), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -212,17 +213,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: n, n: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "N",
-                                             x: x, ldx: max(1, incx),
+                                             a: y, ld: ldb, op: .N,
+                                             x: x, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: n, n: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "N",
-                                                 x: x.advanced(by: offset.x), ldx: max(1, incx),
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .N,
+                                                 x: x.advanced(by: offset.x), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -242,17 +243,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "N",
-                                             b: y, ldb: ldb, opb: "N",
+                                             a: x, ld: lda, op: .N,
+                                             b: y, ld: ldb, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "N",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .N,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -271,17 +272,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "N",
-                                             b: y, ldb: ldb, opb: "T",
+                                             a: x, ld: lda, op: .N,
+                                             b: y, ld: ldb, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "T",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .N,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -300,17 +301,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "T",
-                                             b: y, ldb: ldb, opb: "N",
+                                             a: x, ld: lda, op: .T,
+                                             b: y, ld: ldb, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "T",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "N",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .T,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -329,17 +330,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "T",
-                                             b: y, ldb: ldb, opb: "T",
+                                             a: x, ld: lda, op: .T,
+                                             b: y, ld: ldb, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "T",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "T",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .T,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -358,17 +359,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "T",
-                                             b: x, ldb: lda, opb: "T",
+                                             a: y, ld: ldb, op: .T,
+                                             b: x, ld: lda, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "T",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "T",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .T,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -387,17 +388,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "N",
-                                             b: x, ldb: lda, opb: "T",
+                                             a: y, ld: ldb, op: .T,
+                                             b: x, ld: lda, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "N",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "T",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .N,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -416,17 +417,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "T",
-                                             b: x, ldb: lda, opb: "N",
+                                             a: y, ld: ldb, op: .T,
+                                             b: x, ld: lda, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "T",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "N",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .T,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -445,17 +446,17 @@ extension BLAS.DOT: Tensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "N",
-                                             b: x, ldb: lda, opb: "N",
+                                             a: y, ld: ldb, op: .N,
+                                             b: x, ld: lda, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "N",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "N",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .N,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -494,21 +495,21 @@ extension BLAS.DOT: Tensor {
                                 let b = c.advanced(by: zb)
                                 let a = b.advanced(by: yb)
                                 for offset in xo.2 {
-                                    Element.Copy(x: x.advanced(by: offset.x), ldx: xo.1.x,
-                                                 y: a.advanced(by: offset.y), ldy: xo.1.y,
+                                    Element.Copy(x: x.advanced(by: offset.x), inc: xo.1.x,
+                                                 y: a.advanced(by: offset.y), inc: xo.1.y,
                                                  length: xo.0)
                                 }
                                 for offset in yo.2 {
-                                    Element.Copy(x: y.advanced(by: offset.x), ldx: yo.1.x,
-                                                 y: b.advanced(by: offset.y), ldy: yo.1.y,
+                                    Element.Copy(x: y.advanced(by: offset.x), inc: yo.1.x,
+                                                 y: b.advanced(by: offset.y), inc: yo.1.y,
                                                  length: yo.0)
                                 }
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: a, lda: k, opa: "T",
-                                             b: b, ldb: k, opb: "N",
+                                             a: a, ld: k, op: .T,
+                                             b: b, ld: k, op: .N,
                                              β: 0,
-                                             c: c, ldc: m)
+                                             c: c, ld: m)
                                 $1 = zb
                             }
                     }
@@ -525,21 +526,21 @@ extension BLAS.DOT: Tensor {
                                 let b = c.advanced(by: zb)
                                 let a = b.advanced(by: yb)
                                 for offset in xo.2 {
-                                    Element.Copy(x: x.advanced(by: offset.x), ldx: xo.1.x,
-                                                 y: a.advanced(by: offset.y), ldy: xo.1.y,
+                                    Element.Copy(x: x.advanced(by: offset.x), inc: xo.1.x,
+                                                 y: a.advanced(by: offset.y), inc: xo.1.y,
                                                  length: xo.0)
                                 }
                                 for offset in yo.2 {
-                                    Element.Copy(x: y.advanced(by: offset.x), ldx: yo.1.x,
-                                                 y: b.advanced(by: offset.y), ldy: yo.1.y,
+                                    Element.Copy(x: y.advanced(by: offset.x), inc: yo.1.x,
+                                                 y: b.advanced(by: offset.y), inc: yo.1.y,
                                                  length: yo.0)
                                 }
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: b, lda: k, opa: "T",
-                                             b: a, ldb: k, opb: "N",
+                                             a: b, ld: k, op: .T,
+                                             b: a, ld: k, op: .N,
                                              β: 0,
-                                             c: c, ldc: n)
+                                             c: c, ld: n)
                                 $1 = zb
                             }
                     }
@@ -565,8 +566,8 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                 withUnsafePointer(xm(), ym()) { x, y in
                         .init(arrayLiteral: length.reduce(0 as Element) {
                             $0 + Element.Inner(n: n,
-                                               x: x.advanced(by: $1.x), ldx: max(1, incx),
-                                               y: y.advanced(by: $1.y), ldy: max(1, incy))
+                                               x: x.advanced(by: $1.x), inc: max(1, incx),
+                                               y: y.advanced(by: $1.y), inc: max(1, incy))
                         })
                 }
             })
@@ -583,17 +584,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.Outer(m: m, n: n,
                                               α: 1,
-                                              x: x, ldx: max(1, incx),
-                                              y: y, ldy: max(1, incy),
+                                              x: x, inc: max(1, incx),
+                                              y: y, inc: max(1, incy),
                                               β: 0,
-                                              a: z, lda: ldc)
+                                              a: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.Outer(m: m, n: n,
                                                   α: 1,
-                                                  x: x.advanced(by: offset.x), ldx: max(1, incx),
-                                                  y: y.advanced(by: offset.y), ldy: max(1, incy),
+                                                  x: x.advanced(by: offset.x), inc: max(1, incx),
+                                                  y: y.advanced(by: offset.y), inc: max(1, incy),
                                                   β: 1,
-                                                  a: z, lda: ldc)
+                                                  a: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -612,17 +613,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.Outer(m: n, n: m,
                                               α: 1,
-                                              x: y, ldx: max(1, incy),
-                                              y: x, ldy: max(1, incx),
+                                              x: y, inc: max(1, incy),
+                                              y: x, inc: max(1, incx),
                                               β: 0,
-                                              a: z, lda: ldc)
+                                              a: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.Outer(m: n, n: m,
                                                   α: 1,
-                                                  x: y.advanced(by: offset.y), ldx: max(1, incy),
-                                                  y: x.advanced(by: offset.x), ldy: max(1, incx),
+                                                  x: y.advanced(by: offset.y), inc: max(1, incy),
+                                                  y: x.advanced(by: offset.x), inc: max(1, incx),
                                                   β: 1,
-                                                  a: z, lda: ldc)
+                                                  a: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -643,17 +644,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: m, n: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "N",
-                                             x: y, ldx: max(1, incx),
+                                             a: x, ld: lda, op: .N,
+                                             x: y, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: m, n: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
-                                                 x: y.advanced(by: offset.y), ldx: max(1, incx),
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .N,
+                                                 x: y.advanced(by: offset.y), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -673,17 +674,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: k, n: m,
                                              α: 1,
-                                             a: x, lda: lda, opa: "T",
-                                             x: y, ldx: max(1, incx),
+                                             a: x, ld: lda, op: .T,
+                                             x: y, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: k, n: m,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "T",
-                                                 x: y.advanced(by: offset.y), ldx: max(1, incx),
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .T,
+                                                 x: y.advanced(by: offset.y), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -704,17 +705,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: k, n: n,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "T",
-                                             x: x, ldx: max(1, incx),
+                                             a: y, ld: ldb, op: .T,
+                                             x: x, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: k, n: n,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "T",
-                                                 x: x.advanced(by: offset.x), ldx: max(1, incx),
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .T,
+                                                 x: x.advanced(by: offset.x), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -734,17 +735,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMV(m: n, n: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "N",
-                                             x: x, ldx: max(1, incx),
+                                             a: y, ld: ldb, op: .N,
+                                             x: x, inc: max(1, incx),
                                              β: 0,
-                                             y: z, ldy: max(1, incy))
+                                             y: z, inc: max(1, incy))
                                 for offset in length.dropFirst() {
                                     Element.GEMV(m: n, n: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "N",
-                                                 x: x.advanced(by: offset.x), ldx: max(1, incx),
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .N,
+                                                 x: x.advanced(by: offset.x), inc: max(1, incx),
                                                  β: 1,
-                                                 y: z, ldy: max(1, incy))
+                                                 y: z, inc: max(1, incy))
                                 }
                             }
                             $1 = $0.count
@@ -764,17 +765,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "N",
-                                             b: y, ldb: ldb, opb: "N",
+                                             a: x, ld: lda, op: .N,
+                                             b: y, ld: ldb, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "N",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .N,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -793,17 +794,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "N",
-                                             b: y, ldb: ldb, opb: "T",
+                                             a: x, ld: lda, op: .N,
+                                             b: y, ld: ldb, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "N",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "T",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .N,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -822,17 +823,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "T",
-                                             b: y, ldb: ldb, opb: "N",
+                                             a: x, ld: lda, op: .T,
+                                             b: y, ld: ldb, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "T",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "N",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .T,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -851,17 +852,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: x, lda: lda, opa: "T",
-                                             b: y, ldb: ldb, opb: "T",
+                                             a: x, ld: lda, op: .T,
+                                             b: y, ld: ldb, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: m, n: n, k: k,
                                                  α: 1,
-                                                 a: x.advanced(by: offset.x), lda: lda, opa: "T",
-                                                 b: y.advanced(by: offset.y), ldb: ldb, opb: "T",
+                                                 a: x.advanced(by: offset.x), ld: lda, op: .T,
+                                                 b: y.advanced(by: offset.y), ld: ldb, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -880,17 +881,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "T",
-                                             b: x, ldb: lda, opb: "T",
+                                             a: y, ld: ldb, op: .T,
+                                             b: x, ld: lda, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "T",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "T",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .T,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -909,17 +910,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "N",
-                                             b: x, ldb: lda, opb: "T",
+                                             a: y, ld: ldb, op: .N,
+                                             b: x, ld: lda, op: .T,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "N",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "T",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .N,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .T,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -938,17 +939,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "T",
-                                             b: x, ldb: lda, opb: "N",
+                                             a: y, ld: ldb, op: .T,
+                                             b: x, ld: lda, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "T",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "N",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .T,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -967,17 +968,17 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let z = z.advanced(by: offset.z)
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: y, lda: ldb, opa: "N",
-                                             b: x, ldb: lda, opb: "N",
+                                             a: y, ld: ldb, op: .N,
+                                             b: x, ld: lda, op: .N,
                                              β: 0,
-                                             c: z, ldc: ldc)
+                                             c: z, ld: ldc)
                                 for offset in length.dropFirst() {
                                     Element.GEMM(m: n, n: m, k: k,
                                                  α: 1,
-                                                 a: y.advanced(by: offset.y), lda: ldb, opa: "N",
-                                                 b: x.advanced(by: offset.x), ldb: lda, opb: "N",
+                                                 a: y.advanced(by: offset.y), ld: ldb, op: .N,
+                                                 b: x.advanced(by: offset.x), ld: lda, op: .N,
                                                  β: 1,
-                                                 c: z, ldc: ldc)
+                                                 c: z, ld: ldc)
                                 }
                             }
                             $1 = $0.count
@@ -1016,21 +1017,21 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let b = c.advanced(by: zb)
                                 let a = b.advanced(by: yb)
                                 for offset in xo.2 {
-                                    Element.Copy(x: x.advanced(by: offset.x), ldx: xo.1.x,
-                                                 y: a.advanced(by: offset.y), ldy: xo.1.y,
+                                    Element.Copy(x: x.advanced(by: offset.x), inc: xo.1.x,
+                                                 y: a.advanced(by: offset.y), inc: xo.1.y,
                                                  length: xo.0)
                                 }
                                 for offset in yo.2 {
-                                    Element.Copy(x: y.advanced(by: offset.x), ldx: yo.1.x,
-                                                 y: b.advanced(by: offset.y), ldy: yo.1.y,
+                                    Element.Copy(x: y.advanced(by: offset.x), inc: yo.1.x,
+                                                 y: b.advanced(by: offset.y), inc: yo.1.y,
                                                  length: yo.0)
                                 }
                                 Element.GEMM(m: m, n: n, k: k,
                                              α: 1,
-                                             a: a, lda: k, opa: "T",
-                                             b: b, ldb: k, opb: "N",
+                                             a: a, ld: k, op: .T,
+                                             b: b, ld: k, op: .N,
                                              β: 0,
-                                             c: c, ldc: m)
+                                             c: c, ld: m)
                                 $1 = zb
                             }
                     }
@@ -1047,21 +1048,21 @@ extension BLAS.DOT: InstantTensor where X: InstantTensor, Y: InstantTensor {
                                 let b = c.advanced(by: zb)
                                 let a = b.advanced(by: yb)
                                 for offset in xo.2 {
-                                    Element.Copy(x: x.advanced(by: offset.x), ldx: xo.1.x,
-                                                 y: a.advanced(by: offset.y), ldy: xo.1.y,
+                                    Element.Copy(x: x.advanced(by: offset.x), inc: xo.1.x,
+                                                 y: a.advanced(by: offset.y), inc: xo.1.y,
                                                  length: xo.0)
                                 }
                                 for offset in yo.2 {
-                                    Element.Copy(x: y.advanced(by: offset.x), ldx: yo.1.x,
-                                                 y: b.advanced(by: offset.y), ldy: yo.1.y,
+                                    Element.Copy(x: y.advanced(by: offset.x), inc: yo.1.x,
+                                                 y: b.advanced(by: offset.y), inc: yo.1.y,
                                                  length: yo.0)
                                 }
                                 Element.GEMM(m: n, n: m, k: k,
                                              α: 1,
-                                             a: b, lda: k, opa: "T",
-                                             b: a, ldb: k, opb: "N",
+                                             a: b, ld: k, op: .T,
+                                             b: a, ld: k, op: .N,
                                              β: 0,
-                                             c: c, ldc: n)
+                                             c: c, ld: n)
                                 $1 = zb
                             }
                     }
