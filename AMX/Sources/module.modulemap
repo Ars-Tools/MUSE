@@ -18,6 +18,10 @@ module vFORCE {
     export *
 }
 module AltVec {
-    header "vDSP+gen.h"
+    header "altvec+complex.h"
+    header "altvec+arithmetic.h"
+    header "altvec+geometry.h"
+    header "altvec+fma.h"
+    header "altvec+gen.h"
     export *
 }
