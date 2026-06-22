@@ -136,6 +136,8 @@ struct ArithmeticTestCases {
         ] as [[Complex128]])
         let z = x / y
         let w = try MatBuf(z)
+        print(w)
+
         for (row, col) in product(0..<3, 0..<3) {
             let u = z[row, col]
             let v = try u[]
