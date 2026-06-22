@@ -20,7 +20,7 @@ extension ComplexNumber {
 }
 extension ComplexNumber {
     @inlinable@inline(__always)@_transparent
-	public var conjugate: Self {
+	public var conj: Self {
 		.init(real: real, imag: -imag)
 	}
 }
