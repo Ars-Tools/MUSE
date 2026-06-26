@@ -12,16 +12,16 @@ let package = Package(
     products: [
 		.library(
 			name: "MUSE.Primitives",
-			targets: ["Numerics", "Dense"]
-		),
-		.library(
-			name: "MUSE.Essentials",
-			targets: ["Layout"]
+			targets: ["Numerics", "Dense", "Sparse"]
 		),
         .library(
-            name: "MUSE.Headers",
-            targets: ["AMX"]
+            name: "MUSE.Algorithms",
+            targets: ["Optimise"]
         ),
+		.library(
+			name: "MUSE.Essentials",
+			targets: ["Layout", "AMX"]
+		),
     ],
 	dependencies: [
 		.package(url: "https://github.com/ars-tools/MUCE", branch: "release")
