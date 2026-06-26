@@ -46,4 +46,10 @@ struct ComplexTests {
 		#expect(result.real == real)
 		#expect(result.imag == imag)
 	}
+    @Test(arguments: [
+        (Complex32(real: 3, imag: 4), Complex32(real: 4, imag: 3))
+    ])
+    func div32(lhs: Complex32, rhs: Complex32) {
+        #expect(lhs == ( lhs / rhs ) * rhs)
+    }
 }
