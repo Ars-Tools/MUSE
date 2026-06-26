@@ -10,11 +10,11 @@ public protocol ComplexNumber<FloatLiteralType>: SignedNumeric & Comparable & Ha
 	var magnitude: FloatLiteralType.Magnitude { get }
 //	var argument: FloatLiteralType { get }
 	init(real: FloatLiteralType, imag: FloatLiteralType)
-	static var i: Self { get }
+	static var I: Self { get }
 }
 extension ComplexNumber {
 	@inlinable@inline(__always)@_transparent
-	public static var i: Self {
+	public static var I: Self {
 		.init(real: 0, imag: 1)
 	}
 }
@@ -73,9 +73,9 @@ extension ComplexNumber {
 		lhs.magnitude >= rhs.magnitude
 	}
 }
-extension ComplexNumber where FloatLiteralType: ComplexNumber {
-    @inlinable@inline(__always)@_transparent
-	public var simplified: FloatLiteralType {
-		real + imag * .i
-	}
-}
+//extension ComplexNumber where FloatLiteralType: ComplexNumber {
+//    @inlinable@inline(__always)@_transparent
+//	public var simplified: FloatLiteralType {
+//		real + imag * .i
+//	}
+//}
