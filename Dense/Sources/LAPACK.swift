@@ -104,21 +104,21 @@ extension Complex64: LAPACKElement {
     public static func GETRF(m: Int, n: Int,
                              a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafeMutablePointer<Int>) -> Int {
-        getrf(m, n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p)
+        getrf(m, n, .init(mutating: a.pointer(to: \.rawValue).unsafelyUnwrapped), ld, p)
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRI(n: Int,
                              a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafePointer<Int>) -> Int {
-        switch getri(n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p, .none, -1) {
+        switch getri(n, a.pointer(to: \.rawValue).unsafelyUnwrapped, ld, p, .none, -1) {
         case let info:
             info < 0 ? info :
             withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
                 getri(n,
-                      .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld,
+                      a.pointer(to: \.rawValue).unsafelyUnwrapped, ld,
                       p,
-                      .init(.init($0.baseAddress)) as Optional<UnsafeMutablePointer<RawValue>>, $0.count)
+                      .init(mutating: $0.baseAddress.unsafelyUnwrapped.pointer(to: \.rawValue)), $0.count)
             }
         }
     }
@@ -129,9 +129,9 @@ extension Complex64: LAPACKElement {
                              p: UnsafePointer<Int>,
                              b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
         getrs(n, nrhs,
-              .init(.init(a)) as UnsafePointer<RawValue>, lda, op,
+              a.pointer(to: \.rawValue).unsafelyUnwrapped, lda, op,
               p,
-              .init(.init(b)) as UnsafeMutablePointer<RawValue>, ldb)
+              .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb)
     }
 }
 extension Complex128: LAPACKElement {
@@ -140,21 +140,21 @@ extension Complex128: LAPACKElement {
     public static func GETRF(m: Int, n: Int,
                              a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafeMutablePointer<Int>) -> Int {
-        getrf(m, n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p)
+        getrf(m, n, .init(mutating: a.pointer(to: \.rawValue).unsafelyUnwrapped), ld, p)
     }
     @discardableResult
     @inlinable@inline(__always)@_transparent
     public static func GETRI(n: Int,
                              a: UnsafeMutablePointer<Self>, ld: Int,
                              p: UnsafePointer<Int>) -> Int {
-        switch getri(n, .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld, p, .none, -1) {
+        switch getri(n, a.pointer(to: \.rawValue).unsafelyUnwrapped, ld, p, .none, -1) {
         case let info:
             info < 0 ? info :
             withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
                 getri(n,
-                      .init(.init(a)) as UnsafeMutablePointer<RawValue>, ld,
+                      a.pointer(to: \.rawValue).unsafelyUnwrapped, ld,
                       p,
-                      .init(.init($0.baseAddress)) as Optional<UnsafeMutablePointer<RawValue>>, $0.count)
+                      .init(mutating: $0.baseAddress.unsafelyUnwrapped.pointer(to: \.rawValue)), $0.count)
             }
         }
     }
@@ -165,8 +165,8 @@ extension Complex128: LAPACKElement {
                              p: UnsafePointer<Int>,
                              b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
         getrs(n, nrhs,
-              .init(.init(a)) as UnsafePointer<RawValue>, lda, op,
+              a.pointer(to: \.rawValue).unsafelyUnwrapped, lda, op,
               p,
-              .init(.init(b)) as UnsafeMutablePointer<RawValue>, ldb)
+              .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb)
     }
 }

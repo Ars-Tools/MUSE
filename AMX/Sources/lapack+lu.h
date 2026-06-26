@@ -156,7 +156,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
         return info;
     } else if ( lwork < 0 ) { // query
         __LAPACK_int info;
-        float32_t size = MAX(1, n);
+        float64_t size = MAX(1, n);
         dgetri_(&n,
                 A, &ldA,
                 ipiv,
