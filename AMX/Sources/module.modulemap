@@ -9,6 +9,7 @@ module LAPACK {
     header "lapack+sv.h"
     header "lapack+ls.h"
     header "lapack+eig.h"
+    header "lapack+misc.h"
     export *
 }
 module vFORCE {
