@@ -113,7 +113,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                          float32_t const*__nonnull const A, __LAPACK_int const ldA,
                          __LAPACK_int const*__nonnull const ipiv,
                          float32_t      *__nullable const work, __LAPACK_int const lwork) {
-    if ( lwork < 0 ) { // query
+    if ( 0 < lwork ) { // allocated
         __LAPACK_int info;
         sgetri_(&n,
                 A, &ldA,
@@ -121,7 +121,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                 work, &lwork,
                 &info);
         return info;
-    } else if ( lwork < 0 ) { // allocated
+    } else if ( lwork < 0 ) { // query
         __LAPACK_int info;
         float32_t size = MAX(1, n);
         sgetri_(&n,
@@ -146,7 +146,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                          float64_t const*__nonnull const A, __LAPACK_int const ldA,
                          __LAPACK_int const*__nonnull const ipiv,
                          float64_t      *__nullable const work, __LAPACK_int const lwork) {
-    if ( lwork < 0 ) { // query
+    if ( 0 < lwork ) { // allocated
         __LAPACK_int info;
         dgetri_(&n,
                 A, &ldA,
@@ -154,7 +154,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                 work, &lwork,
                 &info);
         return info;
-    } else if ( 0 < lwork ) { // allocated
+    } else if ( lwork < 0 ) { // query
         __LAPACK_int info;
         float32_t size = MAX(1, n);
         dgetri_(&n,
@@ -179,7 +179,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                          complex64_t const*__nonnull const A, __LAPACK_int const ldA,
                          __LAPACK_int const*__nonnull const ipiv,
                          complex64_t      *__nullable const work, __LAPACK_int const lwork) {
-    if ( lwork < 0 ) { // query
+    if ( 0 < lwork ) { // allocated
         __LAPACK_int info;
         cgetri_(&n,
                 A, &ldA,
@@ -187,7 +187,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                 work, &lwork,
                 &info);
         return info;
-    } else if ( 0 < lwork ) { // allocated
+    } else if ( lwork < 0 ) { // query
         __LAPACK_int info;
         __complex float size = MAX(1, n);
         cgetri_(&n,
@@ -212,7 +212,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                          complex128_t const*__nonnull const A, __LAPACK_int const ldA,
                          __LAPACK_int const*__nonnull const ipiv,
                          complex128_t      *__nullable const work, __LAPACK_int const lwork) {
-    if ( lwork < 0 ) { // query
+    if ( 0 < lwork ) { // allocated
         __LAPACK_int info;
         zgetri_(&n,
                 A, &ldA,
@@ -220,7 +220,7 @@ __LAPACK_int const getri(__LAPACK_int const n,
                 work, &lwork,
                 &info);
         return info;
-    } else if ( 0 < lwork ) { // allocated
+    } else if ( lwork < 0 ) { // query
         __LAPACK_int info;
         __complex double size = MAX(1, n);
         zgetri_(&n,
