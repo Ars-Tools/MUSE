@@ -94,7 +94,7 @@ extension Complex.Realp: InstantTensor where X: InstantTensor {
 }
 extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
     @inlinable@_transparent
-    public var r: Complex<Element>.Realp<Self> {
+    public var realp: Complex<Element>.Realp<Self> {
         .init(x: self)
     }
 }
@@ -153,7 +153,7 @@ extension Complex.Imagp: InstantTensor where X: InstantTensor {
 }
 extension Tensor where Element: ComplexElement, Element.Magnitude: BitwiseCopyable & Sendable {
     @inlinable@_transparent
-    public var i: Complex<Element>.Imagp<Self> {
+    public var imagp: Complex<Element>.Imagp<Self> {
         .init(x: self)
     }
 }
