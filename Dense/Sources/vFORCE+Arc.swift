@@ -6,6 +6,7 @@
 //
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
+import AltVec
 extension vFORCE {
     @frozen public struct ArcSin<X: Tensor<Element>> {
         public typealias S = vFORCE.ArcSin<X.S>
