@@ -4,6 +4,7 @@
 //
 //  Created by Kota on 9/27/25.
 //
+import AltVec
 extension Arithmetic {
     public struct Add<X: Tensor<Element>, Y: Tensor<Element>> {
         public typealias S = Add<X.S, Y.S>
