@@ -16,7 +16,7 @@ import func simd.simd_equal
 import typealias simd.simd_half2
 import protocol Synchronization.AtomicRepresentable
 @_spi(Internal)
-import AltVec
+import Complex
 @frozen public struct Complex32: ComplexNumber & BitwiseCopyable & RawRepresentable {
     public typealias FloatLiteralType = Float16
     public typealias RawValue = SIMD2<FloatLiteralType>
@@ -139,23 +139,23 @@ extension Complex64 {
     }
     @inlinable@inline(__always)@_transparent
     public static prefix func-(lhs: Self) -> Self {
-        .init(rawValue: complex_neg(lhs.rawValue))
+        .init(rawValue: neg(lhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func+(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_add(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: add(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func-(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_sub(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: sub(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func*(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_mul(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: mul(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func/(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_div(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: div(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public init(r: FloatLiteralType, θ: FloatLiteralType) {
@@ -167,15 +167,15 @@ extension Complex64 {
     }
     @inlinable@inline(__always)@_transparent
     public var θ: FloatLiteralType {
-        complex_arg(rawValue);
+        arg(rawValue);
     }
     @inlinable@inline(__always)@_transparent
     public var conj: Self {
-        .init(rawValue: complex_conj(rawValue))
+        .init(rawValue: libcconj(rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public var proj: Self {
-        .init(rawValue: complex_proj(rawValue))
+        .init(rawValue: libcproj(rawValue))
     }
 }
 extension Complex64: AtomicRepresentable {
@@ -235,23 +235,23 @@ extension Complex128 {
     }
     @inlinable@inline(__always)@_transparent
     public static prefix func-(lhs: Self) -> Self {
-        .init(rawValue: complex_neg(lhs.rawValue))
+        .init(rawValue: neg(lhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func+(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_add(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: add(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func-(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_sub(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: sub(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func*(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_mul(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: mul(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public static func/(lhs: Self, rhs: Self) -> Self {
-        .init(rawValue: complex_div(lhs.rawValue, rhs.rawValue))
+        .init(rawValue: div(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public init(r: FloatLiteralType, θ: FloatLiteralType) {
@@ -263,15 +263,15 @@ extension Complex128 {
     }
     @inlinable@inline(__always)@_transparent
     public var θ: FloatLiteralType {
-        complex_arg(rawValue);
+        arg(rawValue);
     }
     @inlinable@inline(__always)@_transparent
     public var conj: Self {
-        .init(rawValue: complex_conj(rawValue))
+        .init(rawValue: libcconj(rawValue))
     }
     @inlinable@inline(__always)@_transparent
     public var proj: Self {
-        .init(rawValue: complex_proj(rawValue))
+        .init(rawValue: libcproj(rawValue))
     }
 }
 extension Complex128: AtomicRepresentable {
