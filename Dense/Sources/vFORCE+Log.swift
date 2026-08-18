@@ -5,6 +5,7 @@
 //  Created by Kota on 9/27/25.
 //
 import func Layout.capacity
+import AltVec
 extension vFORCE {
     @frozen public struct Log<X: Tensor<Element>> {
         public typealias S = Log<X.S>
