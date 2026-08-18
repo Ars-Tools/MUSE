@@ -6,6 +6,7 @@
 //
 import typealias Layout.MemoryStrategy
 import func Layout.capacity
+import AltVec
 extension vFORCE {
     @frozen public struct Magnitude<X: Tensor<Element>> where X.Element.Magnitude: BitwiseCopyable {
         public typealias Element = X.Element.Magnitude
