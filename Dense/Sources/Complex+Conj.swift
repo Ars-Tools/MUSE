@@ -6,6 +6,7 @@
 //
 import func Layout.capacity
 import func Layout.flatten
+import AltVec
 extension Complex {
     @frozen public struct Conj<X: Tensor<Element>> {
         public typealias S = Conj<X.S>
