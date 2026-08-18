@@ -4,6 +4,7 @@
 //
 //  Created by Kota on 9/27/25.
 //
+import AltVec
 extension Complex {
     @frozen public struct Realp<X: Tensor<Element>> {
         public typealias S = Realp<X.S>
