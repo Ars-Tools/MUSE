@@ -6,6 +6,7 @@
 //
 import func Layout.capacity
 import func Layout.flatten
+import AltVec
 extension Complex {
     @frozen public struct Ortho<X: Tensor<Element.Magnitude>, Y: Tensor<Element.Magnitude>> {
         public typealias S = Ortho<X.S, Y.S>
