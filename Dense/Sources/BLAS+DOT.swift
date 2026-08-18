@@ -4,13 +4,13 @@
 //
 //  Created by Kota on 9/27/25.
 //
+import AltVec
 import typealias Layout.MemoryStrategy
 import func Layout.contraction
 import func Layout.concat
 import func Layout.capacity
 import func Layout.broadcast
 import os.log
-import BLAS
 extension BLAS {
     @frozen public struct DOT<X: Tensor<Element>, Y: Tensor<Element>> {
         public typealias S = DOT<X.S, Y.S>
