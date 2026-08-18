@@ -4,8 +4,6 @@
 //
 //  Created by Kota on 6/18/26.
 //
-#ifndef __LINEAR_ALGEBRA_TYPEDEF__
-#define __LINEAR_ALGEBRA_TYPEDEF__
 #ifndef ACCELERATE_NEW_LAPACK
 #define ACCELERATE_NEW_LAPACK
 #endif
@@ -14,6 +12,8 @@
 #endif
 #include<Accelerate/Accelerate.h>
 #include<simd/simd.h>
+#ifndef __LINEAR_ALGEBRA_TYPEDEF__
+#define __LINEAR_ALGEBRA_TYPEDEF__
 //__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
 typedef CF_ENUM(char) {
     op_t_N = 'N',
@@ -58,26 +58,5 @@ typedef CF_ENUM(char) {
     eig_range_t_V = 'V',
     eig_range_t_I = 'I'
 } eig_range_t;
-__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
-typedef union {
-    __complex float const scalar;
-    __LAPACK_float_complex const lapack;
-    simd_float2 const vector;
-    DSPComplex const DSPComplex;
-    struct {
-        float32_t const r;
-        float32_t const i;
-    };
-} complex64_t;
-__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
-typedef union {
-    __complex double const scalar;
-    __LAPACK_double_complex const lapack;
-    simd_double2 const vector;
-    DSPDoubleComplex const DSPComplex;
-    struct {
-        float64_t const r;
-        float64_t const i;
-    };
-} complex128_t;
 #endif
+#include"complex+typedef.h"
