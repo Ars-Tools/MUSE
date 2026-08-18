@@ -1,10 +1,26 @@
+module Complex {
+    header "complex+typedef.h"
+    header "complex+arithmetic.h"
+    header "complex+libm.h"
+    export *
+}
+module MKL {
+    use Complex
+    header "mkl+arithmetic.h"
+    header "mkl+geometry.h"
+    header "mkl+fma.h"
+    header "mkl+gen.h"
+    export *
+}
 module BLAS {
+    use Complex
     header "blas+level1.h"
     header "blas+level2.h"
     header "blas+level3.h"
     export *
 }
 module LAPACK {
+    use Complex
     header "lapack+lu.h"
     header "lapack+sv.h"
     header "lapack+ls.h"
@@ -13,16 +29,9 @@ module LAPACK {
     export *
 }
 module vFORCE {
+    use Complex
     header "vforce+trigonometric.h"
     header "vforce+power.h"
     header "vforce+misc.h"
-    export *
-}
-module AltVec {
-    header "altvec+complex.h"
-    header "altvec+arithmetic.h"
-    header "altvec+geometry.h"
-    header "altvec+fma.h"
-    header "altvec+gen.h"
     export *
 }
