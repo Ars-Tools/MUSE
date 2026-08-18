@@ -67,7 +67,7 @@ void gemv(__LAPACK_int const m, __LAPACK_int const n,
            y, &incy);
 }
 // MARK: symv
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void symv(__LAPACK_int const N,
            float32_t const alpha,
            float32_t const*__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
@@ -82,7 +82,7 @@ void symv(__LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void symv(__LAPACK_int const N,
           float64_t const alpha,
           float64_t const*__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
@@ -97,7 +97,7 @@ void symv(__LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void symv(__LAPACK_int const N,
           complex64_t const alpha,
           complex64_t const*__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
@@ -112,7 +112,7 @@ void symv(__LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void symv(__LAPACK_int const N,
           complex128_t const alpha,
           complex128_t const*__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
@@ -128,7 +128,7 @@ void symv(__LAPACK_int const N,
            y, &incy);
 }
 // MARK: trmv
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void trmv(__LAPACK_int const N,
           float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
           float32_t      *__nonnull const x, __LAPACK_int const incx) {
@@ -137,7 +137,7 @@ void trmv(__LAPACK_int const N,
            A, &ldA,
            x, &incx);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void trmv(__LAPACK_int const N,
           float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
           float64_t      *__nonnull const x, __LAPACK_int const incx) {
@@ -146,7 +146,7 @@ void trmv(__LAPACK_int const N,
            A, &ldA,
            x, &incx);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void trmv(__LAPACK_int const N,
           complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
           complex64_t      *__nonnull const x, __LAPACK_int const incx) {
@@ -155,7 +155,7 @@ void trmv(__LAPACK_int const N,
            A, &ldA,
            x, &incx);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void trmv(__LAPACK_int const N,
           complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
           complex128_t      *__nonnull const x, __LAPACK_int const incx) {
@@ -165,7 +165,7 @@ void trmv(__LAPACK_int const N,
            x, &incx);
 }
 // MARK: ger
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void ger(__LAPACK_int const M, __LAPACK_int const N,
          float32_t const alpha,
          float32_t const*__nonnull const x, __LAPACK_int const incx,
@@ -177,7 +177,7 @@ void ger(__LAPACK_int const M, __LAPACK_int const N,
           y, &incy,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void ger(__LAPACK_int const M, __LAPACK_int const N,
          float64_t const alpha,
          float64_t const*__nonnull const x, __LAPACK_int const incx,
@@ -189,7 +189,7 @@ void ger(__LAPACK_int const M, __LAPACK_int const N,
           y, &incy,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void ger(__LAPACK_int const M, __LAPACK_int const N,
          complex64_t const alpha,
          complex64_t const*__nonnull const x, __LAPACK_int const incx,
@@ -201,7 +201,7 @@ void ger(__LAPACK_int const M, __LAPACK_int const N,
            y, &incy,
            A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void ger(__LAPACK_int const M, __LAPACK_int const N,
          complex128_t const alpha,
          complex128_t const*__nonnull const x, __LAPACK_int const incx,
@@ -213,7 +213,7 @@ void ger(__LAPACK_int const M, __LAPACK_int const N,
           y, &incy,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void gerc(__LAPACK_int const M, __LAPACK_int const N,
           complex64_t const alpha,
           complex64_t const*__nonnull const x, __LAPACK_int const incx,
@@ -225,7 +225,7 @@ void gerc(__LAPACK_int const M, __LAPACK_int const N,
            y, &incy,
            A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void gerc(__LAPACK_int const M, __LAPACK_int const N,
           complex128_t const alpha,
           complex128_t const*__nonnull const x, __LAPACK_int const incx,
@@ -238,7 +238,7 @@ void gerc(__LAPACK_int const M, __LAPACK_int const N,
           A, &ldA);
 }
 // MARK: syr
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void syr(__LAPACK_int const N,
          float32_t const alpha,
          float32_t const*__nonnull const x, __LAPACK_int const incx,
@@ -249,7 +249,7 @@ void syr(__LAPACK_int const N,
           x, &incx,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void syr(__LAPACK_int const N,
          float64_t const alpha,
          float64_t const*__nonnull const x, __LAPACK_int const incx,
@@ -260,7 +260,7 @@ void syr(__LAPACK_int const N,
           x, &incx,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void syr(__LAPACK_int const N,
          complex64_t const alpha,
          complex64_t const*__nonnull const x, __LAPACK_int const incx,
@@ -271,7 +271,7 @@ void syr(__LAPACK_int const N,
           x, &incx,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void syr(__LAPACK_int const N,
          complex128_t const alpha,
          complex128_t const*__nonnull const x, __LAPACK_int const incx,
@@ -283,7 +283,7 @@ void syr(__LAPACK_int const N,
           A, &ldA);
 }
 // MARK: her
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void her(__LAPACK_int const N,
          complex64_t const alpha,
          complex64_t const*__nonnull const x, __LAPACK_int const incx,
@@ -294,7 +294,7 @@ void her(__LAPACK_int const N,
           x, &incx,
           A, &ldA);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void her(__LAPACK_int const N,
          complex128_t const alpha,
          complex128_t const*__nonnull const x, __LAPACK_int const incx,
@@ -306,7 +306,7 @@ void her(__LAPACK_int const N,
           A, &ldA);
 }
 // MARK: gbmv
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void gbmv(__LAPACK_int const M, __LAPACK_int const N,
           __LAPACK_int const KL, __LAPACK_int const KU,
           float32_t const alpha,
@@ -323,7 +323,7 @@ void gbmv(__LAPACK_int const M, __LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void gbmv(__LAPACK_int const M, __LAPACK_int const N,
           __LAPACK_int const KL, __LAPACK_int const KU,
           float64_t const alpha,
@@ -340,7 +340,7 @@ void gbmv(__LAPACK_int const M, __LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void gbmv(__LAPACK_int const M, __LAPACK_int const N,
           __LAPACK_int const KL, __LAPACK_int const KU,
           complex64_t const alpha,
@@ -357,7 +357,7 @@ void gbmv(__LAPACK_int const M, __LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void gbmv(__LAPACK_int const M, __LAPACK_int const N,
           __LAPACK_int const KL, __LAPACK_int const KU,
           complex128_t const alpha,
@@ -375,7 +375,7 @@ void gbmv(__LAPACK_int const M, __LAPACK_int const N,
            y, &incy);
 }
 // MARK: sbmv
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void sbmv(__LAPACK_int const N,
           __LAPACK_int const K,
           float32_t const alpha,
@@ -391,7 +391,7 @@ void sbmv(__LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void sbmv(__LAPACK_int const N,
           __LAPACK_int const K,
           float64_t const alpha,
@@ -408,7 +408,7 @@ void sbmv(__LAPACK_int const N,
            y, &incy);
 }
 // MARK: hbmv
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void hbmv(__LAPACK_int const N,
           __LAPACK_int const K,
           complex64_t const alpha,
@@ -424,7 +424,7 @@ void hbmv(__LAPACK_int const N,
            &beta,
            y, &incy);
 }
-__attribute__((always_inline, __overloadable__)) inline static
+__attribute__((always_inline, overloadable)) static inline
 void hbmv(__LAPACK_int const N,
           __LAPACK_int const K,
           complex128_t const alpha,
