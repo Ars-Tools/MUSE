@@ -7,6 +7,7 @@
 @preconcurrency import Accelerate
 import Dense
 import Layout
+import AltVec
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
 public enum Op {
