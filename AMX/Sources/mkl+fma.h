@@ -1,33 +1,33 @@
 //
-//  altvec+fma.h
+//  mkl+fma.h
 //  MUSE
 //
 //  Created by Kota on 6/19/26.
 //
 #include"module.h"
 // MARK: VVV
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
-         float32_t const*__nonnull const y, intptr_t const incy,
-         float32_t const*__nonnull const z, intptr_t const incz,
-         float32_t      *__nonnull const w, intptr_t const incw,
-         intptr_t const length) {
+              float32_t const*__nonnull const y, intptr_t const incy,
+              float32_t const*__nonnull const z, intptr_t const incz,
+              float32_t      *__nonnull const w, intptr_t const incw,
+              intptr_t const length) {
     vDSP_vma(x, incx, y, incy, z, incz, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
-         float64_t const*__nonnull const y, intptr_t const incy,
-         float64_t const*__nonnull const z, intptr_t const incz,
-         float64_t      *__nonnull const w, intptr_t const incw,
-         intptr_t const length) {
+              float64_t const*__nonnull const y, intptr_t const incy,
+              float64_t const*__nonnull const z, intptr_t const incz,
+              float64_t      *__nonnull const w, intptr_t const incw,
+              intptr_t const length) {
     vDSP_vmaD(x, incx, y, incy, z, incz, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
-         complex64_t const*__nonnull const y, intptr_t const incy,
-         complex64_t const*__nonnull const z, intptr_t const incz,
-         complex64_t      *__nonnull const w, intptr_t const incw,
-         intptr_t const length) {
+              complex64_t const*__nonnull const y, intptr_t const incy,
+              complex64_t const*__nonnull const z, intptr_t const incz,
+              complex64_t      *__nonnull const w, intptr_t const incw,
+              intptr_t const length) {
     vDSP_zvmaD(&(DSPSplitComplex const) {
         .realp = &x->r,
         .imagp = &x->i,
@@ -42,12 +42,12 @@ void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &w->i,
     }, 2 * incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
-         complex128_t const*__nonnull const y, intptr_t const incy,
-         complex128_t const*__nonnull const z, intptr_t const incz,
-         complex128_t      *__nonnull const w, intptr_t const incw,
-         intptr_t const length) {
+              complex128_t const*__nonnull const y, intptr_t const incy,
+              complex128_t const*__nonnull const z, intptr_t const incz,
+              complex128_t      *__nonnull const w, intptr_t const incw,
+              intptr_t const length) {
     vDSP_zvmaD(&(DSPDoubleSplitComplex const) {
         .realp = &x->r,
         .imagp = &x->i,
@@ -63,7 +63,7 @@ void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incw, length);
 }
 // MARK: VVS
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const*__nonnull const y, intptr_t const incy,
               float32_t const z,
@@ -71,7 +71,7 @@ void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
               intptr_t const length) {
     vDSP_vmsa(x, incx, y, incy, &z, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const*__nonnull const y, intptr_t const incy,
               float64_t const z,
@@ -79,7 +79,7 @@ void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
               intptr_t const length) {
     vDSP_vmsaD(x, incx, y, incy, &z, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const*__nonnull const y, intptr_t const incy,
               complex64_t const z,
@@ -99,7 +99,7 @@ void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &w->i,
     }, 2 * incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const*__nonnull const y, intptr_t const incy,
               complex128_t const z,
@@ -120,7 +120,7 @@ void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incw, length);
 }
 // MARK: VSV
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const y,
               float32_t const*__nonnull const z, intptr_t const incz,
@@ -128,7 +128,7 @@ void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
               intptr_t const length) {
     vDSP_vsma(x, incx, &y, z, incz, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const y,
               float64_t const*__nonnull const z, intptr_t const incz,
@@ -136,7 +136,7 @@ void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
               intptr_t const length) {
     vDSP_vsmaD(x, incx, &y, z, incz, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const y,
               complex64_t const*__nonnull const z, intptr_t const incz,
@@ -156,7 +156,7 @@ void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &w->i,
     }, 2 * incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const y,
               complex128_t const*__nonnull const z, intptr_t const incz,
@@ -177,7 +177,7 @@ void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incw, length);
 }
 // MARK: VSS
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const y,
               float32_t const z,
@@ -185,7 +185,7 @@ void vDSP_fma(float32_t const*__nonnull const x, intptr_t const incx,
               intptr_t const length) {
     vDSP_vsmsa(x, incx, &y, &z, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const y,
               float64_t const z,
@@ -193,7 +193,7 @@ void vDSP_fma(float64_t const*__nonnull const x, intptr_t const incx,
               intptr_t const length) {
     vDSP_vsmsaD(x, incx, &y, &z, w, incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const y,
               complex64_t const z,
@@ -213,7 +213,7 @@ void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &w->i,
     }, 2 * incw, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_fma(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const y,
               complex128_t const z,
