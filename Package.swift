@@ -20,7 +20,7 @@ let package = Package(
         ),
 		.library(
 			name: "MUSE.Essentials",
-			targets: ["Layout", "AMX"]
+			targets: ["Layout", "AltVec"]
 		),
     ],
 	dependencies: [
@@ -29,7 +29,7 @@ let package = Package(
     targets: [
 		.target(
 			name: "Dense",
-			dependencies: ["AMX", "Numerics", "Layout"],
+			dependencies: ["Layout", "Numerics", "AltVec"],
 			path: "Dense/Sources",
 			cSettings: [
 				.define("ACCELERATE_NEW_LAPACK"),
@@ -124,6 +124,26 @@ let package = Package(
                 .define("ACCELERATE_LAPACK_ILP64")
             ]
 		),
+        .target(
+            name: "AltVec",
+            dependencies: [
+                "Numerics"
+            ],
+            path: "AltVec/Sources",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+        ),
+        .testTarget(
+            name: "AltVecTests",
+            dependencies: ["AltVec"],
+            path: "AltVec/Tests",
+            cSettings: [
+                .define("ACCELERATE_NEW_LAPACK"),
+                .define("ACCELERATE_LAPACK_ILP64")
+            ]
+        ),
 		.target(
 			name: "Layout",
 			path: "Layout/Sources",
