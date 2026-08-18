@@ -114,11 +114,11 @@ extension Complex64: LAPACKElement {
         switch getri(n, a.pointer(to: \.rawValue).unsafelyUnwrapped, ld, p, .none, -1) {
         case let info:
             info < 0 ? info :
-            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+            withUnsafeTemporaryAllocation(of: RawValue.self, capacity: info) {
                 getri(n,
                       a.pointer(to: \.rawValue).unsafelyUnwrapped, ld,
                       p,
-                      .init(mutating: $0.baseAddress.unsafelyUnwrapped.pointer(to: \.rawValue)), $0.count)
+                      $0.baseAddress.unsafelyUnwrapped, $0.count)
             }
         }
     }
@@ -150,11 +150,11 @@ extension Complex128: LAPACKElement {
         switch getri(n, a.pointer(to: \.rawValue).unsafelyUnwrapped, ld, p, .none, -1) {
         case let info:
             info < 0 ? info :
-            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+            withUnsafeTemporaryAllocation(of: RawValue.self, capacity: info) {
                 getri(n,
                       a.pointer(to: \.rawValue).unsafelyUnwrapped, ld,
                       p,
-                      .init(mutating: $0.baseAddress.unsafelyUnwrapped.pointer(to: \.rawValue)), $0.count)
+                      $0.baseAddress.unsafelyUnwrapped, $0.count)
             }
         }
     }
