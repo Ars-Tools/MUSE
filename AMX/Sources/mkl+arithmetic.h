@@ -1,24 +1,24 @@
 //
-//  altvec+arithmetic.h
+//  mkl+arithmetic.h
 //  MUSE
 //
 //  Created by Kota on 6/19/26.
 //
 #include"module.h"
 // MARK: neg
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_neg(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t      *__nonnull const y, intptr_t const incy,
               intptr_t const length) {
     vDSP_vneg(x, incx, y, incy, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_neg(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t      *__nonnull const y, intptr_t const incy,
               intptr_t const length) {
     vDSP_vnegD(x, incx, y, incy, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_neg(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t      *__nonnull const y, intptr_t const incy,
               intptr_t const length) {
@@ -30,7 +30,7 @@ void vDSP_neg(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &y->i
     }, 2 * incy, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_neg(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t      *__nonnull const y, intptr_t const incy,
               intptr_t const length) {
@@ -43,21 +43,21 @@ void vDSP_neg(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incy, length);
 }
 // MARK: add - vv
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const*__nonnull const y, intptr_t const incy,
               float32_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vadd(x, incx, y, incy, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const*__nonnull const y, intptr_t const incy,
               float64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vaddD(x, incx, y, incy, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const*__nonnull const y, intptr_t const incy,
               complex64_t      *__nonnull const z, intptr_t const incz,
@@ -73,7 +73,7 @@ void vDSP_add(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(complex128_t const*__nonnull const x, intptr_t const incx,
          complex128_t const*__nonnull const y, intptr_t const incy,
          complex128_t      *__nonnull const z, intptr_t const incz,
@@ -90,21 +90,21 @@ void vDSP_add(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incz, length);
 }
 // MARK: add - vs
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const y,
               float32_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vsadd(x, incx, &y, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const y,
               float64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vsaddD(x, incx, &y, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const y,
               complex64_t      *__nonnull const z, intptr_t const incz,
@@ -112,7 +112,7 @@ void vDSP_add(complex64_t const*__nonnull const x, intptr_t const incx,
     vDSP_vsadd(&x->r, 2 * incx, &y.r, &z->r, 2 * incz, length);
     vDSP_vsadd(&x->i, 2 * incx, &y.i, &z->i, 2 * incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_add(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const y,
               complex128_t      *__nonnull const z, intptr_t const incz,
@@ -121,21 +121,21 @@ void vDSP_add(complex128_t const*__nonnull const x, intptr_t const incx,
     vDSP_vsaddD(&x->i, 2 * incx, &y.i, &z->i, 2 * incz, length);
 }
 // MARK: sub
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_sub(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const*__nonnull const y, intptr_t const incy,
               float32_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vsub(y, incy, x, incx, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_sub(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const*__nonnull const y, intptr_t const incy,
               float64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vsubD(y, incy, x, incx, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_sub(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const*__nonnull const y, intptr_t const incy,
               complex64_t      *__nonnull const z, intptr_t const incz,
@@ -151,7 +151,7 @@ void vDSP_sub(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_sub(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const*__nonnull const y, intptr_t const incy,
               complex128_t      *__nonnull const z, intptr_t const incz,
@@ -168,7 +168,7 @@ void vDSP_sub(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incz, length);
 }
 // MARK: addsub
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_addsub(float32_t const*__nonnull const x, intptr_t const incx,
                  float32_t const*__nonnull const y, intptr_t const incy,
                  float32_t      *__nonnull const a, intptr_t const inca,
@@ -176,7 +176,7 @@ void vDSP_addsub(float32_t const*__nonnull const x, intptr_t const incx,
                  intptr_t const length) {
     vDSP_vaddsub(y, incy, x, incx, a, inca, s, incs, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_addsub(float64_t const*__nonnull const x, intptr_t const incx,
                  float64_t const*__nonnull const y, intptr_t const incy,
                  float64_t      *__nonnull const a, intptr_t const inca,
@@ -184,7 +184,7 @@ void vDSP_addsub(float64_t const*__nonnull const x, intptr_t const incx,
                  intptr_t const length) {
     vDSP_vaddsubD(y, incy, x, incx, a, inca, s, incs, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_addsub(complex64_t const*__nonnull const x, intptr_t const incx,
                  complex64_t const*__nonnull const y, intptr_t const incy,
                  complex64_t      *__nonnull const a, intptr_t const inca,
@@ -193,7 +193,7 @@ void vDSP_addsub(complex64_t const*__nonnull const x, intptr_t const incx,
     vDSP_vaddsub(&y->r, 2 * incy, &x->r, 2 * incx, &a->r, 2 * inca, &s->r, 2 * incs, length);
     vDSP_vaddsub(&y->i, 2 * incy, &x->i, 2 * incx, &a->i, 2 * inca, &s->i, 2 * incs, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_addsub(complex128_t const*__nonnull const x, intptr_t const incx,
                  complex128_t const*__nonnull const y, intptr_t const incy,
                  complex128_t      *__nonnull const a, intptr_t const inca,
@@ -203,21 +203,21 @@ void vDSP_addsub(complex128_t const*__nonnull const x, intptr_t const incx,
     vDSP_vaddsubD(&y->i, 2 * incy, &x->i, 2 * incx, &a->i, 2 * inca, &s->i, 2 * incs, length);
 }
 // MARK: mul - vv
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const*__nonnull const y, intptr_t const incy,
               float32_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vmul(x, incx, y, incy, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const*__nonnull const y, intptr_t const incy,
               float64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vmulD(x, incx, y, incy, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const*__nonnull const y, intptr_t const incy,
               complex64_t      *__nonnull const z, intptr_t const incz,
@@ -233,7 +233,7 @@ void vDSP_mul(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length, 1);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const*__nonnull const y, intptr_t const incy,
               complex128_t      *__nonnull const z, intptr_t const incz,
@@ -250,21 +250,21 @@ void vDSP_mul(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incz, length, 1);
 }
 // MARK: mul - vs
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const y,
               float32_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vsmul(x, incx, &y, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const y,
               float64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vsmulD(x, incx, &y, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const y,
               complex64_t      *__nonnull const z, intptr_t const incz,
@@ -280,7 +280,7 @@ void vDSP_mul(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const y,
               complex128_t      *__nonnull const z, intptr_t const incz,
@@ -297,21 +297,21 @@ void vDSP_mul(complex128_t const*__nonnull const x, intptr_t const incx,
     }, 2 * incz, length);
 }
 // MARK: div - vv
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_div(float32_t const*__nonnull const x, intptr_t const incx,
               float32_t const*__nonnull const y, intptr_t const incy,
               float32_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vdiv(y, incy, x, incx, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_div(float64_t const*__nonnull const x, intptr_t const incx,
               float64_t const*__nonnull const y, intptr_t const incy,
               float64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
     vDSP_vdivD(y, incy, x, incx, z, incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_div(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const*__nonnull const y, intptr_t const incy,
               complex64_t      *__nonnull const z, intptr_t const incz,
@@ -327,7 +327,7 @@ void vDSP_div(complex64_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length);
 }
-__attribute__((always_inline, __overloadable__)) static inline
+__attribute__((always_inline, overloadable)) static inline
 void vDSP_div(complex128_t const*__nonnull const x, intptr_t const incx,
               complex128_t const*__nonnull const y, intptr_t const incy,
               complex128_t      *__nonnull const z, intptr_t const incz,
