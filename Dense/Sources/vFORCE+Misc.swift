@@ -5,6 +5,7 @@
 //  Created by Kota on 6/19/26.
 //
 import func Layout.capacity
+import AltVec
 extension vFORCE {
     @frozen public struct Sqrt<X: Tensor<Element>> {
         public typealias S = Exp<X.S>
