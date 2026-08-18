@@ -6,7 +6,7 @@
 //
 import Testing
 import Numerics
-import AltVec
+import MKL
 @testable import Dense
 @Suite
 struct vFORCEComplex64 {
@@ -39,77 +39,77 @@ struct vFORCEComplex64 {
     }
     @Test
     func exp() throws {
-        try single(count: 16, expect: complex_exp, test: Dense.exp)
-        try double(count: 16, expect: complex_exp, test: Dense.exp)
+        try single(count: 16, expect: libcexp, test: Dense.exp)
+        try double(count: 16, expect: libcexp, test: Dense.exp)
     }
     @Test
     func log() throws {
-        try single(count: 16, expect: complex_log, test: Dense.log)
-        try double(count: 16, expect: complex_log, test: Dense.log)
+        try single(count: 16, expect: libclog, test: Dense.log)
+        try double(count: 16, expect: libclog, test: Dense.log)
     }
     @Test
     func sqrt() throws {
-        try single(count: 16, expect: complex_sqrt, test: Dense.sqrt)
-        try double(count: 16, expect: complex_sqrt, test: Dense.sqrt)
+        try single(count: 16, expect: libcsqrt, test: Dense.sqrt)
+        try double(count: 16, expect: libcsqrt, test: Dense.sqrt)
     }
     @Test
     func sin() throws {
-        try single(count: 16, expect: complex_sin, test: Dense.sin)
-        try double(count: 16, expect: complex_sin, test: Dense.sin)
+        try single(count: 16, expect: libcsin, test: Dense.sin)
+        try double(count: 16, expect: libcsin, test: Dense.sin)
     }
     @Test
     func cos() throws {
-        try single(count: 16, expect: complex_cos, test: Dense.cos)
-        try double(count: 16, expect: complex_cos, test: Dense.cos)
+        try single(count: 16, expect: libccos, test: Dense.cos)
+        try double(count: 16, expect: libccos, test: Dense.cos)
     }
     @Test
     func tan() throws {
-        try single(count: 16, expect: complex_tan, test: Dense.tan)
-        try double(count: 16, expect: complex_tan, test: Dense.tan)
+        try single(count: 16, expect: libctan, test: Dense.tan)
+        try double(count: 16, expect: libctan, test: Dense.tan)
     }
     @Test
     func sinh() throws {
-        try single(count: 16, expect: complex_sinh, test: Dense.sinh)
-        try double(count: 16, expect: complex_sinh, test: Dense.sinh)
+        try single(count: 16, expect: libcsinh, test: Dense.sinh)
+        try double(count: 16, expect: libcsinh, test: Dense.sinh)
     }
     @Test
     func cosh() throws {
-        try single(count: 16, expect: complex_cosh, test: Dense.cosh)
-        try double(count: 16, expect: complex_cosh, test: Dense.cosh)
+        try single(count: 16, expect: libccosh, test: Dense.cosh)
+        try double(count: 16, expect: libccosh, test: Dense.cosh)
     }
     @Test
     func tanh() throws {
-        try single(count: 16, expect: complex_tanh, test: Dense.tanh)
-        try double(count: 16, expect: complex_tanh, test: Dense.tanh)
+        try single(count: 16, expect: libctanh, test: Dense.tanh)
+        try double(count: 16, expect: libctanh, test: Dense.tanh)
     }
     @Test
     func asin() throws {
-        try single(count: 16, expect: complex_asin, test: Dense.asin)
-        try double(count: 16, expect: complex_asin, test: Dense.asin)
+        try single(count: 16, expect: libcasin, test: Dense.asin)
+        try double(count: 16, expect: libcasin, test: Dense.asin)
     }
     @Test
     func acos() throws {
-        try single(count: 16, expect: complex_acos, test: Dense.acos)
-        try double(count: 16, expect: complex_acos, test: Dense.acos)
+        try single(count: 16, expect: libcacos, test: Dense.acos)
+        try double(count: 16, expect: libcacos, test: Dense.acos)
     }
     @Test
     func atan() throws {
-        try single(count: 16, expect: complex_atan, test: Dense.atan)
-        try double(count: 16, expect: complex_atan, test: Dense.atan)
+        try single(count: 16, expect: libcatan, test: Dense.atan)
+        try double(count: 16, expect: libcatan, test: Dense.atan)
     }
     @Test
     func asinh() throws {
-        try single(count: 16, expect: complex_acos, test: Dense.acos)
-        try double(count: 16, expect: complex_asinh, test: Dense.asinh)
+        try single(count: 16, expect: libcasinh, test: Dense.asinh)
+        try double(count: 16, expect: libcasinh, test: Dense.asinh)
     }
     @Test
     func acosh() throws {
-        try single(count: 16, expect: complex_acos, test: Dense.acos)
-        try double(count: 16, expect: complex_acosh, test: Dense.acosh)
+        try single(count: 16, expect: libcacosh, test: Dense.acosh)
+        try double(count: 16, expect: libcacosh, test: Dense.acosh)
     }
     @Test
     func atanh() throws {
-        try single(count: 16, expect: complex_acos, test: Dense.acos)
-        try double(count: 16, expect: complex_atanh, test: Dense.atanh)
+        try single(count: 16, expect: libcatanh, test: Dense.atanh)
+        try double(count: 16, expect: libcatanh, test: Dense.atanh)
     }
 }
