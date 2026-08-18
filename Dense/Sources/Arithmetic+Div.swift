@@ -4,6 +4,7 @@
 //
 //  Created by Kota on 9/27/25.
 //
+import AltVec
 extension Arithmetic {
     public struct Div<X: Tensor<Element>, Y: Tensor<Element>> {
         public typealias S = Div<X.S, Y.S>
