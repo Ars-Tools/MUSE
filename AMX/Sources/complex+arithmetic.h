@@ -10,15 +10,13 @@
 __attribute__((always_inline, overloadable)) inline static
 complex64_t const complex_new(float32_t const r) {
     return (complex64_t const) {
-        .r = r,
-        .i = 0
+        .scalar = r
     };
 }
 __attribute__((always_inline, overloadable)) inline static
 complex128_t const complex_new(float64_t const r) {
     return (complex128_t const) {
-        .r = r,
-        .i = 0
+        .scalar = r
     };
 }
 // MARK: neg
@@ -91,7 +89,7 @@ complex64_t const sub(complex64_t const x, float32_t const y) {
     };
 }
 __attribute__((always_inline, overloadable)) inline static
-complex128_t const complex_sub(complex128_t const x, float64_t const y) {
+complex128_t const sub(complex128_t const x, float64_t const y) {
     return (complex128_t const) {
         .vector = x.vector - y
     };
@@ -191,6 +189,15 @@ __attribute__((always_inline, overloadable)) inline static
 float64_t const length(complex128_t const x) {
     return simd_length(x.vector);
 }
+// MARK: mag2
+__attribute__((always_inline, overloadable)) inline static
+float32_t const length_squared(complex64_t const x) {
+    return simd_length_squared(x.vector);
+}
+__attribute__((always_inline, overloadable)) inline static
+float64_t const length_squared(complex128_t const x) {
+    return simd_length_squared(x.vector);
+}
 // MARK: arg
 __attribute__((always_inline, overloadable)) inline static
 float32_t const arg(complex64_t const x) {
@@ -204,13 +211,13 @@ float64_t const arg(complex128_t const x) {
 __attribute__((always_inline, overloadable)) inline static
 complex64_t const complex_new_rt(float32_t const r, float32_t const t) {
     return (complex64_t const) {
-        .scalar = r * cexpf(t)
+        .scalar = r * cexpf(t * I)
     };
 }
 __attribute__((always_inline, overloadable)) inline static
 complex128_t const complex_new_rt(float64_t const r, float64_t const t) {
     return (complex128_t const) {
-        .scalar = r * cexp(t)
+        .scalar = r * cexp(t * I)
     };
 }
 __attribute__((always_inline, overloadable)) inline static

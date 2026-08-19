@@ -360,19 +360,21 @@ void vDSP_div(float64_t const*__nonnull const x, intptr_t const incx,
 }
 __attribute__((always_inline, overloadable)) static inline
 void vDSP_div(complex64_t const*__nonnull const x, intptr_t const incx,
-              float32_t const y,
+              complex64_t const y,
               complex64_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
-    vDSP_vsdiv(&x->r, 2 * incx, &y, &z->r, 2 * incz, length);
-    vDSP_vsdiv(&x->i, 2 * incx, &y, &z->i, 2 * incz, length);
+    vDSP_mul(x, incx, libcconj(y), z, incz, length);
+    vDSP_div(&x->r, 2 * incx, length_squared(y), &z->r, incz, length);
+    vDSP_div(&x->i, 2 * incx, length_squared(y), &z->i, incz, length);
 }
 __attribute__((always_inline, overloadable)) static inline
 void vDSP_div(complex128_t const*__nonnull const x, intptr_t const incx,
-              float64_t const y,
+              complex128_t const y,
               complex128_t      *__nonnull const z, intptr_t const incz,
               intptr_t const length) {
-    vDSP_vsdivD(&x->r, 2 * incx, &y, &z->r, 2 * incz, length);
-    vDSP_vsdivD(&x->i, 2 * incx, &y, &z->i, 2 * incz, length);
+    vDSP_mul(x, incx, libcconj(y), z, incz, length);
+    vDSP_div(&x->r, 2 * incx, length_squared(y), &z->r, incz, length);
+    vDSP_div(&x->i, 2 * incx, length_squared(y), &z->i, incz, length);
 }
 // MARK: complex-related
 // MARK: conj
@@ -472,7 +474,7 @@ void vDSP_rect(complex64_t const*__nonnull const x, intptr_t const incx,
                intptr_t const length) {
     vDSP_rect((float32_t const*__nonnull const)x, 2 * incx,
               (float32_t      *__nonnull const)y, 2 * incy,
-              (int32_t const)length);
+              length);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void vDSP_rect(complex128_t const*__nonnull const x, intptr_t const incx,
@@ -480,7 +482,7 @@ void vDSP_rect(complex128_t const*__nonnull const x, intptr_t const incx,
                intptr_t const length) {
     vDSP_rectD((float64_t const*__nonnull const)x, 2 * incx,
                (float64_t      *__nonnull const)y, 2 * incy,
-               (int32_t const)length);
+               length);
 }
 // MARK: polar
 __attribute__((always_inline, __overloadable__)) inline static
@@ -489,7 +491,7 @@ void vDSP_polar(complex64_t const*__nonnull const x, intptr_t const incx,
                 intptr_t const length) {
     vDSP_polar((float32_t const*__nonnull const)x, 2 * incx,
                (float32_t      *__nonnull const)y, 2 * incy,
-               (int32_t const)length);
+               length);
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void vDSP_polar(complex128_t const*__nonnull const x, intptr_t const incx,
@@ -497,5 +499,5 @@ void vDSP_polar(complex128_t const*__nonnull const x, intptr_t const incx,
                 intptr_t const length) {
     vDSP_polarD((float64_t const*__nonnull const)x, 2 * incx,
                 (float64_t      *__nonnull const)y, 2 * incy,
-                (int32_t const)length);
+                length);
 }
