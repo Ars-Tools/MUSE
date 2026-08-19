@@ -94,7 +94,7 @@ extension Complex128: ComplexElement {
 }
 extension AccelerateBuffer where Element == Float32 {
     @inlinable@inline(__always)@_transparent
-    public func withUnsafeTemporaryComplexBuffer<E, R>(body: (UnsafeMutableBufferPointer<Complex64>) throws (E) -> R) rethrows -> R {
+    public func withUnsafeTemporaryComplexBuffer<E, R>(_ body: (UnsafeMutableBufferPointer<Complex64>) throws (E) -> R) rethrows -> R {
         try withUnsafeTemporaryAllocation(of: Complex64.self, capacity: count) {
             $0.withMemoryRebound(to: Element.self) {
                 let z = $0.baseAddress.unsafelyUnwrapped
@@ -111,7 +111,7 @@ extension AccelerateBuffer where Element == Float32 {
 }
 extension AccelerateBuffer where Element == Float64 {
     @inlinable@inline(__always)@_transparent
-    public func withUnsafeTemporaryComplexBuffer<E, R>(body: (UnsafeMutableBufferPointer<Complex128>) throws (E) -> R) rethrows -> R {
+    public func withUnsafeTemporaryComplexBuffer<E, R>(_ body: (UnsafeMutableBufferPointer<Complex128>) throws (E) -> R) rethrows -> R {
         try withUnsafeTemporaryAllocation(of: Complex128.self, capacity: count) {
             $0.withMemoryRebound(to: Element.self) {
                 let z = $0.baseAddress.unsafelyUnwrapped
