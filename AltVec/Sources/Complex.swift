@@ -4,6 +4,7 @@
 //
 //  Created by Kota on 8/18/26.
 //
+import protocol Accelerate.AccelerateBuffer
 import MKL
 import protocol Numerics.ComplexNumber
 import typealias Numerics.Complex64
@@ -89,5 +90,39 @@ extension Complex128: ComplexElement {
         vDSP_rect(z.pointer(to: \.rawValue).unsafelyUnwrapped, incz,
                   .init(mutating: z.pointer(to: \.rawValue).unsafelyUnwrapped), incz,
                   length)
+    }
+}
+extension AccelerateBuffer where Element == Float32 {
+    @inlinable@inline(__always)@_transparent
+    public func withUnsafeTemporaryComplexBuffer<E, R>(body: (UnsafeMutableBufferPointer<Complex64>) throws (E) -> R) rethrows -> R {
+        try withUnsafeTemporaryAllocation(of: Complex64.self, capacity: count) {
+            $0.withMemoryRebound(to: Element.self) {
+                let z = $0.baseAddress.unsafelyUnwrapped
+                withUnsafeBufferPointer {
+                    Element.Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1,
+                                 y: z, inc: 2,
+                                 length: count)
+                }
+                Element.Zero(x: z.advanced(by: 1), inc: 2, length: count)
+            }
+            return try body($0)
+        }
+    }
+}
+extension AccelerateBuffer where Element == Float64 {
+    @inlinable@inline(__always)@_transparent
+    public func withUnsafeTemporaryComplexBuffer<E, R>(body: (UnsafeMutableBufferPointer<Complex128>) throws (E) -> R) rethrows -> R {
+        try withUnsafeTemporaryAllocation(of: Complex128.self, capacity: count) {
+            $0.withMemoryRebound(to: Element.self) {
+                let z = $0.baseAddress.unsafelyUnwrapped
+                withUnsafeBufferPointer {
+                    Element.Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1,
+                                 y: z, inc: 2,
+                                 length: count)
+                }
+                Element.Zero(x: z.advanced(by: 1), inc: 2, length: count)
+            }
+            return try body($0)
+        }
     }
 }
