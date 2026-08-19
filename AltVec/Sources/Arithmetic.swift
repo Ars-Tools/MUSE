@@ -10,6 +10,10 @@ import typealias Numerics.Complex64
 import typealias Numerics.Complex128
 public protocol ArithmeticElement: Numeric {
     @inlinable@inline(__always)
+    static func Zero(x: UnsafeMutablePointer<Self>, inc: Int, length: Int)
+    @inlinable@inline(__always)
+    static func Fill(x: Self, y: UnsafeMutablePointer<Self>, inc: Int, length: Int)
+    @inlinable@inline(__always)
     static func Copy(x: UnsafePointer<Self>, inc: Int, y: UnsafeMutablePointer<Self>, inc: Int, length: Int)
     @inlinable@inline(__always)
     static func Scale(x: UnsafePointer<Self>, inc: Int, y: Self, z: UnsafeMutablePointer<Self>, inc: Int, length: Int)
@@ -34,9 +38,19 @@ extension ArithmeticElement where Self: SignedNumeric {
 }
 extension ArithmeticElement {
     @inlinable@inline(__always)@_transparent
+    public static func Zero(x: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        Fill(x: .zero, y: x, inc: inc, length: length)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Fill(x: Self, y: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        for index in 0..<length {
+            y[index * inc] = x
+        }
+    }
+    @inlinable@inline(__always)@_transparent
     public static func Copy(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
         for index in 0..<length {
-            y[index * incx] = x[index * incy]
+            y[index * incy] = x[index * incx]
         }
     }
     @inlinable@inline(__always)@_transparent
@@ -94,6 +108,14 @@ extension Int64: ArithmeticElement {
 }
 extension Float32: ArithmeticElement {
     @inlinable@inline(__always)@_transparent
+    public static func Zero(x: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_clr(x, inc, length)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Fill(x: Self, y: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_fill(x, y, inc, length)
+    }
+    @inlinable@inline(__always)@_transparent
     public static func Copy(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
         copy(length, x, incx, y, incy)
     }
@@ -128,6 +150,14 @@ extension Float32: ArithmeticElement {
 }
 extension Float64: ArithmeticElement {
     @inlinable@inline(__always)@_transparent
+    public static func Zero(x: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_clr(x, inc, length)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Fill(x: Self, y: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_fill(x, y, inc, length)
+    }
+    @inlinable@inline(__always)@_transparent
     public static func Copy(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
         copy(length, x, incx, y, incy)
     }
@@ -161,6 +191,14 @@ extension Float64: ArithmeticElement {
     }
 }
 extension Complex64: ArithmeticElement {
+    @inlinable@inline(__always)@_transparent
+    public static func Zero(x: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_clr(x.mutableRawPointer, inc, length)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Fill(x: Self, y: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_fill(x.rawValue, y.mutableRawPointer, inc, length)
+    }
     @inlinable@inline(__always)@_transparent
     public static func Copy(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
         copy(length, .init(.init(x)) as UnsafePointer<RawValue>, incx, .init(.init(y)) as UnsafeMutablePointer<RawValue>, incy)
@@ -216,6 +254,14 @@ extension Complex64: ArithmeticElement {
     }
 }
 extension Complex128: ArithmeticElement {
+    @inlinable@inline(__always)@_transparent
+    public static func Zero(x: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_clr(x.mutableRawPointer, inc, length)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Fill(x: Self, y: UnsafeMutablePointer<Self>, inc: Int, length: Int) {
+        vDSP_fill(x.rawValue, y.mutableRawPointer, inc, length)
+    }
     @inlinable@inline(__always)@_transparent
     public static func Copy(x: UnsafePointer<Self>, inc incx: Int, y: UnsafeMutablePointer<Self>, inc incy: Int, length: Int) {
         copy(length, .init(.init(x)) as UnsafePointer<RawValue>, incx, .init(.init(y)) as UnsafeMutablePointer<RawValue>, incy)
