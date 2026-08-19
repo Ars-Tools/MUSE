@@ -189,6 +189,18 @@ extension Complex64: AtomicRepresentable {
         unsafeBitCast(storage, to: Self.self)
 	}
 }
+extension UnsafePointer where Pointee == Complex64 {
+    @inlinable@inline(__always)@_transparent
+    public var rawPointer: UnsafePointer<Pointee.RawValue> {
+        pointer(to: \.rawValue).unsafelyUnwrapped
+    }
+}
+extension UnsafeMutablePointer where Pointee == Complex64 {
+    @inlinable@inline(__always)@_transparent
+    public var mutableRawPointer: UnsafeMutablePointer<Pointee.RawValue> {
+        .init(mutating: pointer(to: \.rawValue)).unsafelyUnwrapped
+    }
+}
 @frozen public struct Complex128: ComplexNumber & BitwiseCopyable & RawRepresentable & Hashable {
     public typealias FloatLiteralType = Float64
     public typealias RawValue = complex128_t
@@ -284,6 +296,18 @@ extension Complex128: AtomicRepresentable {
 	public static func decodeAtomicRepresentation(_ storage: consuming AtomicRepresentation) -> Self {
 		unsafeBitCast(storage, to: Self.self)
 	}
+}
+extension UnsafePointer where Pointee == Complex128 {
+    @inlinable@inline(__always)@_transparent
+    public var rawPointer: UnsafePointer<Pointee.RawValue> {
+        pointer(to: \.rawValue).unsafelyUnwrapped
+    }
+}
+extension UnsafeMutablePointer where Pointee == Complex128 {
+    @inlinable@inline(__always)@_transparent
+    public var mutableRawPointer: UnsafeMutablePointer<Pointee.RawValue> {
+        .init(mutating: pointer(to: \.rawValue)).unsafelyUnwrapped
+    }
 }
 //extension complex64_t: Hashable {
 //    @inlinable@inline(__always)@_transparent
