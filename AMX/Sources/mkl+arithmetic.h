@@ -343,6 +343,37 @@ void vDSP_div(complex128_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length);
 }
+// MARK: div - vs
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_div(float32_t const*__nonnull const x, intptr_t const incx,
+              float32_t const y,
+              float32_t      *__nonnull const z, intptr_t const incz,
+              intptr_t const length) {
+    vDSP_vsdiv(x, incx, &y, z, incz, length);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_div(float64_t const*__nonnull const x, intptr_t const incx,
+              float64_t const y,
+              float64_t      *__nonnull const z, intptr_t const incz,
+              intptr_t const length) {
+    vDSP_vsdivD(x, incx, &y, z, incz, length);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_div(complex64_t const*__nonnull const x, intptr_t const incx,
+              float32_t const y,
+              complex64_t      *__nonnull const z, intptr_t const incz,
+              intptr_t const length) {
+    vDSP_vsdiv(&x->r, 2 * incx, &y, &z->r, 2 * incz, length);
+    vDSP_vsdiv(&x->i, 2 * incx, &y, &z->i, 2 * incz, length);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_div(complex128_t const*__nonnull const x, intptr_t const incx,
+              float64_t const y,
+              complex128_t      *__nonnull const z, intptr_t const incz,
+              intptr_t const length) {
+    vDSP_vsdivD(&x->r, 2 * incx, &y, &z->r, 2 * incz, length);
+    vDSP_vsdivD(&x->i, 2 * incx, &y, &z->i, 2 * incz, length);
+}
 // MARK: complex-related
 // MARK: conj
 __attribute__((always_inline, __overloadable__)) inline static
