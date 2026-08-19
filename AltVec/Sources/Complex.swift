@@ -10,6 +10,7 @@ import protocol Numerics.ComplexNumber
 import typealias Numerics.Complex64
 import typealias Numerics.Complex128
 public protocol ComplexElement: ArithmeticElement & ComplexNumber {
+    static func Copy(r: UnsafePointer<FloatLiteralType>, inc: Int, z: UnsafeMutablePointer<Self>, inc: Int, length: Int)
     static func Copy(z: UnsafePointer<Self>, inc: Int, r: UnsafeMutablePointer<Magnitude>, inc: Int, length: Int)
     static func Copy(z: UnsafePointer<Self>, inc: Int, i: UnsafeMutablePointer<Magnitude>, inc: Int, length: Int)
     static func Copy(z: UnsafePointer<Self>, inc: Int, θ: UnsafeMutablePointer<Magnitude>, inc: Int, length: Int)
@@ -19,6 +20,13 @@ public protocol ComplexElement: ArithmeticElement & ComplexNumber {
     static func Merge(r: UnsafePointer<Magnitude>, inc: Int, θ: UnsafePointer<Magnitude>, inc: Int, z: UnsafeMutablePointer<Self>, inc: Int, length: Int)
 }
 extension Complex64: ComplexElement {
+    @inlinable@inline(__always)@_transparent
+    public static func Copy(r: UnsafePointer<FloatLiteralType>, inc incr: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        z.withMemoryRebound(to: FloatLiteralType.self, capacity: incz * length) {
+            FloatLiteralType.Copy(x: r, inc: incr, y: $0, inc: 2 * incz, length: length)
+            FloatLiteralType.Zero(x: $0.advanced(by: 1), inc: 2 * incz, length: length)
+        }
+    }
     @inlinable@inline(__always)@_transparent
     public static func Copy(z: UnsafePointer<Self>, inc incz: Int, r: UnsafeMutablePointer<Magnitude>, inc incr: Int, length: Int) {
         Magnitude.Copy(x: .init(.init(z)).advanced(by: 0) as UnsafePointer<Magnitude>, inc: 2 * incz, y: r, inc: incr, length: length)
@@ -56,6 +64,13 @@ extension Complex64: ComplexElement {
     }
 }
 extension Complex128: ComplexElement {
+    @inlinable@inline(__always)@_transparent
+    public static func Copy(r: UnsafePointer<FloatLiteralType>, inc incr: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        z.withMemoryRebound(to: FloatLiteralType.self, capacity: incz * length) {
+            FloatLiteralType.Copy(x: r, inc: incr, y: $0, inc: 2 * incz, length: length)
+            FloatLiteralType.Zero(x: $0.advanced(by: 1), inc: 2 * incz, length: length)
+        }
+    }
     @inlinable@inline(__always)@_transparent
     public static func Copy(z: UnsafePointer<Self>, inc incz: Int, r: UnsafeMutablePointer<Magnitude>, inc incr: Int, length: Int) {
         Magnitude.Copy(x: .init(.init(z)).advanced(by: 0) as UnsafePointer<Magnitude>, inc: 2 * incz, y: r, inc: incr, length: length)
@@ -95,34 +110,28 @@ extension Complex128: ComplexElement {
 extension AccelerateBuffer where Element == Float32 {
     @inlinable@inline(__always)@_transparent
     public func withUnsafeTemporaryComplexBuffer<E, R>(_ body: (UnsafeMutableBufferPointer<Complex64>) throws (E) -> R) rethrows -> R {
-        try withUnsafeTemporaryAllocation(of: Complex64.self, capacity: count) {
-            $0.withMemoryRebound(to: Element.self) {
-                let z = $0.baseAddress.unsafelyUnwrapped
-                withUnsafeBufferPointer {
-                    Element.Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1,
-                                 y: z, inc: 2,
-                                 length: count)
-                }
-                Element.Zero(x: z.advanced(by: 1), inc: 2, length: count)
+        try withUnsafeTemporaryAllocation(of: Complex64.self, capacity: count) { tb in
+            withUnsafeBufferPointer {
+                assert($0.count == tb.count)
+                Complex64.Copy(r: $0.baseAddress.unsafelyUnwrapped, inc: 1,
+                               z: tb.baseAddress.unsafelyUnwrapped, inc: 1,
+                               length: tb.count)
             }
-            return try body($0)
+            return try body(tb)
         }
     }
 }
 extension AccelerateBuffer where Element == Float64 {
     @inlinable@inline(__always)@_transparent
     public func withUnsafeTemporaryComplexBuffer<E, R>(_ body: (UnsafeMutableBufferPointer<Complex128>) throws (E) -> R) rethrows -> R {
-        try withUnsafeTemporaryAllocation(of: Complex128.self, capacity: count) {
-            $0.withMemoryRebound(to: Element.self) {
-                let z = $0.baseAddress.unsafelyUnwrapped
-                withUnsafeBufferPointer {
-                    Element.Copy(x: $0.baseAddress.unsafelyUnwrapped, inc: 1,
-                                 y: z, inc: 2,
-                                 length: count)
-                }
-                Element.Zero(x: z.advanced(by: 1), inc: 2, length: count)
+        try withUnsafeTemporaryAllocation(of: Complex128.self, capacity: count) { tb in
+            withUnsafeBufferPointer {
+                assert($0.count == tb.count)
+                Complex128.Copy(r: $0.baseAddress.unsafelyUnwrapped, inc: 1,
+                                z: tb.baseAddress.unsafelyUnwrapped, inc: 1,
+                                length: tb.count)
             }
-            return try body($0)
+            return try body(tb)
         }
     }
 }
