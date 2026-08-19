@@ -61,6 +61,24 @@ extension Float32: LAPACKElement {
               p,
               b, ldb)
     }
+    @discardableResult
+    @inlinable@inline(__always)
+    public static func GELS(m: Int, n: Int, nrhs: Int,
+                            a: UnsafeMutablePointer<Self>, ld lda: Int, op: op_t,
+                            b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        switch gels(m, n, nrhs,
+                    a, lda, op,
+                    b, ldb, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                gels(m, n, nrhs,
+                     a, lda, op,
+                     b, ldb,
+                     $0.baseAddress, $0.count)
+            }
+        }
+    }
 }
 extension Float64: LAPACKElement {
     @discardableResult
@@ -96,6 +114,24 @@ extension Float64: LAPACKElement {
               a, lda, op,
               p,
               b, ldb)
+    }
+    @discardableResult
+    @inlinable@inline(__always)
+    public static func GELS(m: Int, n: Int, nrhs: Int,
+                            a: UnsafeMutablePointer<Self>, ld lda: Int, op: op_t,
+                            b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        switch gels(m, n, nrhs,
+                    a, lda, op,
+                    b, ldb, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                gels(m, n, nrhs,
+                     a, lda, op,
+                     b, ldb,
+                     $0.baseAddress, $0.count)
+            }
+        }
     }
 }
 extension Complex64: LAPACKElement {
@@ -133,6 +169,24 @@ extension Complex64: LAPACKElement {
               p,
               .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb)
     }
+    @discardableResult
+    @inlinable@inline(__always)
+    public static func GELS(m: Int, n: Int, nrhs: Int,
+                            a: UnsafeMutablePointer<Self>, ld lda: Int, op: op_t,
+                            b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        switch gels(m, n, nrhs,
+                    .init(mutating: a.pointer(to: \.rawValue).unsafelyUnwrapped), lda, op,
+                    .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                gels(m, n, nrhs,
+                     .init(mutating: a.pointer(to: \.rawValue).unsafelyUnwrapped), lda, op,
+                     .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb,
+                     .init(mutating: $0.baseAddress.unsafelyUnwrapped.pointer(to: \.rawValue)), $0.count)
+            }
+        }
+    }
 }
 extension Complex128: LAPACKElement {
     @discardableResult
@@ -168,5 +222,23 @@ extension Complex128: LAPACKElement {
               a.pointer(to: \.rawValue).unsafelyUnwrapped, lda, op,
               p,
               .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb)
+    }
+    @discardableResult
+    @inlinable@inline(__always)
+    public static func GELS(m: Int, n: Int, nrhs: Int,
+                            a: UnsafeMutablePointer<Self>, ld lda: Int, op: op_t,
+                            b: UnsafeMutablePointer<Self>, ld ldb: Int) -> Int {
+        switch gels(m, n, nrhs,
+                    .init(mutating: a.pointer(to: \.rawValue).unsafelyUnwrapped), lda, op,
+                    .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb, .none, -1) {
+        case let info:
+            info < 0 ? info :
+            withUnsafeTemporaryAllocation(of: Self.self, capacity: info) {
+                gels(m, n, nrhs,
+                     .init(mutating: a.pointer(to: \.rawValue).unsafelyUnwrapped), lda, op,
+                     .init(mutating: b.pointer(to: \.rawValue).unsafelyUnwrapped), ldb,
+                     .init(mutating: $0.baseAddress.unsafelyUnwrapped.pointer(to: \.rawValue)), $0.count)
+            }
+        }
     }
 }
