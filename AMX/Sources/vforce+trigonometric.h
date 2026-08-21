@@ -244,4 +244,17 @@ void vvatanh(float64_t const*__nonnull const x,
              intptr_t const length) {
     vvatanh(y, x, __MKL_REF32__(length));
 }
+// MARK: complex-exp
+__attribute__((always_inline, overloadable)) static inline
+void vvcosisin(float32_t const*__nonnull const x,
+               __complex float*__nonnull const y,
+               intptr_t const length) {
+    vvcosisinf(y, x, __MKL_REF32__(length));
+}
+__attribute__((always_inline, overloadable)) static inline
+void vvcosisin(float64_t const*__nonnull const x,
+               __complex double*__nonnull const y,
+               intptr_t const length) {
+    vvcosisin(y, x, __MKL_REF32__(length));
+}
 #undef __MKL_REF32__
