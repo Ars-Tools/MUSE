@@ -13,9 +13,9 @@ struct LAPACKTestCases {
         var A = [
             1.2, 0,
             0, 3.4
-        ] as Array<Float32>
-        var r = [0, 0] as Array<Float32>
-        var i = [0, 0] as Array<Float32>
+        ] as Array<Float64>
+        var r = [0, 0] as Array<Float64>
+        var i = [0, 0] as Array<Float64>
         let size = geev(2,
                         &A, 2,
                         &r, &i,
