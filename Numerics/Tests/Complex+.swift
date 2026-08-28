@@ -52,4 +52,15 @@ struct ComplexTests {
     func div32(lhs: Complex32, rhs: Complex32) {
         #expect(lhs == ( lhs / rhs ) * rhs)
     }
+    @Test
+    func ref() {
+        let x: Complex128.RawValue = .init()
+        withUnsafePointer(to: x) {
+            print($0.pointer(to: \.r))
+            print($0.pointer(to: \.i))
+            print($0.pointer(to: \.DSPComplex))
+            print($0.pointer(to: \.vector))
+            print($0.pointer(to: \.self)?.pointer(to: \.DSPComplex))
+        }
+    }
 }
