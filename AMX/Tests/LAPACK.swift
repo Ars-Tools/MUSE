@@ -33,6 +33,31 @@ struct LAPACKTestCases {
                         .allocate(capacity: size), size)
         print(info)
         print(r, i)
-        
+    }
+    @Test
+    func seqr() {
+        var A = [
+            1.2, 0,
+            0, 3.4
+        ] as Array<Float64>
+        var r = [0, 0] as Array<Float64>
+        var i = [0, 0] as Array<Float64>
+        let size = hseqr(.E, .N,
+                         2,
+                         1, 2,
+                         &A, 2,
+                         &r, &i,
+                         .none, 2,
+                         .none, 0)
+        print(size)
+        let info = hseqr(.E, .N,
+                         2,
+                         1, 2,
+                         &A, 2,
+                         &r, &i,
+                         .none, 2,
+                         .allocate(capacity: size), size)
+        print(r, i)
+        #expect(info == 0)
     }
 }

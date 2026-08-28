@@ -22,6 +22,7 @@ module BLAS {
 module LAPACK {
     use Complex
     header "lapack+lu.h"
+    header "lapack+qr.h"
     header "lapack+sv.h"
     header "lapack+ls.h"
     header "lapack+eig.h"
