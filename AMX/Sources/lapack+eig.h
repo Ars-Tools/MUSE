@@ -8,15 +8,16 @@
 // MARK: GEEV
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
-                        float32_t*__nonnull const A, __LAPACK_int const ldA,
-                        float32_t*__nonnull const r,
-                        float32_t*__nonnull const i,
+                        float32_t*__nullable const A, __LAPACK_int const ldA,
+                        float32_t*__nullable const r,
+                        float32_t*__nullable const i,
                         float32_t*__nullable const vl, __LAPACK_int const ldvl,
                         float32_t*__nullable const vr, __LAPACK_int const ldvr,
                         float32_t*__nullable const work, __LAPACK_int const lwork) {
+    static char const job[] = "VN";
     __LAPACK_int info;
     float32_t size;
-    sgeev_((char const*__nonnull const)"NV" + !!vl, (char const*__nonnull const)"NV" + !!vr,
+    sgeev_(job + !vl, job + !vr,
            &n,
            A, &ldA,
            r, i,
@@ -28,15 +29,16 @@ __LAPACK_int const geev(__LAPACK_int const n,
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
-                        float64_t*__nonnull const A, __LAPACK_int const ldA,
-                        float64_t*__nonnull const r,
-                        float64_t*__nonnull const i,
+                        float64_t*__nullable const A, __LAPACK_int const ldA,
+                        float64_t*__nullable const r,
+                        float64_t*__nullable const i,
                         float64_t*__nullable const vl, __LAPACK_int const ldvl,
                         float64_t*__nullable const vr, __LAPACK_int const ldvr,
                         float64_t*__nullable const work, __LAPACK_int const lwork) {
+    static char const job[] = "VN";
     __LAPACK_int info;
     float64_t size;
-    dgeev_((char const*__nonnull const)"NV" + !!vl, (char const*__nonnull const)"NV" + !!vr,
+    dgeev_(job + !vl, job + !vr,
            &n,
            A, &ldA,
            r, i,
@@ -48,15 +50,16 @@ __LAPACK_int const geev(__LAPACK_int const n,
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
-                        complex64_t*__nonnull const A, __LAPACK_int const ldA,
-                        complex64_t*__nonnull const w,
+                        complex64_t*__nullable const A, __LAPACK_int const ldA,
+                        complex64_t*__nullable const w,
                         complex64_t*__nullable const vl, __LAPACK_int const ldvl,
                         complex64_t*__nullable const vr, __LAPACK_int const ldvr,
                         complex64_t*__nullable const work, __LAPACK_int const lwork,
                         float32_t*__nonnull const rwork /* require 2N elements space */) {
+    static char const job[] = "VN";
     __LAPACK_int info;
     __complex float size;
-    cgeev_((char const*__nonnull const)"NV" + !!vl, (char const*__nonnull const)"NV" + !!vr,
+    cgeev_(job + !vl, job + !vr,
            &n,
            A, &ldA,
            w,
@@ -68,15 +71,16 @@ __LAPACK_int const geev(__LAPACK_int const n,
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
-                        complex128_t*__nonnull const A, __LAPACK_int const ldA,
-                        complex128_t*__nonnull const w,
+                        complex128_t*__nullable const A, __LAPACK_int const ldA,
+                        complex128_t*__nullable const w,
                         complex128_t*__nullable const vl, __LAPACK_int const ldvl,
                         complex128_t*__nullable const vr, __LAPACK_int const ldvr,
                         complex128_t*__nullable const work, __LAPACK_int const lwork,
                         float64_t*__nonnull const rwork /* require 2N elements space */) {
+    static char const job[] = "VN";
     __LAPACK_int info;
     __complex double size;
-    zgeev_((char const*__nonnull const)"NV" + !!vl, (char const*__nonnull const)"NV" + !!vr,
+    zgeev_(job + !vl, job + !vr,
            &n,
            A, &ldA,
            w,
