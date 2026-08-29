@@ -29,7 +29,7 @@ void vvpow(float32_t const*__nonnull const x,
 }
 __attribute__((always_inline, __overloadable__)) inline static
 void vvpow(float64_t const*__nonnull const x,
-           float32_t const y,
+           float64_t const y,
            float64_t      *__nonnull const z,
            intptr_t const length) {
     vvpows(z, &y, x, (int32_t const[]){(int32_t const)length});
