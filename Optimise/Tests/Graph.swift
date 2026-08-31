@@ -138,4 +138,94 @@ struct GraphTestCases {
             )
         }
     }
+    @Test
+    func maximumBottleneckPairingPrefersBestWorstEdge() {
+        let table = MatBuf(rows: [
+            [0, 10, 6, 2],
+            [10, 0, 2, 6],
+            [6, 2, 0, 1],
+            [2, 6, 1, 0],
+        ])
+
+        #expect(
+            Graph.maximumBottleneckPairing(table: table)
+            == [SIMD2(0, 2), SIMD2(1, 3)]
+        )
+    }
+    @Test(arguments: [2, 4, 6, 8, 10, 12])
+    func maximumBottleneckPairing(n: Int) {
+        func bruteForce(
+            _ indices: Array<Int>,
+            _ table: MatBuf<Int>
+        ) -> Int? {
+            guard let row = indices.first else {
+                return nil
+            }
+
+            var candidates = Array(indices.dropFirst())
+            var bestWeight: Int?
+
+            for offset in candidates.indices {
+                let col = candidates.remove(at: offset)
+                let tail = bruteForce(candidates, table)
+                let weight = tail.map {
+                    min(table[row, col], $0)
+                } ?? table[row, col]
+
+                if bestWeight.map({ $0 < weight }) ?? true {
+                    bestWeight = weight
+                }
+
+                candidates.insert(col, at: offset)
+            }
+
+            return bestWeight
+        }
+
+        for _ in 0..<16 {
+            var rows = Array(
+                repeating: Array(
+                    repeating: 0,
+                    count: n
+                ),
+                count: n
+            )
+
+            for row in 0..<n {
+                for col in (row + 1)..<n {
+                    let weight = Int.random(
+                        in: 1...4096
+                    )
+
+                    rows[row][col] = weight
+                    rows[col][row] = weight
+                }
+            }
+
+            let table = MatBuf(rows: rows)
+            let result = Graph.maximumBottleneckPairing(
+                table: table
+            )
+            let weight = result.map {
+                table[$0.x, $0.y]
+            }.min()
+
+            #expect(
+                weight
+                == bruteForce(Array(0..<n), table)
+            )
+            #expect(result.count == n / 2)
+
+            let vertices = result.flatMap {
+                [$0.x, $0.y]
+            }
+
+            #expect(Set(vertices) == Set(0..<n))
+            #expect(
+                result.allSatisfy {
+                    $0.x < $0.y
+                }
+            )
+        }
+    }
 }
