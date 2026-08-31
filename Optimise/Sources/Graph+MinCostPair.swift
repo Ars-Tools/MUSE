@@ -6,8 +6,9 @@
 //
 import typealias Dense.MatBuf
 extension Graph {
-    /// 計算量: O(n² 2ⁿ)
-    /// メモリ: O(2ⁿ)
+    /// bitmask-dp
+    /// computation: O(n² 2ⁿ)
+    /// workspace: O(2ⁿ)
     @inlinable
     public static func Pair<
         Element: Numeric & Comparable
