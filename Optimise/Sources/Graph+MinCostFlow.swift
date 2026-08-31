@@ -8,6 +8,7 @@ import protocol Accelerate.AccelerateBuffer
 import typealias Foundation.KeyPathComparator
 import typealias Dense.MatBuf
 extension Graph {
+    @inlinable
 	public static func SuccessiveShortestPath<K: Hashable, F: Numeric & Comparable, C: Numeric & Comparable>(source: K,
 																											 target: K,
 																											 demand d: F,
@@ -25,7 +26,7 @@ extension Graph {
 //						assert($0.1[s, default: .init()][t, default: .zero] >= .zero)
 					}
 					if 0 < f[s, default: .init()][t, default: .zero] {
-						$0.0[t, default: .init()][s] = f[s, default: .init()][t, default: .zero]
+						$0.0[t, default: .init()][s] = 0 + f[s, default: .init()][t, default: .zero]
 						$0.1[t, default: .init()][s] = max(0, p[s, default: .zero] - p[t, default: .zero] - v)
 //						assert($0.1[t, default: .init()][s, default: .zero] >= .zero)
 					}
@@ -55,6 +56,7 @@ extension Graph {
 	}
 }
 extension Graph {
+    @inlinable
 	public static func Match<Element: Numeric & Comparable>(table: MatBuf<Element>) -> Set<SIMD2<Int>> {
 		precondition(table.rows == table.cols, "table should be square")
 		let n = max(table.rows, table.cols)
