@@ -5,7 +5,7 @@
 //  Created by Kota on 9/16/R7.
 //
 import Testing
-import Dense
+import typealias Dense.MatBuf
 @testable import Optimise
 @Suite
 struct GraphTestCases {
@@ -69,4 +69,73 @@ struct GraphTestCases {
 		#expect(e["s", default: .init()].reduce(0) { $0 + $1.value } == 4)
 		#expect(e.reduce(0) { $0 + $1.value.filter { $0.key == "t" }.reduce(0) { $0 + $1.1 } } == 4)
 	}
+    @Test(arguments: [2, 4, 6, 8, 10, 12])
+    func minimumWeightPairing(n: Int) {
+        for _ in 0..<16 {
+            var rows = Array(
+                repeating: Array(
+                    repeating: 0,
+                    count: n
+                ),
+                count: n
+            )
+
+            // 一般無向グラフなので対称コスト行列を作る。
+            for row in 0..<n {
+                for col in (row + 1)..<n {
+                    let cost = Int.random(
+                        in: 1...4096
+                    )
+
+                    rows[row][col] = cost
+                    rows[col][row] = cost
+                }
+            }
+
+            let table = MatBuf(rows: rows)
+
+            let result = Graph.Pair(
+                table: table
+            )
+
+            let expected =
+                Graph.bruteforcePairing(
+                    table: table
+                )
+
+            func totalCost(
+                _ pairs: Set<SIMD2<Int>>
+            ) -> Int {
+                pairs.reduce(0) {
+                    $0 + table[$1.x, $1.y]
+                }
+            }
+
+            // 同率解を考慮して総コストを比較
+            #expect(
+                totalCost(result)
+                ==
+                totalCost(expected)
+            )
+
+            // n個の頂点からn/2組
+            #expect(result.count == n / 2)
+
+            // すべての頂点がちょうど1回現れる
+            let vertices = result.flatMap {
+                [$0.x, $0.y]
+            }
+
+            #expect(vertices.count == n)
+            #expect(Set(vertices).count == n)
+            #expect(Set(vertices) == Set(0..<n))
+
+            // Pairは上三角形式で返す
+            #expect(
+                result.allSatisfy {
+                    $0.x < $0.y
+                }
+            )
+        }
+    }
 }
