@@ -162,8 +162,8 @@ extension Complex64 {
         rawValue = complex_new_rt(r, θ)
     }
     @inlinable@inline(__always)@_transparent
-    public init(r: FloatLiteralType, πr: FloatLiteralType) {
-        rawValue = complex_new_rp(r, πr)
+    public init(r: FloatLiteralType, ω: FloatLiteralType) {
+        rawValue = complex_new_rp(r, ω)
     }
     @inlinable@inline(__always)@_transparent
     public var θ: FloatLiteralType {
@@ -270,8 +270,8 @@ extension Complex128 {
         rawValue = complex_new_rt(r, θ)
     }
     @inlinable@inline(__always)@_transparent
-    public init(r: FloatLiteralType, πr: FloatLiteralType) {
-        rawValue = complex_new_rp(r, πr)
+    public init(r: FloatLiteralType, ω: FloatLiteralType) {
+        rawValue = complex_new_rp(r, ω)
     }
     @inlinable@inline(__always)@_transparent
     public var θ: FloatLiteralType {

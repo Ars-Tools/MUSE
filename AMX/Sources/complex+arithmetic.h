@@ -222,14 +222,14 @@ complex128_t const complex_new_rt(float64_t const r, float64_t const t) {
 }
 __attribute__((always_inline, overloadable)) inline static
 complex64_t const complex_new_rp(float32_t const r, float32_t const p) {
-    register struct __float2 const e = __sincospif_stret(p);
+    register struct __float2 const e = __sincospif_stret(2 * p);
     return (complex64_t const) {
         .vector = r * simd_make_float2(e.__cosval, e.__sinval)
     };
 }
 __attribute__((always_inline, overloadable)) inline static
 complex128_t const complex_new_rp(float64_t const r, float64_t const p) {
-    register struct __double2 const e = __sincospi_stret(p);
+    register struct __double2 const e = __sincospi_stret(2 * p);
     return (complex128_t const) {
         .vector = r * simd_make_double2(e.__cosval, e.__sinval)
     };
