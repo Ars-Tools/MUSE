@@ -48,13 +48,13 @@ complex128_t const add(complex128_t const x, complex128_t const y) {
 __attribute__((always_inline, overloadable)) inline static
 complex64_t const add(complex64_t const x, float32_t const y) {
     return (complex64_t const) {
-        .vector = x.vector + y
+        .scalar = x.scalar + y
     };
 }
 __attribute__((always_inline, overloadable)) inline static
 complex128_t const add(complex128_t const x, float64_t const y) {
     return (complex128_t const) {
-        .vector = x.vector + y
+        .scalar = x.scalar + y
     };
 }
 __attribute__((always_inline, overloadable)) inline static
@@ -85,13 +85,13 @@ complex128_t const sub(complex128_t const x, complex128_t const y) {
 __attribute__((always_inline, overloadable)) inline static
 complex64_t const sub(complex64_t const x, float32_t const y) {
     return (complex64_t const) {
-        .vector = x.vector - y
+        .scalar = x.scalar - y
     };
 }
 __attribute__((always_inline, overloadable)) inline static
 complex128_t const sub(complex128_t const x, float64_t const y) {
     return (complex128_t const) {
-        .vector = x.vector - y
+        .scalar = x.scalar - y
     };
 }
 __attribute__((always_inline, overloadable)) inline static
