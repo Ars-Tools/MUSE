@@ -35,28 +35,21 @@ typedef CF_ENUM(char) {
     diag_t_U = 'U', // assumed to be unit triangular
     diag_t_N = 'N'  // nnot assumed to be unit triangler
 } diag_t;
-//__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
-typedef CF_ENUM(char) {
-    job_t_A = 'A',
-    job_t_S = 'S',
-    job_t_O = 'O',
-    job_t_N = 'N'
-} svd_job_t;
-//__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
-typedef CF_ENUM(char) {
-    eig_job_t_N = 'N',
-    eig_job_t_V = 'V'
-} eig_job_t;
-//__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
-typedef CF_ENUM(char) {
-    eig_sort_t_N = 'N',
-    eig_sort_t_S = 'S'
-} eig_sort_t;
-//__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
-typedef CF_ENUM(char) {
-    eig_range_t_A = 'A',
-    eig_range_t_V = 'V',
-    eig_range_t_I = 'I'
-} eig_range_t;
+////__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
+//typedef CF_ENUM(char) {
+//    eig_job_t_N = 'N',
+//    eig_job_t_V = 'V'
+//} eig_job_t;
+////__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
+//typedef CF_ENUM(char) {
+//    eig_sort_t_N = 'N',
+//    eig_sort_t_S = 'S'
+//} eig_sort_t;
+////__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
+//typedef CF_ENUM(char) {
+//    eig_range_t_A = 'A',
+//    eig_range_t_V = 'V',
+//    eig_range_t_I = 'I'
+//} eig_range_t;
 #endif
 #include"complex+typedef.h"
