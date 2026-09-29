@@ -172,8 +172,17 @@ extension Complex64: BLASElement {
                              x: UnsafePointer<Self>, inc incx: Int,
                              y: UnsafePointer<Self>, inc incy: Int) -> Self {
         .init(rawValue: dot(n,
-                            .init(.init(x)), incx,
-                            .init(.init(y)), incy))
+                            x.rawPointer, incx,
+                            y.rawPointer, incy))
+    }
+    
+    @inlinable@inline(__always)@_transparent
+    public static func Inner(n: Int,
+                             conjx x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int) -> Self {
+        .init(rawValue: dotc(n,
+                             x.rawPointer, incx,
+                             y.rawPointer, incy))
     }
     @inlinable@inline(__always)@_transparent
     public static func Outer(m: Int, n: Int,
@@ -186,15 +195,36 @@ extension Complex64: BLASElement {
         case 1:
             break
         default:
-            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)) {
-                scal(m, β.rawValue, .init(.init(r)), 1)
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)).map(\.mutableRawPointer) {
+                scal(m, β.rawValue, r, 1)
             }
         }
         ger(m, n,
             α.rawValue,
-            .init(.init(x)), incx,
-            .init(.init(y)), incy,
-            .init(.init(a)), ld)
+            x.rawPointer, incx,
+            y.rawPointer, incy,
+            a.mutableRawPointer, ld)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Outer(m: Int, n: Int,
+                             α: Self,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             conjy y: UnsafePointer<Self>, inc incy: Int,
+                             β: Self,
+                             a: UnsafeMutablePointer<Self>, ld: Int) {
+        switch β {
+        case 1:
+            break
+        default:
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)).map(\.mutableRawPointer) {
+                scal(m, β.rawValue, r, 1)
+            }
+        }
+        gerc(m, n,
+             α.rawValue,
+             x.rawPointer, incx,
+             y.rawPointer, incy,
+             a.mutableRawPointer, ld)
     }
     @inlinable@inline(__always)@_transparent
     public static func GEMM(m: Int, n: Int, k: Int,
@@ -205,10 +235,10 @@ extension Complex64: BLASElement {
                             c: UnsafeMutablePointer<Self>, ld ldc: Int) {
         gemm(m, n, k,
              α.rawValue,
-             .init(.init(a)), lda, opa,
-             .init(.init(b)), ldb, opb,
+             a.rawPointer, lda, opa,
+             b.rawPointer, ldb, opb,
              β.rawValue,
-             .init(.init(c)), ldc)
+             c.mutableRawPointer, ldc)
     }
     @inlinable@inline(__always)@_transparent
     public static func GEMV(m: Int, n: Int,
@@ -219,10 +249,10 @@ extension Complex64: BLASElement {
                             y: UnsafeMutablePointer<Self>, inc incy: Int) {
         gemv(m, n,
              α.rawValue,
-             .init(.init(a)), ld, op,
-             .init(.init(x)), incx,
+             a.rawPointer, ld, op,
+             x.rawPointer, incx,
              β.rawValue,
-             .init(.init(y)), incy)
+             y.mutableRawPointer, incy)
     }
 }
 extension Complex128: BLASElement {
@@ -235,8 +265,16 @@ extension Complex128: BLASElement {
                              x: UnsafePointer<Self>, inc incx: Int,
                              y: UnsafePointer<Self>, inc incy: Int) -> Self {
         .init(rawValue: dot(n,
-                            .init(.init(x)), incx,
-                            .init(.init(y)), incy))
+                            x.rawPointer, incx,
+                            y.rawPointer, incy))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Inner(n: Int,
+                             conjx x: UnsafePointer<Self>, inc incx: Int,
+                             y: UnsafePointer<Self>, inc incy: Int) -> Self {
+        .init(rawValue: dotc(n,
+                             x.rawPointer, incx,
+                             y.rawPointer, incy))
     }
     @inlinable@inline(__always)@_transparent
     public static func Outer(m: Int, n: Int,
@@ -249,15 +287,36 @@ extension Complex128: BLASElement {
         case 1:
             break
         default:
-            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)) {
-                scal(m, β.rawValue, .init(.init(r)), 1)
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)).map(\.mutableRawPointer) {
+                scal(m, β.rawValue, r, 1)
             }
         }
         ger(m, n,
             α.rawValue,
-            .init(.init(x)), incx,
-            .init(.init(y)), incy,
-            .init(.init(a)), ld)
+            x.rawPointer, incx,
+            y.rawPointer, incy,
+            a.mutableRawPointer, ld)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Outer(m: Int, n: Int,
+                             α: Self,
+                             x: UnsafePointer<Self>, inc incx: Int,
+                             conjy y: UnsafePointer<Self>, inc incy: Int,
+                             β: Self,
+                             a: UnsafeMutablePointer<Self>, ld: Int) {
+        switch β {
+        case 1:
+            break
+        default:
+            for r in stride(from: 0, to: n * ld, by: ld).lazy.map(a.advanced(by:)).map(\.mutableRawPointer) {
+                scal(m, β.rawValue, r, 1)
+            }
+        }
+        gerc(m, n,
+             α.rawValue,
+             x.rawPointer, incx,
+             y.rawPointer, incy,
+             a.mutableRawPointer, ld)
     }
     @inlinable@inline(__always)@_transparent
     public static func GEMM(m: Int, n: Int, k: Int,
@@ -268,10 +327,10 @@ extension Complex128: BLASElement {
                             c: UnsafeMutablePointer<Self>, ld ldc: Int) {
         gemm(m, n, k,
              α.rawValue,
-             .init(.init(a)), lda, opa,
-             .init(.init(b)), ldb, opb,
+             a.rawPointer, lda, opa,
+             b.rawPointer, ldb, opb,
              β.rawValue,
-             .init(.init(c)), ldc)
+             c.mutableRawPointer, ldc)
     }
     @inlinable@inline(__always)@_transparent
     public static func GEMV(m: Int, n: Int,
@@ -282,9 +341,9 @@ extension Complex128: BLASElement {
                             y: UnsafeMutablePointer<Self>, inc incy: Int) {
         gemv(m, n,
              α.rawValue,
-             .init(.init(a)), ld, op,
-             .init(.init(x)), incx,
+             a.rawPointer, ld, op,
+             x.rawPointer, incx,
              β.rawValue,
-             .init(.init(y)), incy)
+             y.mutableRawPointer, incy)
     }
 }
