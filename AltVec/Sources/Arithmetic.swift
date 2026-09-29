@@ -238,6 +238,13 @@ extension Complex64: ArithmeticElement {
                  length)
     }
     @inlinable@inline(__always)@_transparent
+    public static func Mul(conjx x: UnsafePointer<Self>, inc incx: Int, y: UnsafePointer<Self>, inc incy: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        vDSP_conjmul(x.pointer(to: \.rawValue).unsafelyUnwrapped, incx,
+                     y.pointer(to: \.rawValue).unsafelyUnwrapped, incy,
+                     .init(mutating: z.pointer(to: \.rawValue).unsafelyUnwrapped), incz,
+                     length)
+    }
+    @inlinable@inline(__always)@_transparent
     public static func Div(x: UnsafePointer<Self>, inc incx: Int, y: UnsafePointer<Self>, inc incy: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
         vDSP_div(x.pointer(to: \.rawValue).unsafelyUnwrapped, incx,
                  y.pointer(to: \.rawValue).unsafelyUnwrapped, incy,
@@ -299,6 +306,13 @@ extension Complex128: ArithmeticElement {
                  y.pointer(to: \.rawValue).unsafelyUnwrapped, incy,
                  .init(mutating: z.pointer(to: \.rawValue).unsafelyUnwrapped), incz,
                  length)
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func Mul(conjx x: UnsafePointer<Self>, inc incx: Int, y: UnsafePointer<Self>, inc incy: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
+        vDSP_conjmul(x.pointer(to: \.rawValue).unsafelyUnwrapped, incx,
+                     y.pointer(to: \.rawValue).unsafelyUnwrapped, incy,
+                     .init(mutating: z.pointer(to: \.rawValue).unsafelyUnwrapped), incz,
+                     length)
     }
     @inlinable@inline(__always)@_transparent
     public static func Div(x: UnsafePointer<Self>, inc incx: Int, y: UnsafePointer<Self>, inc incy: Int, z: UnsafeMutablePointer<Self>, inc incz: Int, length: Int) {
