@@ -281,6 +281,70 @@ void vDSP_mul(complex128_t const*__nonnull const x, intptr_t const incx,
         .imagp = &z->i,
     }, 2 * incz, length, 1);
 }
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_conjmul(__complex float const*__nonnull const x, intptr_t const incx,
+                  __complex float const*__nonnull const y, intptr_t const incy,
+                  __complex float      *__nonnull const z, intptr_t const incz,
+              intptr_t const length) {
+    vDSP_zvmul(&(DSPSplitComplex const) {
+        .realp = &__real(*x),
+        .imagp = &__imag(*x),
+    }, 2 * incx, &(DSPSplitComplex const) {
+        .realp = &__real(*y),
+        .imagp = &__imag(*y),
+    }, 2 * incy, &(DSPSplitComplex const) {
+        .realp = &__real(*z),
+        .imagp = &__imag(*z),
+    }, 2 * incz, length, -1);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_conjmul(__complex double const*__nonnull const x, intptr_t const incx,
+                  __complex double const*__nonnull const y, intptr_t const incy,
+                  __complex double      *__nonnull const z, intptr_t const incz,
+                  intptr_t const length) {
+    vDSP_zvmulD(&(DSPDoubleSplitComplex const) {
+        .realp = &__real(*x),
+        .imagp = &__imag(*x),
+    }, 2 * incx, &(DSPDoubleSplitComplex const) {
+        .realp = &__real(*y),
+        .imagp = &__imag(*y),
+    }, 2 * incy, &(DSPDoubleSplitComplex const) {
+        .realp = &__real(*z),
+        .imagp = &__imag(*z),
+    }, 2 * incz, length, -1);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_conjmul(complex64_t const*__nonnull const x, intptr_t const incx,
+                  complex64_t const*__nonnull const y, intptr_t const incy,
+                  complex64_t      *__nonnull const z, intptr_t const incz,
+                  intptr_t const length) {
+    vDSP_zvmul(&(DSPSplitComplex const) {
+        .realp = &x->r,
+        .imagp = &x->i,
+    }, 2 * incx, &(DSPSplitComplex const) {
+        .realp = &y->r,
+        .imagp = &y->i,
+    }, 2 * incy, &(DSPSplitComplex const) {
+        .realp = &z->r,
+        .imagp = &z->i,
+    }, 2 * incz, length, -1);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_conjmul(complex128_t const*__nonnull const x, intptr_t const incx,
+                  complex128_t const*__nonnull const y, intptr_t const incy,
+                  complex128_t      *__nonnull const z, intptr_t const incz,
+                  intptr_t const length) {
+    vDSP_zvmulD(&(DSPDoubleSplitComplex const) {
+        .realp = &x->r,
+        .imagp = &x->i,
+    }, 2 * incx, &(DSPDoubleSplitComplex const) {
+        .realp = &y->r,
+        .imagp = &y->i,
+    }, 2 * incy, &(DSPDoubleSplitComplex const) {
+        .realp = &z->r,
+        .imagp = &z->i,
+    }, 2 * incz, length, -1);
+}
 // MARK: mul - vs
 __attribute__((always_inline, overloadable)) static inline
 void vDSP_mul(float32_t const*__nonnull const x, intptr_t const incx,
