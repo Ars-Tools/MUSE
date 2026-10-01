@@ -18,6 +18,67 @@ typedef CF_ENUM(char) {
     seqr_z_t_I = 'I',
     seqr_z_t_V = 'V'
 } seqr_z_t;
+// MARK: geqr
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const geqr(__LAPACK_int const m, __LAPACK_int const n,
+                        float32_t * _Nullable const A, __LAPACK_int const ldA,
+                        float32_t * _Nullable const t, __LAPACK_int const tsize,
+                        float32_t * _Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    float32_t size;
+    sgeqr_(&m, &n,
+           A, &ldA,
+           t, &tsize,
+           work ? work : &size, work ? &lwork : &query,
+           &info);
+    return info ? info : work ? info : size;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const geqr(__LAPACK_int const m, __LAPACK_int const n,
+                        float64_t * _Nullable const A, __LAPACK_int const ldA,
+                        float64_t * _Nullable const t, __LAPACK_int const tsize,
+                        float64_t * _Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    float64_t size;
+    dgeqr_(&m, &n,
+           A, &ldA,
+           t, &tsize,
+           work ? work : &size, work ? &lwork : &query,
+           &info);
+    return info ? info : work ? info : size;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const geqr(__LAPACK_int const m, __LAPACK_int const n,
+                        complex64_t * _Nullable const A, __LAPACK_int const ldA,
+                        complex64_t * _Nullable const t, __LAPACK_int const tsize,
+                        complex64_t * _Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    __complex float size;
+    cgeqr_(&m, &n,
+           A, &ldA,
+           t, &tsize,
+           work ? work : &size, work ? &lwork : &query,
+           &info);
+    return info ? info : work ? info : __real(size);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const geqr(__LAPACK_int const m, __LAPACK_int const n,
+                        complex128_t * _Nullable const A, __LAPACK_int const ldA,
+                        complex128_t * _Nullable const t, __LAPACK_int const tsize,
+                        complex128_t * _Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    __complex double size;
+    zgeqr_(&m, &n,
+           A, &ldA,
+           t, &tsize,
+           work ? work : &size, work ? &lwork : &query,
+           &info);
+    return info ? info : work ? info : __real(size);
+}
 // MARK: hseqr
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
 __LAPACK_int const hseqr(seqr_job_t const job,
