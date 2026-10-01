@@ -58,3 +58,52 @@ __LAPACK_int const gesv(__LAPACK_int const n, __LAPACK_int const nrhs,
            &info);
     return info;
 }
+// MARK: posv
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const posv(__LAPACK_int const n, __LAPACK_int const nrhs,
+                        float32_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                        float32_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    sposv_(&uploA,
+           &n, &nrhs,
+           A, &ldA,
+           B, &ldB,
+           &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const posv(__LAPACK_int const n, __LAPACK_int const nrhs,
+                        float64_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                        float64_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    dposv_(&uploA,
+           &n, &nrhs,
+           A, &ldA,
+           B, &ldB,
+           &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const posv(__LAPACK_int const n, __LAPACK_int const nrhs,
+                        complex64_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                        complex64_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    cposv_(&uploA,
+           &n, &nrhs,
+           A, &ldA,
+           B, &ldB,
+           &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const posv(__LAPACK_int const n, __LAPACK_int const nrhs,
+                        complex128_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                        complex128_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    zposv_(&uploA,
+           &n, &nrhs,
+           A, &ldA,
+           B, &ldB,
+           &info);
+    return info;
+}
