@@ -5,6 +5,8 @@
 //  Created by Kota on 6/18/26.
 //
 #include"module.h"
+__attribute__((__visibility__("hidden"))) static
+__LAPACK_int const query = -1;
 // MARK: GEEV
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
@@ -87,6 +89,37 @@ __LAPACK_int const geev(__LAPACK_int const n,
            vl, &ldvl,
            vr, &ldvr,
            work ? work : &size, work ? &lwork : (__LAPACK_int const[]) {-1}, rwork,
+           &info);
+    return info ? info : work ? info : size;
+}
+// MARK: SYEV
+__attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
+__LAPACK_int const syev(__LAPACK_int const n,
+                        float32_t*__nullable const A, __LAPACK_int const ldA, uplo_t const uploA, bool const eigvA,
+                        float32_t*__nullable const w,
+                        float32_t*__nullable const work, __LAPACK_int const lwork) {
+    static char const job[] = "VN";
+    __LAPACK_int info;
+    float64_t size;
+    ssyev_(job + !eigvA, &uploA, &n,
+           A, &ldA,
+           w,
+           work ? work : &size, work ? &lwork : &query,
+           &info);
+    return info ? info : work ? info : size;
+}
+__attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
+__LAPACK_int const syev(__LAPACK_int const n,
+                        float64_t*__nullable const A, __LAPACK_int const ldA, uplo_t const uploA, bool const eigvA,
+                        float64_t*__nullable const w,
+                        float64_t*__nullable const work, __LAPACK_int const lwork) {
+    static char const job[] = "VN";
+    __LAPACK_int info;
+    float64_t size;
+    dsyev_(job + !eigvA, &uploA, &n,
+           A, &ldA,
+           w,
+           work ? work : &size, work ? &lwork : &query,
            &info);
     return info ? info : work ? info : size;
 }
