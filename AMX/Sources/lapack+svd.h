@@ -6,8 +6,6 @@
 //
 #include"module.h"
 __attribute__((__visibility__("hidden"))) static
-__LAPACK_int const query = -1;
-__attribute__((__visibility__("hidden"))) static
 __LAPACK_int const _[] = {0, 1, 2};
 // MARK: gesvd
 //__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
@@ -24,6 +22,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          float32_t      *__nullable U, __LAPACK_int const ldU,
                          float32_t      *__nullable V, __LAPACK_int const ldV,
                          float32_t      *__nullable work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
     static char const jobuv[] = "SN";
     __LAPACK_int info;
     float32_t size;
@@ -44,6 +43,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          float64_t      *__nullable U, __LAPACK_int const ldU,
                          float64_t      *__nullable V, __LAPACK_int const ldV,
                          float64_t      *__nullable work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
     static char const jobuv[] = "SN";
     __LAPACK_int info;
     float64_t size;
@@ -65,6 +65,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          complex64_t      *__nullable V, __LAPACK_int const ldV,
                          complex64_t      *__nullable work, __LAPACK_int const lwork,
                          float32_t      * __nullable const rwork /* 5 * min(m, n) */) {
+    static __LAPACK_int const query = -1;
     static char const jobuv[] = "SN";
     __LAPACK_int info;
     __complex float size;
@@ -87,6 +88,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          complex128_t      *__nullable V, __LAPACK_int const ldV,
                          complex128_t      *__nullable work, __LAPACK_int const lwork,
                          float64_t      * __nullable const rwork /* 5 * min(m, n) */) {
+    static __LAPACK_int const query = -1;
     static char const jobuv[] = "SN";
     __LAPACK_int info;
     __complex double size;
