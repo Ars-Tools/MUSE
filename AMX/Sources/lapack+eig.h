@@ -5,8 +5,6 @@
 //  Created by Kota on 6/18/26.
 //
 #include"module.h"
-__attribute__((__visibility__("hidden"))) static
-__LAPACK_int const query = -1;
 // MARK: GEEV
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
@@ -16,6 +14,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                         float32_t*__nullable const vl, __LAPACK_int const ldvl,
                         float32_t*__nullable const vr, __LAPACK_int const ldvr,
                         float32_t*__nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
     float32_t size;
@@ -25,7 +24,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
            r, i,
            vl, &ldvl,
            vr, &ldvr,
-           work ? work : &size, work ? &lwork : (__LAPACK_int const[]) {-1},
+           work ? work : &size, work ? &lwork : &query,
            &info);
     return info ? info : work ? info : size;
 }
@@ -37,6 +36,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                         float64_t*__nullable const vl, __LAPACK_int const ldvl,
                         float64_t*__nullable const vr, __LAPACK_int const ldvr,
                         float64_t*__nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
     float64_t size;
@@ -46,7 +46,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
            r, i,
            vl, &ldvl,
            vr, &ldvr,
-           work ? work : &size, work ? &lwork : (__LAPACK_int const[]) {-1},
+           work ? work : &size, work ? &lwork : &query,
            &info);
     return info ? info : work ? info : size;
 }
@@ -58,6 +58,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                         complex64_t*__nullable const vr, __LAPACK_int const ldvr,
                         complex64_t*__nullable const work, __LAPACK_int const lwork,
                         float32_t*__nonnull const rwork /* require 2N elements space */) {
+    static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
     __complex float size;
@@ -67,7 +68,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
            w,
            vl, &ldvl,
            vr, &ldvr,
-           work ? work : &size, work ? &lwork : (__LAPACK_int const[]) {-1}, rwork,
+           work ? work : &size, work ? &lwork : &query, rwork,
            &info);
     return info ? info : work ? info : size;
 }
@@ -79,6 +80,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
                         complex128_t*__nullable const vr, __LAPACK_int const ldvr,
                         complex128_t*__nullable const work, __LAPACK_int const lwork,
                         float64_t*__nonnull const rwork /* require 2N elements space */) {
+    static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
     __complex double size;
@@ -88,7 +90,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
            w,
            vl, &ldvl,
            vr, &ldvr,
-           work ? work : &size, work ? &lwork : (__LAPACK_int const[]) {-1}, rwork,
+           work ? work : &size, work ? &lwork : &query, rwork,
            &info);
     return info ? info : work ? info : size;
 }
@@ -98,6 +100,7 @@ __LAPACK_int const syev(__LAPACK_int const n,
                         float32_t*__nullable const A, __LAPACK_int const ldA, uplo_t const uploA, bool const eigvA,
                         float32_t*__nullable const w,
                         float32_t*__nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
     float64_t size;
@@ -113,6 +116,7 @@ __LAPACK_int const syev(__LAPACK_int const n,
                         float64_t*__nullable const A, __LAPACK_int const ldA, uplo_t const uploA, bool const eigvA,
                         float64_t*__nullable const w,
                         float64_t*__nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
     float64_t size;
