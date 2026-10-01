@@ -107,3 +107,76 @@ __LAPACK_int const posv(__LAPACK_int const n, __LAPACK_int const nrhs,
            &info);
     return info;
 }
+// MARK: POTRF & POTRS
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrf(__LAPACK_int const n, float32_t    *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    spotrf_(&uploA, &n, A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrf(__LAPACK_int const n, float64_t    *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    dpotrf_(&uploA, &n, A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrf(__LAPACK_int const n, complex64_t  *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    cpotrf_(&uploA, &n, A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrf(__LAPACK_int const n, complex128_t *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    zpotrf_(&uploA, &n, A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrs(__LAPACK_int const n, __LAPACK_int const nrhs,
+                         float32_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                         float32_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    spotrs_(&uploA,
+            &n, &nrhs,
+            A, &ldA,
+            B, &ldB,
+            &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrs(__LAPACK_int const n, __LAPACK_int const nrhs,
+                         float64_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                         float64_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    dpotrs_(&uploA,
+            &n, &nrhs,
+            A, &ldA,
+            B, &ldB,
+            &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrs(__LAPACK_int const n, __LAPACK_int const nrhs,
+                         complex64_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                         complex64_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    cpotrs_(&uploA,
+            &n, &nrhs,
+            A, &ldA,
+            B, &ldB,
+            &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potrs(__LAPACK_int const n, __LAPACK_int const nrhs,
+                         complex128_t      *__nonnull const A, __LAPACK_int const ldA, uplo_t const uploA,
+                         complex128_t      *__nonnull const B, __LAPACK_int const ldB) {
+    __LAPACK_int info;
+    zpotrs_(&uploA,
+            &n, &nrhs,
+            A, &ldA,
+            B, &ldB,
+            &info);
+    return info;
+}
