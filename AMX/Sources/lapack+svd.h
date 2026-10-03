@@ -23,7 +23,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          float32_t      *__nullable V, __LAPACK_int const ldV,
                          float32_t      *__nullable work, __LAPACK_int const lwork) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     float32_t size;
     sgesvd_(jobuv + !U, jobuv + !V,
@@ -44,7 +44,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          float64_t      *__nullable V, __LAPACK_int const ldV,
                          float64_t      *__nullable work, __LAPACK_int const lwork) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     float64_t size;
     dgesvd_(jobuv + !U, jobuv + !V,
@@ -66,7 +66,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          complex64_t      *__nullable work, __LAPACK_int const lwork,
                          float32_t      * __nullable const rwork /* 5 * min(m, n) */) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     __complex float size;
     cgesvd_(jobuv + !U, jobuv + !V,
@@ -89,7 +89,7 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
                          complex128_t      *__nullable work, __LAPACK_int const lwork,
                          float64_t      * __nullable const rwork /* 5 * min(m, n) */) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     __complex double size;
     zgesvd_(jobuv + !U, jobuv + !V,
@@ -117,7 +117,7 @@ __LAPACK_int const gesvj(__LAPACK_int const m, __LAPACK_int const n,
                          float32_t * _Nullable V, __LAPACK_int const ldV,
                          float32_t * _Nullable work, __LAPACK_int const lwork) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     float size;
     sgesvj_(&jobA, "N", jobuv + !V,
@@ -137,7 +137,7 @@ __LAPACK_int const gesvj(__LAPACK_int const m, __LAPACK_int const n,
                          float64_t * _Nullable V, __LAPACK_int const ldV,
                          float64_t * _Nullable work, __LAPACK_int const lwork) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     double size;
     dgesvj_(&jobA, "N", jobuv + !V,
@@ -158,7 +158,7 @@ simd_long2 const gesvj(__LAPACK_int const m, __LAPACK_int const n,
                          complex64_t * _Nullable work, __LAPACK_int const lwork,
                          complex64_t * _Nullable rwork, __LAPACK_int const lrwork) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     __complex float size[2];
     cgesvj_(&jobA, "N", jobuv + !V,
@@ -181,7 +181,7 @@ simd_long2 const gesvj(__LAPACK_int const m, __LAPACK_int const n,
                        complex128_t * _Nullable work, __LAPACK_int const lwork,
                        complex128_t * _Nullable rwork, __LAPACK_int const lrwork) {
     static __LAPACK_int const query = -1;
-    static char const jobuv[] = "SN";
+    static char const jobuv[] = "VN";
     __LAPACK_int info;
     __complex double size[2];
     zgesvj_(&jobA, "N", jobuv + !V,
