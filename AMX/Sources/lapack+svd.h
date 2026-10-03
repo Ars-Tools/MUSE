@@ -103,6 +103,101 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
             &info);
     return work ? info : info ? info : __real(size);
 }
+// MARK: gesvj
+typedef CF_ENUM(char) {
+    svj_joba_t_U = 'U', // lower
+    svj_joba_t_L = 'L', // upper
+    svj_joba_t_G = 'G' // general
+} svj_joba_t;
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const gesvj(__LAPACK_int const m, __LAPACK_int const n,
+                         float32_t * _Nullable A, __LAPACK_int const ldA, svj_joba_t const jobA,
+                         float32_t * _Nullable s,
+                         __LAPACK_int const mv,
+                         float32_t * _Nullable V, __LAPACK_int const ldV,
+                         float32_t * _Nullable work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    static char const jobuv[] = "SN";
+    __LAPACK_int info;
+    float size;
+    sgesvj_(&jobA, "N", jobuv + !V,
+            &m, &n,
+            A, &ldA,
+            s,
+            &mv,
+            V, &ldV,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return work ? info : info ? info : size;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const gesvj(__LAPACK_int const m, __LAPACK_int const n,
+                         float64_t * _Nullable A, __LAPACK_int const ldA, svj_joba_t const jobA,
+                         float64_t * _Nullable s,
+                         __LAPACK_int const mv,
+                         float64_t * _Nullable V, __LAPACK_int const ldV,
+                         float64_t * _Nullable work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    static char const jobuv[] = "SN";
+    __LAPACK_int info;
+    double size;
+    dgesvj_(&jobA, "N", jobuv + !V,
+            &m, &n,
+            A, &ldA,
+            s,
+            &mv,
+            V, &ldV,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return work ? info : info ? info : size;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+simd_long2 const gesvj(__LAPACK_int const m, __LAPACK_int const n,
+                         complex64_t * _Nullable A, __LAPACK_int const ldA, svj_joba_t const jobA,
+                         complex64_t * _Nullable s,
+                         __LAPACK_int const mv,
+                         complex64_t * _Nullable V, __LAPACK_int const ldV,
+                         complex64_t * _Nullable work, __LAPACK_int const lwork,
+                         complex64_t * _Nullable rwork, __LAPACK_int const lrwork) {
+    static __LAPACK_int const query = -1;
+    static char const jobuv[] = "SN";
+    __LAPACK_int info;
+    __complex float size[2];
+    cgesvj_(&jobA, "N", jobuv + !V,
+            &m, &n,
+            A, &ldA,
+            s,
+            &mv,
+            V, &ldV,
+            work ? work : (size + 0), work ? &lwork : &query,
+            rwork ? rwork : (size + 1), rwork ? &rwork : &query,
+            &info);
+    return work && rwork ? info : info ? info : (simd_long2 const) {__real(size[0]), __real(size[1])};
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+simd_long2 const gesvj(__LAPACK_int const m, __LAPACK_int const n,
+                       complex128_t * _Nullable A, __LAPACK_int const ldA, svj_joba_t const jobA,
+                       complex128_t * _Nullable s,
+                       __LAPACK_int const mv,
+                       complex128_t * _Nullable V, __LAPACK_int const ldV,
+                       complex128_t * _Nullable work, __LAPACK_int const lwork,
+                       complex128_t * _Nullable rwork, __LAPACK_int const lrwork) {
+    static __LAPACK_int const query = -1;
+    static char const jobuv[] = "SN";
+    __LAPACK_int info;
+    __complex double size[2];
+    zgesvj_(&jobA, "N", jobuv + !V,
+            &m, &n,
+            A, &ldA,
+            s,
+            &mv,
+            V, &ldV,
+            work ? work : (size + 0), work ? &lwork : &query,
+            rwork ? rwork : (size + 1), rwork ? &rwork : &query,
+            &info);
+    return work && rwork ? info : info ? info : (simd_long2 const) {__real(size[0]), __real(size[1])};
+}
+
+
+
 // MARK: gejsv, not implemented yet
 ////__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
 //typedef CF_ENUM(char) {
