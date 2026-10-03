@@ -105,8 +105,8 @@ __LAPACK_int const gesvd(__LAPACK_int const m, __LAPACK_int const n,
 }
 // MARK: gesvj
 typedef CF_ENUM(char) {
-    svj_joba_t_U = 'U', // lower
-    svj_joba_t_L = 'L', // upper
+    svj_joba_t_U = 'U', // upper
+    svj_joba_t_L = 'L', // lower
     svj_joba_t_G = 'G' // general
 } svj_joba_t;
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
