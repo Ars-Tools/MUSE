@@ -280,35 +280,31 @@ void larf(__LAPACK_int const m, __LAPACK_int const n,
            work);
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
-float32_t larfg(__LAPACK_int const n,
-                float32_t const alpha, float32_t const tau,
-                float32_t * _Nullable x, __LAPACK_int const incx) {
-    float32_t beta = alpha;
-    clarfg_(&n, &beta, x, &incx, &tau);
-    return beta;
+simd_float2 larfg(__LAPACK_int const n,
+                float32_t alpha, float32_t tau,
+                float32_t * _Nullable const x, __LAPACK_int const incx) {
+    slarfg_(&n, &alpha, x, &incx, &tau);
+    return (simd_float2 const) { alpha, tau };
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
-float64_t larfg(__LAPACK_int const n,
-                float64_t const alpha, float64_t const tau,
-                float64_t * _Nullable x, __LAPACK_int const incx) {
-    double beta = alpha;
-    dlarfg_(&n, &beta, x, &incx, &tau);
-    return beta;
+simd_double2 larfg(__LAPACK_int const n,
+                float64_t alpha, float64_t tau,
+                float64_t * _Nullable const x, __LAPACK_int const incx) {
+    dlarfg_(&n, &alpha, x, &incx, &tau);
+    return (simd_double2 const) { alpha, tau };
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
-complex64_t larfg(__LAPACK_int const n,
-                  complex64_t const alpha, complex64_t const tau,
-                  complex64_t * _Nullable x, __LAPACK_int const incx) {
-    complex64_t beta = alpha;
-    clarfg_(&n, &beta, x, &incx, &tau);
-    return beta;
+simd_float4 larfg(__LAPACK_int const n,
+                  complex64_t alpha, complex64_t tau,
+                  complex64_t * _Nullable const x, __LAPACK_int const incx) {
+    clarfg_(&n, &alpha, x, &incx, &tau);
+    return (simd_float4 const) { alpha.r, alpha.i, tau.r, alpha.i };
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
-complex128_t larfg(__LAPACK_int const n,
-                   complex128_t const alpha, complex128_t const tau,
-                   complex128_t * _Nullable x, __LAPACK_int const incx) {
-    complex128_t beta = alpha;
-    zlarfg_(&n, &beta, x, &incx, &tau);
-    return beta;
+simd_double4 larfg(__LAPACK_int const n,
+                   complex128_t alpha, complex128_t tau,
+                   complex128_t * _Nullable const x, __LAPACK_int const incx) {
+    zlarfg_(&n, &alpha, x, &incx, &tau);
+    return (simd_double4 const) { alpha.r, alpha.i, tau.r, alpha.i };
 }
 #endif
