@@ -117,7 +117,7 @@ __LAPACK_int const gesvj(__LAPACK_int const m, __LAPACK_int const n,
                          float32_t * _Nullable V, __LAPACK_int const ldV,
                          float32_t * _Nullable work, __LAPACK_int const lwork) {
     // Accelerate rejects LWORK=-1 for real GESVJ. Return its required size.
-    if (!work) return MIN(m, n) == 0 ? 1 : MAX(6, m + n);
+    if (!work) return MAX(6, m + n);
     static char const jobuv[] = "VN";
     __LAPACK_int info;
     sgesvj_(&jobA, "N", jobuv + !V,
@@ -137,7 +137,7 @@ __LAPACK_int const gesvj(__LAPACK_int const m, __LAPACK_int const n,
                          float64_t * _Nullable V, __LAPACK_int const ldV,
                          float64_t * _Nullable work, __LAPACK_int const lwork) {
     // Accelerate rejects LWORK=-1 for real GESVJ. Return its required size.
-    if (!work) return MIN(m, n) == 0 ? 1 : MAX(6, m + n);
+    if (!work) return MAX(6, m + n);
     static char const jobuv[] = "VN";
     __LAPACK_int info;
     dgesvj_(&jobA, "N", jobuv + !V,
@@ -195,9 +195,6 @@ simd_long2 const gesvj(__LAPACK_int const m, __LAPACK_int const n,
             &info);
     return work && rwork ? info : info ? info : (simd_long2 const) {__real(size[0]), __real(size[1])};
 }
-
-
-
 // MARK: gejsv, not implemented yet
 ////__attribute__((__swift_attr__("BitwiseCopyable"), __swift_attr__("Sendable")))
 //typedef CF_ENUM(char) {
