@@ -180,3 +180,35 @@ __LAPACK_int const potrs(__LAPACK_int const n, __LAPACK_int const nrhs,
             &info);
     return info;
 }
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potri(__LAPACK_int const n,
+                         float32_t * __nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    spotri_(&uploA, &n,
+            A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potri(__LAPACK_int const n,
+                         float64_t * __nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    dpotri_(&uploA, &n,
+            A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potri(__LAPACK_int const n,
+                         complex64_t * __nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    cpotri_(&uploA, &n,
+            A, &ldA, &info);
+    return info;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const potri(__LAPACK_int const n,
+                         complex128_t * __nonnull const A, __LAPACK_int const ldA, uplo_t const uploA) {
+    __LAPACK_int info;
+    zpotri_(&uploA, &n,
+            A, &ldA, &info);
+    return info;
+}
