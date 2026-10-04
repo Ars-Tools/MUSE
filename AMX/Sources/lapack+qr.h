@@ -227,4 +227,88 @@ __LAPACK_int const geqrf(__LAPACK_int const m, __LAPACK_int const n,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : __real(size);
 }
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+void larf(__LAPACK_int const m, __LAPACK_int const n,
+          float32_t * _Nullable v, __LAPACK_int const incv, side_t const sidev,
+          float32_t const tau,
+          float32_t * _Nullable c, __LAPACK_int const ldc,
+          float32_t * _Nullable work) {
+    slarf_(&sidev,
+           &m, &n,
+           v, &incv,
+           &tau,
+           c, &ldc,
+           work);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+void larf(__LAPACK_int const m, __LAPACK_int const n,
+          float64_t * _Nullable v, __LAPACK_int const incv, side_t const sidev,
+          float64_t const tau,
+          float64_t * _Nullable c, __LAPACK_int const ldc,
+          float64_t * _Nullable work) {
+    dlarf_(&sidev,
+           &m, &n,
+           v, &incv,
+           &tau,
+           c, &ldc,
+           work);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+void larf(__LAPACK_int const m, __LAPACK_int const n,
+          complex64_t * _Nullable v, __LAPACK_int const incv, side_t const sidev,
+          complex64_t const tau,
+          complex64_t * _Nullable c, __LAPACK_int const ldc,
+          complex64_t * _Nullable work) {
+    clarf_(&sidev,
+           &m, &n,
+           v, &incv,
+           &tau,
+           c, &ldc,
+           work);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+void larf(__LAPACK_int const m, __LAPACK_int const n,
+          complex128_t * _Nullable v, __LAPACK_int const incv, side_t const sidev,
+          complex128_t const tau,
+          complex128_t * _Nullable c, __LAPACK_int const ldc,
+          complex128_t * _Nullable work) {
+    zlarf_(&sidev,
+           &m, &n,
+           v, &incv,
+           &tau,
+           c, &ldc,
+           work);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+float32_t larfg(__LAPACK_int const n,
+                float32_t const alpha, float32_t const tau,
+                float32_t * _Nullable x, __LAPACK_int const incx) {
+    float32_t beta = alpha;
+    clarfg_(&n, &beta, x, &incx, &tau);
+    return beta;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+float64_t larfg(__LAPACK_int const n,
+                float64_t const alpha, float64_t const tau,
+                float64_t * _Nullable x, __LAPACK_int const incx) {
+    double beta = alpha;
+    dlarfg_(&n, &beta, x, &incx, &tau);
+    return beta;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+complex64_t larfg(__LAPACK_int const n,
+                  complex64_t const alpha, complex64_t const tau,
+                  complex64_t * _Nullable x, __LAPACK_int const incx) {
+    complex64_t beta = alpha;
+    clarfg_(&n, &beta, x, &incx, &tau);
+    return beta;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+complex128_t larfg(__LAPACK_int const n,
+                   complex128_t const alpha, complex128_t const tau,
+                   complex128_t * _Nullable x, __LAPACK_int const incx) {
+    complex128_t beta = alpha;
+    zlarfg_(&n, &beta, x, &incx, &tau);
+    return beta;
+}
 #endif
