@@ -210,7 +210,6 @@ void trmm(__LAPACK_int const M, __LAPACK_int const N,
 __attribute__((always_inline, overloadable)) static inline
 void syrk(__LAPACK_int const N, __LAPACK_int const K,
           float32_t const alpha,
-          float32_t const*__nonnull const x, __LAPACK_int const incx,
           float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
           float32_t const beta,
           float32_t      *__nonnull const C, __LAPACK_int const ldC, uplo_t const uploC) {
@@ -225,7 +224,6 @@ void syrk(__LAPACK_int const N, __LAPACK_int const K,
 __attribute__((always_inline, overloadable)) static inline
 void syrk(__LAPACK_int const N, __LAPACK_int const K,
           float64_t const alpha,
-          float64_t const*__nonnull const x, __LAPACK_int const incx,
           float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
           float64_t const beta,
           float64_t      *__nonnull const C, __LAPACK_int const ldC, uplo_t const uploC) {
@@ -240,7 +238,6 @@ void syrk(__LAPACK_int const N, __LAPACK_int const K,
 __attribute__((always_inline, overloadable)) static inline
 void syrk(__LAPACK_int const N, __LAPACK_int const K,
           complex64_t const alpha,
-          complex64_t const*__nonnull const x, __LAPACK_int const incx,
           complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
           complex64_t const beta,
           complex64_t      *__nonnull const C, __LAPACK_int const ldC, uplo_t const uploC) {
@@ -255,7 +252,6 @@ void syrk(__LAPACK_int const N, __LAPACK_int const K,
 __attribute__((always_inline, overloadable)) static inline
 void syrk(__LAPACK_int const N, __LAPACK_int const K,
           complex128_t const alpha,
-          complex128_t const*__nonnull const x, __LAPACK_int const incx,
           complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
           complex128_t const beta,
           complex128_t      *__nonnull const C, __LAPACK_int const ldC, uplo_t const uploC) {
@@ -270,7 +266,6 @@ void syrk(__LAPACK_int const N, __LAPACK_int const K,
 __attribute__((always_inline, overloadable)) static inline
 void herk(__LAPACK_int const N, __LAPACK_int const K,
           float32_t const alpha,
-          complex64_t const*__nonnull const x, __LAPACK_int const incx,
           complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
           float32_t const beta,
           complex64_t      *__nonnull const C, __LAPACK_int const ldC, uplo_t const uploC) {
@@ -285,7 +280,6 @@ void herk(__LAPACK_int const N, __LAPACK_int const K,
 __attribute__((always_inline, overloadable)) static inline
 void herk(__LAPACK_int const N, __LAPACK_int const K,
           float64_t const alpha,
-          complex128_t const*__nonnull const x, __LAPACK_int const incx,
           complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA,
           float64_t const beta,
           complex128_t      *__nonnull const C, __LAPACK_int const ldC, uplo_t const uploC) {
