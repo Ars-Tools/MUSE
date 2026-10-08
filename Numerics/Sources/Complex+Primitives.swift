@@ -158,6 +158,14 @@ extension Complex64 {
         .init(rawValue: div(lhs.rawValue, rhs.rawValue))
     }
     @inlinable@inline(__always)@_transparent
+    public static func*(lhs: Self, rhs: FloatLiteralType) -> Self {
+        .init(rawValue: mul(lhs.rawValue, rhs))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func/(lhs: Self, rhs: FloatLiteralType) -> Self {
+        .init(rawValue: div(lhs.rawValue, rhs))
+    }
+    @inlinable@inline(__always)@_transparent
     public init(r: FloatLiteralType, θ: FloatLiteralType) {
         rawValue = complex_new_rt(r, θ)
     }
@@ -264,6 +272,14 @@ extension Complex128 {
     @inlinable@inline(__always)@_transparent
     public static func/(lhs: Self, rhs: Self) -> Self {
         .init(rawValue: div(lhs.rawValue, rhs.rawValue))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func*(lhs: Self, rhs: FloatLiteralType) -> Self {
+        .init(rawValue: mul(lhs.rawValue, rhs))
+    }
+    @inlinable@inline(__always)@_transparent
+    public static func/(lhs: Self, rhs: FloatLiteralType) -> Self {
+        .init(rawValue: div(lhs.rawValue, rhs))
     }
     @inlinable@inline(__always)@_transparent
     public init(r: FloatLiteralType, θ: FloatLiteralType) {
