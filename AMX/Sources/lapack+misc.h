@@ -22,72 +22,67 @@ typedef CF_ENUM(char) {
     trcon_norm_t_O = 'O',
     trcon_norm_t_I = 'I',
 } trcon_norm_t;
+// WORK: 3*n reals; IWORK: n integers. TRCON has no workspace query.
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
 __LAPACK_int const trcon(trcon_norm_t const f,
                          __LAPACK_int const n,
                          float32_t const*_Nullable const A, __LAPACK_int const ldA, uplo_t const uploA, diag_t const diagA,
-                         float32_t      *_Nullable const rcond,
-                         float32_t      *_Nullable       work, __LAPACK_int const lwork) {
-    static __LAPACK_int const query = -1;
+                         float32_t      *__nonnull const rcond,
+                         float32_t      *_Nullable work,
+                         __LAPACK_int   *_Nullable iwork) {
+    if (!work) work = alloca(3 * n * sizeof(float32_t const));
+    if (!iwork) iwork = alloca(n * sizeof(__LAPACK_int const));
     __LAPACK_int info;
-    float32_t size;
-    strcon_(&f,
-            &uploA, &diagA,
-            &n,
-            A, &ldA,
-            &rcond,
-            work ? work : &size, work ? &lwork : &query, &info);
-    return info ? info : work ? info : size;
+    strcon_(&f, &uploA, &diagA, &n, A, &ldA, rcond, work, iwork, &info);
+    return info;
 }
+
+// WORK: 3*n reals; IWORK: n integers. TRCON has no workspace query.
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
 __LAPACK_int const trcon(trcon_norm_t const f,
                          __LAPACK_int const n,
                          float64_t const*_Nullable const A, __LAPACK_int const ldA, uplo_t const uploA, diag_t const diagA,
-                         float64_t      *_Nullable const rcond,
-                         float64_t      *_Nullable       work, __LAPACK_int const lwork) {
-    static __LAPACK_int const query = -1;
+                         float64_t      *__nonnull const rcond,
+                         float64_t      *_Nullable work,
+                         __LAPACK_int   *_Nullable iwork) {
+    if (!work) work = alloca(3 * n * sizeof(float64_t const));
+    if (!iwork) iwork = alloca(n * sizeof(__LAPACK_int const));
     __LAPACK_int info;
-    float64_t size;
-    dtrcon_(&f,
-            &uploA, &diagA,
-            &n,
-            A, &ldA,
-            &rcond,
-            work ? work : &size, work ? &lwork : &query, &info);
-    return info ? info : work ? info : size;
+    dtrcon_(&f, &uploA, &diagA, &n, A, &ldA, rcond, work, iwork, &info);
+    return info;
 }
+
+// WORK: 2*n complex values; RWORK: n reals; RCOND is real.
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
 __LAPACK_int const trcon(trcon_norm_t const f,
                          __LAPACK_int const n,
                          complex64_t const*_Nullable const A, __LAPACK_int const ldA, uplo_t const uploA, diag_t const diagA,
-                         complex64_t      *_Nullable const rcond,
-                         complex64_t      *_Nullable       work, __LAPACK_int const lwork) {
-    static __LAPACK_int const query = -1;
+                         float32_t        *__nonnull const rcond,
+                         complex64_t      *_Nullable work,
+                         float32_t        *_Nullable rwork) {
+    if (!work) work = alloca(2 * n * sizeof(complex64_t const));
+    if (!iwork) iwork = alloca(n * sizeof(__LAPACK_int const));
     __LAPACK_int info;
-    __complex float size;
-    ctrcon_(&f,
-            &uploA, &diagA,
-            &n,
-            A, &ldA,
-            &rcond,
-            work ? work : &size, work ? &lwork : &query, &info);
-    return info ? info : work ? info : __real(size);
+    ctrcon_(&f, &uploA, &diagA, &n,
+             (__LAPACK_float_complex const*)A, &ldA, rcond,
+             (__LAPACK_float_complex*)work, rwork, &info);
+    return info;
 }
+
+// WORK: 2*n complex values; RWORK: n reals; RCOND is real.
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
 __LAPACK_int const trcon(trcon_norm_t const f,
                          __LAPACK_int const n,
                          complex128_t const*_Nullable const A, __LAPACK_int const ldA, uplo_t const uploA, diag_t const diagA,
-                         complex128_t      *_Nullable const rcond,
-                         complex128_t      *_Nullable       work, __LAPACK_int const lwork) {
-    static __LAPACK_int const query = -1;
+                         float64_t         *__nonnull const rcond,
+                         complex128_t      *_Nullable work,
+                         float64_t         *_Nullable rwork) {
+    if (!work) work = alloca(2 * n * sizeof(complex128_t const));
+    if (!iwork) iwork = alloca(n * sizeof(__LAPACK_int const));
     __LAPACK_int info;
-    __complex double size;
-    dtrcon_(&f,
-            &uploA, &diagA,
-            &n,
-            A, &ldA,
-            &rcond,
-            work ? work : &size, work ? &lwork : &query, &info);
-    return info ? info : work ? info : __real(size);
+    ztrcon_(&f, &uploA, &diagA, &n,
+             (__LAPACK_double_complex const*)A, &ldA, rcond,
+             (__LAPACK_double_complex*)work, rwork, &info);
+    return info;
 }
 #endif
