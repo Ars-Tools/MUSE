@@ -440,3 +440,40 @@ void hbmv(__LAPACK_int const N,
            &beta,
            y, &incy);
 }
+// MARK: trsv
+__attribute__((always_inline, overloadable)) static inline
+void trsv(__LAPACK_int const n,
+          float32_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
+          float32_t      *__nonnull const x, __LAPACK_int const incx) {
+    strsv_(&uploA, &opA, &diagA,
+           &n,
+           A, &ldA,
+           x, &incx);
+}
+__attribute__((always_inline, overloadable)) static inline
+void trsv(__LAPACK_int const n,
+          float64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
+          float64_t      *__nonnull const x, __LAPACK_int const incx) {
+    dtrsv_(&uploA, &opA, &diagA,
+           &n,
+           A, &ldA,
+           x, &incx);
+}
+__attribute__((always_inline, overloadable)) static inline
+void trsv(__LAPACK_int const n,
+          complex64_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
+          complex64_t      *__nonnull const x, __LAPACK_int const incx) {
+    ctrsv_(&uploA, &opA, &diagA,
+           &n,
+           A, &ldA,
+           x, &incx);
+}
+__attribute__((always_inline, overloadable)) static inline
+void trsv(__LAPACK_int const n,
+          complex128_t const*__nonnull const A, __LAPACK_int const ldA, op_t const opA, uplo_t const uploA, diag_t const diagA,
+          complex128_t      *__nonnull const x, __LAPACK_int const incx) {
+    ztrsv_(&uploA, &opA, &diagA,
+           &n,
+           A, &ldA,
+           x, &incx);
+}
