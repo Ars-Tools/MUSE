@@ -61,11 +61,11 @@ __LAPACK_int const trcon(trcon_norm_t const f,
                          complex64_t      *_Nullable work,
                          float32_t        *_Nullable rwork) {
     if (!work) work = alloca(2 * n * sizeof(complex64_t const));
-    if (!iwork) iwork = alloca(n * sizeof(__LAPACK_int const));
+    if (!rwork) rwork = alloca(n * sizeof(float32_t const));
     __LAPACK_int info;
     ctrcon_(&f, &uploA, &diagA, &n,
-             (__LAPACK_float_complex const*)A, &ldA, rcond,
-             (__LAPACK_float_complex*)work, rwork, &info);
+            A, &ldA, rcond,
+            work, rwork, &info);
     return info;
 }
 
@@ -78,11 +78,11 @@ __LAPACK_int const trcon(trcon_norm_t const f,
                          complex128_t      *_Nullable work,
                          float64_t         *_Nullable rwork) {
     if (!work) work = alloca(2 * n * sizeof(complex128_t const));
-    if (!iwork) iwork = alloca(n * sizeof(__LAPACK_int const));
+    if (!rwork) rwork = alloca(n * sizeof(float64_t const));
     __LAPACK_int info;
     ztrcon_(&f, &uploA, &diagA, &n,
-             (__LAPACK_double_complex const*)A, &ldA, rcond,
-             (__LAPACK_double_complex*)work, rwork, &info);
+            A, &ldA, rcond,
+            work, rwork, &info);
     return info;
 }
 #endif
