@@ -227,6 +227,76 @@ __LAPACK_int const geqrf(__LAPACK_int const m, __LAPACK_int const n,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : __real(size);
 }
+// MARK: MQR
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+                         float32_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
+                         float32_t const*_Nullable const tau,
+                         float32_t      *_Nullable const C, __LAPACK_int const ldC,
+                         float32_t      *_Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    float32_t size;
+    sormqr_(&sideA, &opA,
+            &m, &n, &k,
+            A, &ldA,
+            tau,
+            &C, &ldC,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return info ? info : work ? info : size;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const unmqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+                         complex64_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
+                         complex64_t const*_Nullable const tau,
+                         complex64_t      *_Nullable const C, __LAPACK_int const ldC,
+                         complex64_t      *_Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    __complex float size;
+    cunmqr_(&sideA, &opA,
+            &m, &n, &k,
+            A, &ldA,
+            tau,
+            &C, &ldC,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return info ? info : work ? info : __real(size);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const unmqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+                         complex128_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
+                         complex128_t const*_Nullable const tau,
+                         complex128_t      *_Nullable const C, __LAPACK_int const ldC,
+                         complex128_t      *_Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    __complex double size;
+    zunmqr_(&sideA, &opA,
+            &m, &n, &k,
+            A, &ldA,
+            tau,
+            &C, &ldC,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return info ? info : work ? info : __real(size);
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+                         float64_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
+                         float64_t const*_Nullable const tau,
+                         float64_t      *_Nullable const C, __LAPACK_int const ldC,
+                         float64_t      *_Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    float64_t size;
+    dormqr_(&sideA, &opA,
+            &m, &n, &k,
+            A, &ldA,
+            tau,
+            &C, &ldC,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return info ? info : work ? info : size;
+}
+// MARK: LARF
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
 void larf(__LAPACK_int const m, __LAPACK_int const n,
           float32_t * _Nullable v, __LAPACK_int const incv, side_t const sidev,
