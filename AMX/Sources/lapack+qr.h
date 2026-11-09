@@ -241,7 +241,7 @@ __LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_in
             &m, &n, &k,
             A, &ldA,
             tau,
-            &C, &ldC,
+            C, &ldC,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : size;
 }
@@ -258,7 +258,7 @@ __LAPACK_int const unmqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_in
             &m, &n, &k,
             A, &ldA,
             tau,
-            &C, &ldC,
+            C, &ldC,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : __real(size);
 }
@@ -275,7 +275,7 @@ __LAPACK_int const unmqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_in
             &m, &n, &k,
             A, &ldA,
             tau,
-            &C, &ldC,
+            C, &ldC,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : __real(size);
 }
@@ -292,7 +292,7 @@ __LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_in
             &m, &n, &k,
             A, &ldA,
             tau,
-            &C, &ldC,
+            C, &ldC,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : size;
 }
