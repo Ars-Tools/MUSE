@@ -246,6 +246,23 @@ __LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_in
     return info ? info : work ? info : size;
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
+__LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
+                         float64_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
+                         float64_t const*_Nullable const tau,
+                         float64_t      *_Nullable const C, __LAPACK_int const ldC,
+                         float64_t      *_Nullable const work, __LAPACK_int const lwork) {
+    static __LAPACK_int const query = -1;
+    __LAPACK_int info;
+    float64_t size;
+    dormqr_(&sideA, &opA,
+            &m, &n, &k,
+            A, &ldA,
+            tau,
+            C, &ldC,
+            work ? work : &size, work ? &lwork : &query, &info);
+    return info ? info : work ? info : size;
+}
+__attribute__((always_inline, overloadable, warn_unused_result)) inline static
 __LAPACK_int const unmqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
                          complex64_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
                          complex64_t const*_Nullable const tau,
@@ -278,23 +295,6 @@ __LAPACK_int const unmqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_in
             C, &ldC,
             work ? work : &size, work ? &lwork : &query, &info);
     return info ? info : work ? info : __real(size);
-}
-__attribute__((always_inline, overloadable, warn_unused_result)) inline static
-__LAPACK_int const ormqr(__LAPACK_int const m, __LAPACK_int const n, __LAPACK_int const k,
-                         float64_t const*_Nullable const A, __LAPACK_int const ldA, op_t const opA, side_t const sideA,
-                         float64_t const*_Nullable const tau,
-                         float64_t      *_Nullable const C, __LAPACK_int const ldC,
-                         float64_t      *_Nullable const work, __LAPACK_int const lwork) {
-    static __LAPACK_int const query = -1;
-    __LAPACK_int info;
-    float64_t size;
-    dormqr_(&sideA, &opA,
-            &m, &n, &k,
-            A, &ldA,
-            tau,
-            C, &ldC,
-            work ? work : &size, work ? &lwork : &query, &info);
-    return info ? info : work ? info : size;
 }
 // MARK: LARF
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
@@ -364,17 +364,17 @@ simd_double2 larfg(__LAPACK_int const n,
     return (simd_double2 const) { alpha, tau };
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
-simd_float4 larfg(__LAPACK_int const n,
+simd_float2x2 larfg(__LAPACK_int const n,
                   complex64_t alpha, complex64_t tau,
                   complex64_t * _Nullable const x, __LAPACK_int const incx) {
     clarfg_(&n, &alpha, x, &incx, &tau);
-    return (simd_float4 const) { alpha.r, alpha.i, tau.r, alpha.i };
+    return simd_matrix(alpha.vector, tau.vector);
 }
 __attribute__((always_inline, overloadable, warn_unused_result)) inline static
-simd_double4 larfg(__LAPACK_int const n,
+simd_double2x2 larfg(__LAPACK_int const n,
                    complex128_t alpha, complex128_t tau,
                    complex128_t * _Nullable const x, __LAPACK_int const incx) {
     zlarfg_(&n, &alpha, x, &incx, &tau);
-    return (simd_double4 const) { alpha.r, alpha.i, tau.r, alpha.i };
+    return simd_matrix(alpha.vector, tau.vector);
 }
 #endif
