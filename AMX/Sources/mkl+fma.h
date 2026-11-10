@@ -84,7 +84,7 @@ void vDSP_fma(complex64_t const*__nonnull const x, intptr_t const incx,
               complex64_t const*__nonnull const y, intptr_t const incy,
               complex64_t const z,
               complex64_t      *__nonnull const w, intptr_t const incw,
-         intptr_t const length) {
+              intptr_t const length) {
     vDSP_zvma(&(DSPSplitComplex const) {
         .realp = &x->r,
         .imagp = &x->i,
