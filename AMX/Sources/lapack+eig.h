@@ -70,7 +70,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
            vr, &ldvr,
            work ? work : &size, work ? &lwork : &query, rwork,
            &info);
-    return info ? info : work ? info : size;
+    return info ? info : work ? info : __real(size);
 }
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
 __LAPACK_int const geev(__LAPACK_int const n,
@@ -92,7 +92,7 @@ __LAPACK_int const geev(__LAPACK_int const n,
            vr, &ldvr,
            work ? work : &size, work ? &lwork : &query, rwork,
            &info);
-    return info ? info : work ? info : size;
+    return info ? info : work ? info : __real(size);
 }
 // MARK: SYEV
 __attribute__((always_inline, __overloadable__, warn_unused_result)) inline static
@@ -103,7 +103,7 @@ __LAPACK_int const syev(__LAPACK_int const n,
     static __LAPACK_int const query = -1;
     static char const job[] = "VN";
     __LAPACK_int info;
-    float64_t size;
+    float32_t size;
     ssyev_(job + !eigvA, &uploA, &n,
            A, &ldA,
            w,
