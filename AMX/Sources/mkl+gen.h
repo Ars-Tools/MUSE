@@ -101,3 +101,16 @@ void vDSP_move(intptr_t const m, intptr_t const n,
     for ( register intptr_t col = 0 ; col < n ; ++ col )
         memmove(B + col * ldB, A + col * ldA, m * sizeof(complex128_t const));
 }
+// MARK: ramp
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_ramp(float32_t const a, float32_t const b,
+               float32_t * __nonnull const c, intptr_t const ic,
+               intptr_t const n) {
+    vDSP_vramp(&a, &b, c, ic, n);
+}
+__attribute__((always_inline, overloadable)) static inline
+void vDSP_ramp(float64_t const a, float64_t const b,
+               float64_t * __nonnull const c, intptr_t const ic,
+               intptr_t const n) {
+    vDSP_vrampD(&a, &b, c, ic, n);
+}
